@@ -3,10 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1a3a6b">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<title>Phlebotomy Roster</title>
+<meta name="theme-color" content="#C8102E">
+<title>Phlebotomist Roster</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
@@ -14,83 +12,152 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#f4f6fa;color:#222;font-size:14px;padding-bottom:70px}
-.header{background:#1a3a6b;color:#fff;padding:12px 16px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px}
-.header h1{font-size:15px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.header button{background:rgba(255,255,255,.15);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:12px;cursor:pointer}
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#F5F7FA;color:#222;font-size:14px;padding-bottom:72px}
+.header{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;padding:12px 14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px}
+.header .logo-img{width:38px;height:38px;border-radius:8px;background:#fff;padding:3px;object-fit:contain;display:flex;align-items:center;justify-content:center;font-weight:800;color:#C8102E;font-size:16px}
+.header .titles{flex:1;overflow:hidden}
+.header h1{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header .sub{font-size:10px;opacity:.85}
+.header button{background:rgba(255,255,255,.18);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600}
 .container{padding:12px;max-width:100%}
-.card{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:14px;margin-bottom:12px}
-.card h2{color:#1a3a6b;font-size:15px;margin-bottom:10px}
+.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:12px}
+.card h2{color:#C8102E;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700}
+.card h2 .ico{font-size:18px}
 input,select,textarea,button{font-family:inherit;font-size:14px}
-input,select,textarea{width:100%;padding:10px 12px;border:1px solid #d0d5dd;border-radius:8px;margin-bottom:8px;background:#fff}
-button{background:#1a3a6b;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:500}
-button:active{opacity:.8}
-button.sec{background:#e5e8ee;color:#1a3a6b}
-button.danger{background:#c0392b}
-button.success{background:#27ae60}
-button.sm{padding:6px 10px;font-size:12px}
-button.block{width:100%;padding:14px;font-size:15px}
+input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid #E0E4EB;border-radius:8px;margin-bottom:8px;background:#fff;color:#222}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#C8102E}
+button{background:#C8102E;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600;transition:.2s}
+button:active{opacity:.8;transform:scale(.98)}
+button.sec{background:#E8EBF2;color:#1E5BA8}
+button.blue{background:#1E5BA8}
+button.success{background:#27AE60}
+button.danger{background:#C0392B}
+button.warning{background:#E67E22}
+button.sm{padding:6px 10px;font-size:12px;border-radius:6px}
+button.block{width:100%;padding:14px;font-size:15px;margin-top:6px}
+button:disabled{opacity:.5;cursor:not-allowed}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
 .row>*{flex:1;min-width:0}
+.row.auto>*{flex:0 0 auto}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-.stat{background:#fff;border-radius:10px;padding:12px;border-left:4px solid #1a3a6b;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.stat .num{font-size:22px;font-weight:700;color:#1a3a6b;line-height:1.2}
-.stat .label{font-size:10px;color:#666;text-transform:uppercase;margin-top:3px}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid #e0e0e0;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.05)}
-.nav button{flex:1;background:none;color:#666;border:none;padding:8px 4px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:0}
-.nav button.active{color:#1a3a6b;font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:#fff;border-radius:12px;padding:14px;border-left:5px solid #C8102E;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat.blue{border-left-color:#1E5BA8}
+.stat.green{border-left-color:#27AE60}
+.stat.orange{border-left-color:#E67E22}
+.stat .num{font-size:24px;font-weight:800;color:#1E5BA8;line-height:1.1}
+.stat .label{font-size:10px;color:#666;text-transform:uppercase;margin-top:4px;font-weight:600;letter-spacing:.5px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:2px solid #F0F2F5;z-index:100;box-shadow:0 -3px 12px rgba(0,0,0,.08);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav::-webkit-scrollbar{display:none}
+.nav button{flex:0 0 auto;background:none;color:#888;border:none;padding:9px 10px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:0;min-width:60px;font-weight:600}
+.nav button.active{color:#C8102E}
 .nav button .ico{font-size:18px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{border:1px solid #e0e0e0;padding:6px 4px;text-align:center;white-space:nowrap}
-th{background:#1a3a6b;color:#fff;font-size:11px;position:sticky;top:0}
-tr:nth-child(even) td{background:#fafbfc}
-.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px}
+th,td{border:1px solid #E8EBF2;padding:6px 5px;text-align:center;white-space:nowrap}
+th{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;font-size:11px;font-weight:600;position:sticky;top:0;z-index:2}
+tr:nth-child(even) td{background:#FAFBFD}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
 .scroll-x table{min-width:max-content}
-.cell{display:inline-block;padding:4px 6px;border-radius:4px;min-width:26px;cursor:pointer;font-weight:600;font-size:11px}
-.d-M{background:#FFF3B0;color:#7d6608}
-.d-E,.d-E4{background:#FFD6A5;color:#7d4a00}
-.d-N,.d-N12,.d-EN{background:#A0C4FF;color:#0b3d91}
-.d-O{background:#E0E0E0;color:#555}
-.d-PH{background:#FFADAD;color:#922b21}
-.d-CPL{background:#FFD6A5;color:#7d4a00}
-.d-EL{background:#FDFFB6;color:#7d6608}
-.d-D,.d-D2{background:#BDB2FF;color:#4a1d96}
-.d-X,.d-DX{background:#CAFFBF;color:#1e8449}
-.d-ME{background:#FDFFB6;color:#7d6608}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase}
-.b-draft{background:#FFF3B0;color:#7d6608}
-.b-published{background:#CAFFBF;color:#1e8449}
-.b-locked{background:#FFADAD;color:#922b21}
-.b-pending{background:#FFD6A5;color:#7d4a00}
-.b-approved{background:#CAFFBF;color:#1e8449}
-.b-rejected{background:#FFADAD;color:#922b21}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#27ae60;color:#fff;padding:12px 20px;border-radius:25px;font-size:13px;font-weight:500;z-index:9999;opacity:0;transition:.3s;box-shadow:0 4px 12px rgba(0,0,0,.2);max-width:90%;text-align:center}
+.cell{display:inline-block;padding:4px 7px;border-radius:5px;min-width:28px;cursor:pointer;font-weight:700;font-size:11px;border:1px solid transparent}
+.cell:active{outline:2px solid #C8102E}
+.d-M{background:#FFF3B0;color:#7D6608}
+.d-E{background:#FFD6A5;color:#7D4A00}
+.d-E4{background:#FFC6FF;color:#8E2DE2}
+.d-N,.d-N12{background:#A0C4FF;color:#0B3D91}
+.d-O,.d-OFF{background:#E5E5E5;color:#555}
+.d-PH,.d-GH{background:#FFADAD;color:#922B21}
+.d-CPL{background:#FFD6A5;color:#7D4A00}
+.d-EL,.d-CL,.d-AL{background:#FDFFB6;color:#7D6608}
+.d-SL{background:#FFC9DE;color:#A61E4D}
+.d-ML{background:#D0BFFF;color:#5F3DC4}
+.d-D{background:#BDB2FF;color:#4A1D96}
+.d-X{background:#CAFFBF;color:#1E8449}
+.d-ME{background:#FDFFB6;color:#7D6608}
+.d-EN{background:#9BF6FF;color:#0B7285}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.b-draft{background:#FFF3B0;color:#7D6608}
+.b-published{background:#CAFFBF;color:#1E8449}
+.b-locked{background:#FFADAD;color:#922B21}
+.b-pending{background:#FFD6A5;color:#7D4A00}
+.b-approved{background:#CAFFBF;color:#1E8449}
+.b-rejected{background:#FFADAD;color:#922B21}
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#27AE60;color:#fff;padding:12px 22px;border-radius:25px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:.3s;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:90%;text-align:center}
 .toast.show{opacity:1}
-.toast.error{background:#c0392b}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:1000}
-.modal-c{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
-.modal-c h2{color:#1a3a6b;margin-bottom:14px}
-.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,#1a3a6b,#2c5fa8)}
-.login{background:#fff;border-radius:16px;padding:28px 22px;width:100%;max-width:400px;box-shadow:0 10px 40px rgba(0,0,0,.2)}
-.login h1{color:#1a3a6b;text-align:center;font-size:22px;margin-bottom:6px}
-.login p{text-align:center;color:#666;margin-bottom:24px;font-size:12px}
-.login input{margin-bottom:12px;padding:14px}
-.login button{width:100%;padding:14px;font-size:15px;margin-top:6px}
-.hint{font-size:11px;color:#999;text-align:center;margin-top:14px}
+.toast.error{background:#C0392B}
+.toast.info{background:#1E5BA8}
+.toast.warning{background:#E67E22}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:1000;overflow-y:auto}
+.modal-c{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;margin-top:auto}
+.modal-c h2{color:#C8102E;margin-bottom:14px;font-size:17px}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,rgba(200,16,46,.92),rgba(30,91,168,.92))}
+.login{background:rgba(255,255,255,.98);border-radius:20px;padding:30px 24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login .logo{text-align:center;margin-bottom:18px}
+.login .logo-img{width:90px;height:90px;object-fit:contain;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;border-radius:20px;font-size:32px;font-weight:800;box-shadow:0 8px 24px rgba(200,16,46,.3)}
+.login h1{color:#C8102E;text-align:center;font-size:19px;margin-bottom:4px;font-weight:800}
+.login .sub{text-align:center;color:#666;margin-bottom:22px;font-size:11px;font-weight:600;letter-spacing:.5px}
+.login input{margin-bottom:12px;padding:14px;font-size:15px}
+.login button{width:100%;padding:15px;font-size:16px;margin-top:8px;font-weight:700}
+.login .hint{font-size:11px;color:#999;text-align:center;margin-top:16px}
+.login .forgot{text-align:center;margin-top:12px}
+.login .forgot a{color:#1E5BA8;text-decoration:none;font-size:12px;cursor:pointer;font-weight:600}
 .legend{display:flex;gap:6px;flex-wrap:wrap;font-size:10px;margin-bottom:10px}
-.legend span{padding:3px 8px;border-radius:5px;font-weight:600}
-.empty{text-align:center;color:#999;padding:30px 10px;font-size:13px}
-.pill{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;background:#e5e8ee;color:#1a3a6b;margin:2px;cursor:pointer}
-.pill.on{background:#1a3a6b;color:#fff}
-.help{font-size:11px;color:#888;margin-top:-4px;margin-bottom:8px}
+.legend span{padding:4px 8px;border-radius:6px;font-weight:700}
+.empty{text-align:center;color:#AAA;padding:36px 12px;font-size:13px}
+.empty .big{font-size:40px;margin-bottom:8px;opacity:.4}
+.pill{display:inline-block;padding:6px 12px;border-radius:14px;font-size:12px;background:#E8EBF2;color:#1E5BA8;margin:3px;cursor:pointer;font-weight:600;border:1.5px solid transparent}
+.pill.on{background:#C8102E;color:#fff;border-color:#C8102E}
+.help{font-size:11px;color:#888;margin-top:-4px;margin-bottom:8px;font-style:italic}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.tabs button{flex:0 0 auto;background:#E8EBF2;color:#666;padding:8px 14px;font-size:12px;border-radius:10px;font-weight:600}
+.tabs button.active{background:#C8102E;color:#fff}
+.divider{height:1px;background:#E8EBF2;margin:12px 0}
+.chip{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:#F0F2F5;color:#555;margin:2px}
+.chip.blue{background:#E3F2FD;color:#1E5BA8}
+.chip.red{background:#FFEBEE;color:#C8102E}
+.chip.green{background:#E8F5E9;color:#27AE60}
+.chip.orange{background:#FFF3E0;color:#E67E22}
+.chat-msg{padding:10px 14px;border-radius:16px;margin-bottom:8px;max-width:80%;word-wrap:break-word;font-size:13px}
+.chat-msg.me{background:#C8102E;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
+.chat-msg.other{background:#F0F2F5;color:#222;border-bottom-left-radius:4px}
+.chat-msg .meta{font-size:10px;opacity:.7;margin-bottom:3px}
+.chat-msg img{max-width:100%;border-radius:10px;margin-top:6px}
+.chat-input-bar{position:fixed;bottom:72px;left:0;right:0;background:#fff;padding:8px 12px;border-top:1px solid #E8EBF2;display:flex;gap:8px;align-items:center;z-index:99}
+.chat-input-bar input{flex:1;margin:0;padding:10px 14px;border-radius:22px}
+.chat-input-bar button{width:44px;height:44px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.chat-input-bar .attach{background:#E8EBF2;color:#1E5BA8}
+.notif-badge{background:#C8102E;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;font-weight:700}
+.notif-item{padding:12px;border-bottom:1px solid #F0F2F5;cursor:pointer}
+.notif-item.unread{background:#FFF9FA;border-left:3px solid #C8102E}
+.notif-item .title{font-weight:700;font-size:13px;color:#C8102E;margin-bottom:3px}
+.notif-item .desc{font-size:12px;color:#555;margin-bottom:4px}
+.notif-item .time{font-size:10px;color:#AAA}
+.staff-card{padding:12px;border-bottom:1px solid #F0F2F5;display:flex;align-items:center;gap:12px}
+.staff-card .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.staff-card .info{flex:1;min-width:0}
+.staff-card .name{font-weight:700;font-size:14px;color:#222;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.staff-card .detail{font-size:11px;color:#888}
+.staff-card .actions{display:flex;gap:4px;flex-shrink:0}
+.priority-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#F9FAFB;padding:8px;border-radius:8px}
+.priority-row .rank{font-size:18px;width:28px;text-align:center}
+.priority-row select{flex:1;margin:0}
+.priority-row button{width:36px;height:36px;padding:0;border-radius:8px;font-size:16px;flex-shrink:0}
+.special-off-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#FFF9FA;padding:8px;border-radius:8px;border-left:3px solid #C8102E}
+.special-off-row input{flex:1;margin:0}
+.special-off-row button{width:36px;height:36px;padding:0;border-radius:8px;flex-shrink:0}
+.file-input{display:none}
+@media (min-width:600px){
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .container{max-width:1200px;margin:0 auto}
+  .nav{justify-content:center}
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
 /* ============================================================
-   🔥 Firebase Config (آپ کی اپنی config)
+   🔥 FIREBASE CONFIG
    ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyB4uyNiVe5CQ-vAZalcYpQxz2XCq4XY17o",
@@ -105,208 +172,2241 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+/* ============================================================
+   📦 CLOUD CACHE
+   ============================================================ */
 const Cache = {
   data: {},
   init() {
-    const keys = ['users','staff','duties','periods','assignments','leave','overtime','exchanges','audit','settings'];
+    const keys = ['users','staff','technologists','duties','periods','assignments',
+                  'techPeriods','techAssignments','leave','overtime','exchanges',
+                  'audit','settings','notifications','chat','holidays','shifts',
+                  'stations','config'];
     keys.forEach(k => {
       db.ref(k).on('value', snap => {
         this.data[k] = snap.val();
-        if (k === 'settings' && !this.data[k]) db.ref('settings').set({hospital_name:'LABORATORY AND BLOOD BANK',department:'Phlebotomy Department',whatsapp_bot:'FlipBotMe'});
-        if (k === 'staff' && !this.data[k]) db.ref('staff').set(DEFAULT_STAFF);
+        if (k === 'settings' && !this.data[k]) db.ref('settings').set(DEFAULT_SETTINGS);
         if (k === 'duties' && !this.data[k]) db.ref('duties').set(DEFAULT_DUTIES);
-        if (k === 'users' && !this.data[k]) db.ref('users').set({admin:{username:'admin',password:'admin123',role:'supervisor',active:true}});
+        if (k === 'shifts' && !this.data[k]) db.ref('shifts').set(DEFAULT_SHIFTS);
+        if (k === 'stations' && !this.data[k]) db.ref('stations').set(DEFAULT_STATIONS);
+        if (k === 'config' && !this.data[k]) db.ref('config').set(DEFAULT_CONFIG);
+        if (k === 'users' && !this.data[k]) db.ref('users').set({
+          admin:{username:'admin',password:'admin123',role:'supervisor',active:true,mobile:'03001234567',name:'Admin'}
+        });
         if (S.user) render();
       });
     });
   },
   get(k, def) { return this.data[k] ?? def; },
-  set(k, v) { this.data[k] = v; db.ref(k).set(v).catch(e => toast('Sync error','error')); }
+  set(k, v) { 
+    this.data[k] = v; 
+    return db.ref(k).set(v).catch(e => { toast('Sync error','error'); throw e; });
+  },
+  update(k, v) {
+    this.data[k] = v;
+    return db.ref(k).set(v);
+  }
+};
+
+/* ============================================================
+   📊 DEFAULT DATA
+   ============================================================ */
+const DEFAULT_SETTINGS = {
+  hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
+  department: 'Laboratory and Blood Bank',
+  app_title: 'Phlebotomist Roster',
+  whatsapp_bot: 'FlipBotMe',
+  address: 'Islamabad, Pakistan'
+};
+
+const DEFAULT_CONFIG = {
+  phlebo_12: { M: 4, D: 1, E: 4, X: 1, N12: 1, OFF: 1 },
+  phlebo_11: { M: 4, D: 1, E: 4, X: 0, N12: 1, OFF: 1 },
+  phlebo_10: { M: 3, D: 1, E: 3, X: 1, N12: 1, OFF: 1 },
+  phlebo_9:  { M: 3, D: 1, E: 3, X: 1, N: 1, OFF: 0 },
+  sunday: { M: 2, E: 2, N: 1, OFF: 6 },
+  cpl_per_hour: 0.125,
+  weekly_off: 1
+};
+
+const DEFAULT_SHIFTS = {
+  M:   { code:'M',   name:'Morning',       start:'07:00', end:'15:30', color:'#FFF3B0' },
+  E:   { code:'E',   name:'Evening',       start:'15:00', end:'23:00', color:'#FFD6A5' },
+  E4:  { code:'E4',  name:'Evening4',      start:'16:00', end:'00:00', color:'#FFC6FF' },
+  N:   { code:'N',   name:'Night',         start:'23:00', end:'07:00', color:'#A0C4FF' },
+  N12: { code:'N12', name:'Night12',       start:'00:00', end:'07:00', color:'#A0C4FF' },
+  D:   { code:'D',   name:'Day (Gynee)',   start:'09:00', end:'21:00', color:'#BDB2FF' },
+  X:   { code:'X',   name:'Extra/Floating',start:'',      end:'',      color:'#CAFFBF' },
+  O:   { code:'O',   name:'OFF',           start:'',      end:'',      color:'#E5E5E5' },
+  EL:  { code:'EL',  name:'Earned Leave',  start:'',      end:'',      color:'#FDFFB6' },
+  CPL: { code:'CPL', name:'Comp. Leave',   start:'',      end:'',      color:'#FFD6A5' },
+  CL:  { code:'CL',  name:'Casual Leave',  start:'',      end:'',      color:'#FDFFB6' },
+  GH:  { code:'GH',  name:'Gazetted Holiday',start:'',    end:'',      color:'#FFADAD' },
+  SL:  { code:'SL',  name:'Sick Leave',    start:'',      end:'',      color:'#FFC9DE' },
+  AL:  { code:'AL',  name:'Annual Leave',  start:'',      end:'',      color:'#FDFFB6' },
+  ML:  { code:'ML',  name:'Maternity Leave',start:'',     end:'',      color:'#D0BFFF' }
 };
 
 const DEFAULT_DUTIES = {
-  'M':{code:'M',name:'Morning',start:'07:00',end:'15:30'},
-  'E':{code:'E',name:'Evening',start:'15:00',end:'23:30'},
-  'N':{code:'N',name:'Night',start:'23:00',end:'07:00',night:1},
-  'N12':{code:'N12',name:'Night12',start:'00:00',end:'08:00',night:1},
-  'D':{code:'D',name:'Day',start:'09:00',end:'17:30'},
-  'D2':{code:'D2',name:'Day2',start:'10:00',end:'18:00'},
-  'E4':{code:'E4',name:'Evening4',start:'16:00',end:'00:00'},
-  'X':{code:'X',name:'X',start:'11:00',end:'19:30'},
-  'DX':{code:'DX',name:'DX',start:'09:00',end:'17:30'},
-  'ME':{code:'ME',name:'ME',start:'11:00',end:'23:00'},
-  'EN':{code:'EN',name:'EN',start:'19:00',end:'07:00',night:1},
-  'O':{code:'O',name:'OFF',start:'',end:'',off:1},
-  'PH':{code:'PH',name:'Public Holiday',start:'',end:'',off:1},
-  'CPL':{code:'CPL',name:'Compensated Leave',start:'',end:'',off:1},
-  'EL':{code:'EL',name:'Earned Leave',start:'',end:'',off:1},
-  'CL':{code:'CL',name:'Casual Leave',start:'',end:'',off:1},
-  'GH':{code:'GH',name:'Gazetted Holiday',start:'',end:'',off:1}
+  M: { code:'M', name:'Morning', start:'07:00', end:'15:30' },
+  E: { code:'E', name:'Evening', start:'15:00', end:'23:00' },
+  E4: { code:'E4', name:'Evening4', start:'16:00', end:'00:00' },
+  N: { code:'N', name:'Night', start:'23:00', end:'07:00' },
+  N12: { code:'N12', name:'Night12', start:'00:00', end:'07:00' },
+  D: { code:'D', name:'Day', start:'09:00', end:'21:00' },
+  X: { code:'X', name:'X', start:'', end:'' },
+  O: { code:'O', name:'OFF', start:'', end:'' }
 };
 
-const DEFAULT_STAFF = {
-  '1':{id:1,sid:'PH-001',name:'Noreen Akhtar',designation:'Phlebotomist',status:'Active'},
-  '2':{id:2,sid:'PH-002',name:'Syed Sajid Hussain Shah',designation:'Phlebotomist',status:'Active'},
-  '3':{id:3,sid:'PH-003',name:'Habiba Fiaz',designation:'Phlebotomist',status:'Active'},
-  '4':{id:4,sid:'PH-004',name:'Qurat Ul Ain',designation:'Phlebotomist',status:'Active'},
-  '5':{id:5,sid:'PH-005',name:'Donia Bashir',designation:'Phlebotomist',status:'Active'},
-  '6':{id:6,sid:'PH-006',name:'Sheryar Khan',designation:'Phlebotomist',status:'Active'},
-  '7':{id:7,sid:'PH-007',name:'Waqas Aziz',designation:'Phlebotomist',status:'Active'},
-  '8':{id:8,sid:'PH-008',name:'Bushra Safeer Awan',designation:'Phlebotomist',status:'Active'},
-  '9':{id:9,sid:'PH-009',name:'Asim Ali',designation:'Phlebotomist',status:'Active'},
-  '10':{id:10,sid:'PH-010',name:'Muhammad Zakria',designation:'Phlebotomist',status:'Active'},
-  '11':{id:11,sid:'PH-011',name:'Imran Mubarak Abbasi',designation:'Phlebotomist',status:'Active'},
-  '12':{id:12,sid:'PH-012',name:'Tasleem Fatima',designation:'Phlebotomist',status:'Active'}
+const DEFAULT_STATIONS = {
+  first_floor: { name:'First Floor', code:'FF', required_per_shift:2, active:true },
+  basement: { name:'Basement', code:'BM', required_per_shift:1, active:true },
+  diagnostic: { name:'Diagnostic', code:'DG', required_per_shift:1, active:true, timing:'09:00-21:00', rotation:'weekly' },
+  gynee: { name:'Gynee', code:'GY', required_per_shift:1, active:true, timing:'09:00-21:00', rotation:'weekly', gender:'Female' }
 };
 
-const S = { user: null, view: 'dashboard', periodId: null };
+/* ============================================================
+   🎯 STATE
+   ============================================================ */
+const S = { 
+  user: null, 
+  view: 'dashboard', 
+  periodId: null,
+  techPeriodId: null,
+  chatWith: null,
+  chatType: 'group'
+};
 
+/* ============================================================
+   🛠 HELPERS
+   ============================================================ */
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function toast(msg,type='success'){const t=document.createElement('div');t.className='toast '+(type==='error'?'error':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),20);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2800);}
+function toast(msg,type='success'){
+  const t=document.createElement('div');
+  t.className='toast '+(type==='error'?'error':type==='info'?'info':type==='warning'?'warning':'');
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.classList.add('show'),20);
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2800);
+}
 function datesBetween(s,e){const out=[];const d=new Date(s+'T00:00:00');const end=new Date(e+'T00:00:00');while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}return out;}
 function today(){return new Date().toISOString().slice(0,10);}
 function uid(){return Date.now()+Math.floor(Math.random()*1000);}
-function audit(action,entity,oldv,newv,reason){const log=Cache.get('audit',[])||[];const arr=Array.isArray(log)?log:Object.values(log);arr.unshift({id:uid(),user:S.user?S.user.username:'system',action,entity,old:oldv??null,new:newv??null,reason:reason||null,at:new Date().toISOString()});Cache.set('audit',arr.slice(0,500));}
+function fmtDate(d){const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtTime(d){return new Date(d).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
+function dayOfWeek(d){const dt=new Date(d+'T00:00:00');return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];}
+function isSunday(d){return new Date(d+'T00:00:00').getDay()===0;}
+function isHoliday(d){const h=Cache.get('holidays',{})||{};return Object.values(h).some(x=>x.date===d&&x.active);}
+function isSundayOrHoliday(d){return isSunday(d)||isHoliday(d);}
+function getSetting(k){return (Cache.get('settings',{})||{})[k]||'';}
+function initials(name){return (name||'?').split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();}
 
-function renderLogin(){
-  document.getElementById('app').innerHTML=`<div class="login-wrap"><div class="login"><h1>🧪 Phlebotomy Roster</h1><p>${esc(Cache.get('settings',{})?.hospital_name||'Laboratory and Blood Bank')}</p><input id="u" placeholder="Username" autocomplete="username"><input id="p" type="password" placeholder="Password"><button onclick="doLogin()">Login</button><div class="hint">Admin: admin / admin123<br>Staff: ph-001 / staff123</div></div></div>`;
-  document.getElementById('p').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-}
-function doLogin(){
-  const u=document.getElementById('u').value.trim().toLowerCase();
-  const p=document.getElementById('p').value;
-  const users=Cache.get('users',{})||{};
-  const user=Object.values(users).find(x=>x.username&&x.username.toLowerCase()===u&&x.password===p);
-  if(!user)return toast('Invalid credentials','error');
-  S.user={username:user.username,role:user.role,staff_id:user.staff_id||null};
-  localStorage.setItem('phleb_user',JSON.stringify(S.user));
-  S.view='dashboard';toast('Welcome '+user.username);render();
-}
-function doLogout(){S.user=null;localStorage.removeItem('phleb_user');render();}
-
-function render(){
-  if(!S.user)return renderLogin();
-  const v=S.view;
-  const body=v==='dashboard'?viewDashboard():v==='roster'?viewRoster():v==='staff'?viewStaff():v==='leave'?viewLeave():v==='overtime'?viewOvertime():v==='exchange'?viewExchange():v==='reports'?viewReports():v==='audit'?viewAudit():v==='settings'?viewSettings():'<div class="empty">Unknown</div>';
-  const nav=[['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['leave','🏖','Leave'],['exchange','🔄','Exchange'],['reports','📊','Reports']];
-  document.getElementById('app').innerHTML=`<div class="header"><h1>${esc(Cache.get('settings',{})?.hospital_name||'Phlebotomy Roster')}</h1><span style="font-size:11px;opacity:.8">${esc(S.user.username)}</span><button onclick="doLogout()">Logout</button></div><div class="container">${body}</div><div class="nav">${nav.map(([k,i,l])=>`<button class="${S.view===k?'active':''}" onclick="go('${k}')"><span class="ico">${i}</span>${l}</button>`).join('')}</div>`;
-}
-function go(v){S.view=v;render();window.scrollTo(0,0);}
-
-function viewDashboard(){
-  const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
-  const periods=Object.values(Cache.get('periods',{})||{});
-  const t=today();
-  const cp=periods.find(p=>p.start<=t&&p.end>=t);
-  const asg=Cache.get('assignments',{})||{};
-  const lv=Object.values(Cache.get('leave',{})||{}).filter(l=>l.start<=t&&l.end>=t&&l.status==='Approved');
-  const ex=Object.values(Cache.get('exchanges',{})||{}).filter(e=>e.status==='Pending');
-  const ot=Object.values(Cache.get('overtime',{})||{});
-  let td={};if(cp){const pd=asg[cp.id]||{};staff.forEach(s=>{const c=pd[s.id+'_'+t];if(c)td[c]=(td[c]||0)+1;});}
-  return `<div class="stats"><div class="stat"><div class="num">${staff.length}</div><div class="label">Active Staff</div></div><div class="stat"><div class="num">${lv.length}</div><div class="label">On Leave</div></div><div class="stat"><div class="num">${ex.length}</div><div class="label">Pending Exchanges</div></div><div class="stat"><div class="num">${ot.length}</div><div class="label">Overtime</div></div></div><div class="card"><h2>📅 Current Period</h2>${cp?`<div><b>${esc(cp.name)}</b></div><div style="color:#666;font-size:12px;margin:4px 0">${cp.start} → ${cp.end}</div><div style="margin-top:8px">Status: <span class="badge b-${cp.status.toLowerCase()}">${cp.status}</span></div>`:'<div class="empty">No active period</div>'}</div><div class="card"><h2>Today's Duties</h2>${Object.keys(td).length?`<div class="legend">${Object.entries(td).map(([c,n])=>`<span class="d-${c}">${c}: ${n}</span>`).join('')}</div>`:'<div class="empty">No duties today</div>'}</div>`;
+function audit(action, entity, oldv, newv, reason) {
+  const log = Cache.get('audit', {}) || {};
+  const arr = Object.values(log);
+  const entry = {
+    id: uid(),
+    user: S.user ? S.user.username : 'system',
+    user_name: S.user ? (S.user.name || S.user.username) : 'system',
+    action, entity,
+    old: oldv ?? null, new: newv ?? null,
+    reason: reason || null,
+    at: new Date().toISOString()
+  };
+  arr.unshift(entry);
+  const obj = {};
+  arr.slice(0, 1000).forEach(x => { obj[x.id] = x; });
+  Cache.set('audit', obj);
 }
 
-function viewRoster(){
-  const periodsObj=Cache.get('periods',{})||{};
-  const periods=Object.values(periodsObj).sort((a,b)=>b.start.localeCompare(a.start));
-  const isSup=S.user.role==='supervisor';
-  if(!periods.length){
-    if(!isSup)return '<div class="card"><div class="empty">No roster published</div></div>';
-    return `<div class="card"><h2>Create Roster Period</h2><input id="pName" placeholder="Name" value="Aug-Sep 2026"><div class="grid2"><input id="pStart" type="date" value="2026-08-26"><input id="pEnd" type="date" value="2026-09-25"></div><button class="block success" onclick="createPeriod()">Create</button></div>`;
+function notifyAll(title, body, type='info') {
+  const notifs = Cache.get('notifications', {}) || {};
+  const id = 'n_' + uid();
+  notifs[id] = { id, title, body, type, at:new Date().toISOString(), read:false };
+  Cache.set('notifications', notifs);
+}
+
+/* ============================================================
+   🔐 LOGIN
+   ============================================================ */
+function renderLogin() {
+  document.getElementById('app').innerHTML = `
+    <div class="login-wrap">
+      <div class="login">
+        <div class="logo">
+          <div class="logo-img">KIH</div>
+        </div>
+        <h1>Phlebotomist Roster</h1>
+        <p class="sub">KULSUM INTERNATIONAL HOSPITAL</p>
+        <input id="u" placeholder="Mobile Number" inputmode="tel" autocomplete="username">
+        <input id="p" type="password" placeholder="Password" autocomplete="current-password">
+        <button onclick="doLogin()">🔐 Login</button>
+        <div class="forgot"><a onclick="showForgot()">Forgot Password?</a></div>
+        <div class="hint">Admin: 03001234567 / admin123</div>
+      </div>
+    </div>`;
+  document.getElementById('p').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('u').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('p').focus(); });
+}
+
+function doLogin() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  if (!u || !p) return toast('Enter mobile and password','error');
+  const users = Cache.get('users', {}) || {};
+  const user = Object.values(users).find(x => 
+    x.username === u && x.password === p
+  );
+  if (!user) return toast('Invalid credentials','error');
+  if (user.active === false) return toast('Account disabled','error');
+  S.user = { 
+    username: user.username, 
+    name: user.name || user.username,
+    role: user.role, 
+    staff_id: user.staff_id || null,
+    mobile: user.mobile || user.username
+  };
+  localStorage.setItem('phleb_user', JSON.stringify(S.user));
+  S.view = 'dashboard';
+  toast('Welcome ' + (user.name || user.username));
+  render();
+}
+
+function doLogout() {
+  if (!confirm('Logout?')) return;
+  S.user = null;
+  localStorage.removeItem('phleb_user');
+  render();
+}
+
+function showForgot() {
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>🔑 Forgot Password</h2>
+    <p style="font-size:13px;color:#666;margin-bottom:12px">Enter your registered mobile number. We'll send you an OTP.</p>
+    <input id="fgMobile" placeholder="Mobile Number" inputmode="tel">
+    <div class="row">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button onclick="sendOTP()">Send OTP</button>
+    </div>
+    <div id="fgStatus" style="margin-top:12px;font-size:12px"></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function sendOTP() {
+  const mobile = document.getElementById('fgMobile').value.trim();
+  if (!mobile) return toast('Enter mobile','error');
+  const users = Cache.get('users', {}) || {};
+  const user = Object.values(users).find(x => x.username === mobile);
+  if (!user) {
+    document.getElementById('fgStatus').innerHTML = '<span style="color:#C0392B">Mobile not registered</span>';
+    return;
   }
-  if(!S.periodId)S.periodId=periods[0].id;
-  const period=periods.find(p=>p.id===S.periodId)||periods[0];
-  S.periodId=period.id;
-  const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
-  const dates=datesBetween(period.start,period.end);
-  const asg=Cache.get('assignments',{})||{};
-  const pd=asg[period.id]||{};
-  const locked=period.status==='Locked';
-  let grid=`<div class="scroll-x"><table><thead><tr><th>Name</th>${dates.map(d=>`<th>${d.slice(8)}</th>`).join('')}<th>O</th><th>PH</th><th>CPL</th><th>EL</th><th>Tot</th></tr></thead><tbody>`;
-  staff.forEach(s=>{
-    const c={O:0,PH:0,CPL:0,EL:0};
-    grid+=`<tr><td style="text-align:left;max-width:120px;overflow:hidden;text-overflow:ellipsis;${S.user.staff_id===s.id?'background:#E8F5E9;font-weight:600':''}">${esc(s.name)}</td>`;
-    dates.forEach(d=>{const code=pd[s.id+'_'+d]||'';if(c[code]!==undefined)c[code]++;const cls=code?'d-'+code:'';grid+=`<td><span class="cell ${cls}" onclick="editCell(${s.id},'${d}')">${code||'·'}</span></td>`;});
-    const tot=c.O+c.PH+c.CPL+c.EL;
-    grid+=`<td>${c.O}</td><td>${c.PH}</td><td>${c.CPL}</td><td>${c.EL}</td><td><b>${tot}</b></td></tr>`;
-  });
-  grid+='</tbody></table></div>';
-  const opts=periods.map(p=>`<option value="${p.id}" ${p.id===period.id?'selected':''}>${esc(p.name)}</option>`).join('');
-  return `<div class="card"><div class="row"><select onchange="S.periodId=this.value;render()">${opts}</select><span class="badge b-${period.status.toLowerCase()}">${period.status}</span></div><div style="color:#666;font-size:12px;margin-bottom:10px">${period.start} → ${period.end}</div>${isSup?`<div class="grid2"><button class="success" onclick="autoGenerate()">⚡ Auto Generate</button><button class="sec" onclick="showImportDialog()">📥 Import Excel</button><button class="sec" onclick="publishRoster()">📢 Publish</button>${locked?`<button class="danger" onclick="unlockRoster()">🔓 Unlock</button>`:`<button class="danger" onclick="lockRoster()">🔒 Lock</button>`}<button class="sec" onclick="exportExcel()">📊 Excel</button><button class="sec" onclick="exportPDF()">📄 PDF</button><button class="sec" onclick="shareWhatsApp('full')">💬 WhatsApp</button><button class="sec" onclick="newPeriodModal()">➕ New Period</button></div>`:`<div class="grid2"><button class="sec" onclick="shareWhatsApp('staff')">💬 Share My Duties</button><button onclick="go('exchange')">🔄 Exchange</button></div>`}</div><div class="card"><h2>Roster Grid</h2><div class="legend"><span class="d-M">M</span><span class="d-E">E</span><span class="d-N">N</span><span class="d-O">O</span><span class="d-PH">PH</span><span class="d-CPL">CPL</span><span class="d-EL">EL</span></div>${isSup?'<div class="help">Tap cell to change duty</div>':''}${grid}</div>`;
+  // Demo: Generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  sessionStorage.setItem('otp_' + mobile, otp);
+  sessionStorage.setItem('otp_time_' + mobile, Date.now().toString());
+  document.getElementById('fgStatus').innerHTML = `
+    <div style="background:#FFF3E0;padding:12px;border-radius:8px;color:#E67E22;font-weight:600">
+      Demo OTP: <span style="font-size:20px;letter-spacing:3px">${otp}</span>
+      <div style="font-size:11px;margin-top:6px;color:#666">(In production, this will be sent via SMS)</div>
+    </div>
+    <input id="fgOTP" placeholder="Enter 6-digit OTP" inputmode="numeric" maxlength="6" style="margin-top:12px">
+    <input id="fgNewPass" type="password" placeholder="New Password (min 6 chars)">
+    <button class="block success" onclick="verifyOTPReset('${mobile}')">Reset Password</button>
+  `;
 }
 
-function createPeriod(){const name=document.getElementById('pName').value.trim();const start=document.getElementById('pStart').value;const end=document.getElementById('pEnd').value;if(!name||!start||!end)return toast('All fields required','error');const id='p_'+uid();const periods=Cache.get('periods',{})||{};periods[id]={id,name,start,end,status:'Draft',created:new Date().toISOString()};Cache.set('periods',periods);S.periodId=id;audit('CREATE_PERIOD','period',null,name);toast('Period created');render();}
-function newPeriodModal(){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-c"><h2>New Period</h2><input id="npName" placeholder="Name"><div class="grid2"><input id="npStart" type="date"><input id="npEnd" type="date"></div><div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button onclick="createPeriod2()">Create</button></div></div>`;document.body.appendChild(m);}
-function createPeriod2(){const name=document.getElementById('npName').value.trim();const start=document.getElementById('npStart').value;const end=document.getElementById('npEnd').value;if(!name||!start||!end)return toast('All fields required','error');const id='p_'+uid();const periods=Cache.get('periods',{})||{};periods[id]={id,name,start,end,status:'Draft',created:new Date().toISOString()};Cache.set('periods',periods);S.periodId=id;toast('Created');document.querySelector('.modal').remove();render();}
-function editCell(sid,date){if(S.user.role!=='supervisor')return toast('Only supervisor','error');const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return;if(p.status==='Locked')return toast('Roster locked','error');const duties=Cache.get('duties',{})||{};const asg=Cache.get('assignments',{})||{};const pd=asg[p.id]||{};const cur=pd[sid+'_'+date]||'';const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-c"><h2>Change Duty</h2><div style="color:#666;font-size:12px;margin-bottom:10px">${date} — Current: ${cur||'none'}</div><div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">${Object.values(duties).map(d=>`<button class="pill ${d.code===cur?'on':''}" onclick="setDuty(${sid},'${date}','${d.code}')">${d.code}</button>`).join('')}</div><div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button></div></div>`;document.body.appendChild(m);}
-function setDuty(sid,date,code){const asg=Cache.get('assignments',{})||{};const pd=asg[S.periodId]||{};const old=pd[sid+'_'+date]||null;if(old===code){document.querySelector('.modal').remove();return;}pd[sid+'_'+date]=code;asg[S.periodId]=pd;Cache.set('assignments',asg);audit('EDIT_DUTY','assignment',old,code,null);document.querySelector('.modal').remove();toast('Updated');render();}
-function publishRoster(){const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return;p.status='Published';p.published=new Date().toISOString();Cache.set('periods',periods);audit('PUBLISH','period','Draft','Published');toast('Published');render();}
-function lockRoster(){if(!confirm('Lock roster?'))return;const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return;p.status='Locked';p.locked=new Date().toISOString();Cache.set('periods',periods);toast('Locked');render();}
-function unlockRoster(){const reason=prompt('Reason:');if(!reason)return;const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return;p.status='Published';p.locked=null;Cache.set('periods',periods);audit('UNLOCK','period','Locked','Published',reason);toast('Unlocked');render();}
+function verifyOTPReset(mobile) {
+  const entered = document.getElementById('fgOTP').value.trim();
+  const newPass = document.getElementById('fgNewPass').value;
+  const savedOTP = sessionStorage.getItem('otp_' + mobile);
+  const savedTime = parseInt(sessionStorage.getItem('otp_time_' + mobile) || '0');
+  if (Date.now() - savedTime > 5*60*1000) return toast('OTP expired','error');
+  if (entered !== savedOTP) return toast('Invalid OTP','error');
+  if (!newPass || newPass.length < 6) return toast('Password must be 6+ chars','error');
+  const users = Cache.get('users', {}) || {};
+  const user = Object.values(users).find(x => x.username === mobile);
+  if (!user) return toast('User not found','error');
+  user.password = newPass;
+  Cache.set('users', users);
+  audit('PASSWORD_RESET', 'user', null, mobile);
+  sessionStorage.removeItem('otp_' + mobile);
+  document.querySelector('.modal').remove();
+  toast('Password reset! Login now.');
+}
 
-function autoGenerate(){
-  if(!confirm('Generate roster? Existing will be replaced.'))return;
-  const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return;
-  const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
-  const duties=Cache.get('duties',{})||{};
-  const leaves=Object.values(Cache.get('leave',{})||{}).filter(l=>l.status==='Approved');
-  const dates=datesBetween(p.start,p.end);
-  const req=[{code:'M',count:2},{code:'E',count:2},{code:'N12',count:1},{code:'E4',count:1}];
-  const result={};const stats={};staff.forEach(s=>stats[s.id]={counts:{},total:0,lastDate:null,weekly:{}});
-  const wk=d=>{const dt=new Date(d);return dt.getFullYear()+'-W'+Math.ceil((dt-new Date(dt.getFullYear(),0,1))/86400000/7);};
-  const onLv=(sid,d)=>leaves.find(l=>l.staff_id===sid&&d>=l.start&&d<=l.end);
-  dates.forEach(date=>{
-    const w=wk(date);const q=[];req.forEach(r=>{for(let i=0;i<r.count;i++)q.push(r.code);});
-    q.sort((a,b)=>(duties[a]?.night?0:1)-(duties[b]?.night?0:1));
-    q.forEach(code=>{
-      const el=staff.filter(s=>{if(onLv(s.id,date))return false;if(result[s.id+'_'+date])return false;stats[s.id].weekly[w]=stats[s.id].weekly[w]||0;if(stats[s.id].weekly[w]>=6)return false;if(stats[s.id].lastDate===date)return false;return true;});
-      el.sort((a,b)=>{const ac=stats[a.id].counts[code]||0;const bc=stats[b.id].counts[code]||0;if(ac!==bc)return ac-bc;return stats[a.id].total-stats[b.id].total;});
-      const ch=el[0];
-      if(ch){result[ch.id+'_'+date]=code;stats[ch.id].counts[code]=(stats[ch.id].counts[code]||0)+1;stats[ch.id].total++;stats[ch.id].weekly[w]++;stats[ch.id].lastDate=date;}
+/* ============================================================
+   🎨 RENDER
+   ============================================================ */
+function render() {
+  if (!S.user) return renderLogin();
+  const v = S.view;
+  const body = v === 'dashboard' ? viewDashboard()
+    : v === 'roster' ? viewRoster()
+    : v === 'staff' ? viewStaff()
+    : v === 'leave' ? viewLeave()
+    : v === 'overtime' ? viewOvertime()
+    : v === 'exchange' ? viewExchange()
+    : v === 'chat' ? viewChat()
+    : v === 'notifications' ? viewNotifications()
+    : v === 'reports' ? viewReports()
+    : v === 'technologist' ? viewTechnologist()
+    : v === 'audit' ? viewAudit()
+    : v === 'settings' ? viewSettings()
+    : '<div class="empty">Unknown view</div>';
+
+  const isSup = S.user.role === 'supervisor';
+  const navItems = isSup ? [
+    ['dashboard','🏠','Home'],
+    ['roster','📅','Roster'],
+    ['staff','👥','Staff'],
+    ['technologist','🔬','Techno'],
+    ['leave','🏖','Leave'],
+    ['exchange','🔄','Exchange'],
+    ['overtime','⏱','OT'],
+    ['chat','💬','Chat'],
+    ['notifications','🔔','Bell'],
+    ['reports','📊','Reports'],
+    ['audit','📜','Audit'],
+    ['settings','⚙','Set']
+  ] : [
+    ['dashboard','🏠','Home'],
+    ['roster','📅','Roster'],
+    ['leave','🏖','Leave'],
+    ['exchange','🔄','Exchange'],
+    ['chat','💬','Chat'],
+    ['notifications','🔔','Bell']
+  ];
+
+  const unreadCount = (Cache.get('notifications',{})||{});
+  const unreadNum = Object.values(unreadCount).filter(n=>!n.read).length;
+
+  document.getElementById('app').innerHTML = `
+    <div class="header">
+      <div class="logo-img">KIH</div>
+      <div class="titles">
+        <h1>${esc(getSetting('app_title')||'Phlebotomist Roster')}</h1>
+        <div class="sub">${esc(S.user.name||S.user.username)} · ${isSup?'Supervisor':'Staff'}</div>
+      </div>
+      <button onclick="doLogout()">Logout</button>
+    </div>
+    <div class="container">${body}</div>
+    <div class="nav">
+      ${navItems.map(([k,i,l]) => 
+        `<button class="${S.view===k?'active':''}" onclick="go('${k}')">
+          <span class="ico">${i}</span>${l}${k==='notifications'&&unreadNum?`<span class="notif-badge">${unreadNum}</span>`:''}
+        </button>`
+      ).join('')}
+    </div>`;
+}
+function go(v) { S.view = v; render(); window.scrollTo(0,0); }
+
+/* ============================================================
+   🏠 DASHBOARD
+   ============================================================ */
+function viewDashboard() {
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const t = today();
+  const cp = periods.find(p => p.start <= t && p.end >= t);
+  const asg = Cache.get('assignments',{})||{};
+  const lv = Object.values(Cache.get('leave',{})||{}).filter(l => l.start <= t && l.end >= t && l.status === 'Approved');
+  const ex = Object.values(Cache.get('exchanges',{})||{}).filter(e => e.status === 'Pending');
+  const ot = Object.values(Cache.get('overtime',{})||{});
+  const todayHoliday = isHoliday(t);
+  const todaySunday = isSunday(t);
+
+  let td = {};
+  if (cp) {
+    const pd = asg[cp.id] || {};
+    staff.forEach(s => {
+      const c = pd[s.id + '_' + t];
+      if (c) td[c] = (td[c]||0) + 1;
     });
-    staff.forEach(s=>{if(result[s.id+'_'+date])return;const lv=onLv(s.id,date);result[s.id+'_'+date]=lv?(lv.type||'EL'):'O';});
-  });
-  const asg=Cache.get('assignments',{})||{};asg[p.id]=result;Cache.set('assignments',asg);audit('GENERATE','period',null,Object.keys(result).length+' assignments');toast('Generated '+Object.keys(result).length);render();
+  }
+
+  return `
+    <div class="stats">
+      <div class="stat"><div class="num">${staff.length}</div><div class="label">Active Staff</div></div>
+      <div class="stat green"><div class="num">${lv.length}</div><div class="label">On Leave</div></div>
+      <div class="stat orange"><div class="num">${ex.length}</div><div class="label">Pending Exchange</div></div>
+      <div class="stat blue"><div class="num">${ot.length}</div><div class="label">Overtime</div></div>
+    </div>
+    ${(todaySunday||todayHoliday)?`<div class="card" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">
+      <h2 style="color:#E67E22">🎉 ${todaySunday?'Sunday':'Gazetted Holiday'}</h2>
+      <div style="font-size:13px;color:#7D4A00">Today is ${todaySunday?'Sunday':'Holiday'} — Special Sunday roster applies (2 M + 2 E + 1 N)</div>
+    </div>`:''}
+    <div class="card">
+      <h2><span class="ico">📅</span> Current Period</h2>
+      ${cp ? `
+        <div style="font-weight:700;font-size:15px">${esc(cp.name)}</div>
+        <div style="color:#666;font-size:12px;margin:4px 0">${fmtDate(cp.start)} → ${fmtDate(cp.end)}</div>
+        <div style="margin-top:8px">Status: <span class="badge b-${cp.status.toLowerCase()}">${cp.status}</span></div>
+      ` : '<div class="empty">No active period</div>'}
+    </div>
+    <div class="card">
+      <h2><span class="ico">📊</span> Today's Duties (${fmtDate(t)})</h2>
+      ${Object.keys(td).length ? `
+        <div class="legend">${Object.entries(td).map(([c,n])=>`<span class="d-${c}">${c}: ${n}</span>`).join('')}</div>
+      ` : '<div class="empty"><div class="big">📋</div>No duties today</div>'}
+    </div>
+    <div class="card">
+      <h2><span class="ico">⚡</span> Quick Actions</h2>
+      <div class="grid2">
+        <button onclick="go('roster')">📅 View Roster</button>
+        <button class="blue" onclick="go('staff')">👥 Staff</button>
+        <button class="sec" onclick="go('notifications')">🔔 Notifications</button>
+        <button class="sec" onclick="go('chat')">💬 Chat</button>
+      </div>
+    </div>`;
 }
 
-function viewStaff(){const staff=Object.values(Cache.get('staff',{})||{});const isSup=S.user.role==='supervisor';return `<div class="card"><h2>Staff (${staff.length})</h2>${isSup?'<button class="block" onclick="showAddStaff()" style="margin-bottom:10px">➕ Add Staff</button>':''}${staff.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #eee"><div style="flex:1"><div style="font-weight:600">${esc(s.name)}</div><div style="font-size:11px;color:#888">${esc(s.sid)} · ${esc(s.designation||'')}</div></div><span style="font-size:11px;color:${s.status==='Active'?'#27ae60':'#c0392b'};font-weight:600">${s.status}</span>${isSup?`<button class="sec sm" onclick="toggleStaff('${s.id}')">${s.status==='Active'?'Off':'On'}</button>`:''}</div>`).join('')}</div>`;}
-function showAddStaff(){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-c"><h2>Add Staff</h2><input id="asSid" placeholder="Staff ID"><input id="asName" placeholder="Name"><input id="asDesig" placeholder="Designation" value="Phlebotomist"><div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button onclick="addStaff()">Add</button></div></div>`;document.body.appendChild(m);}
-function addStaff(){const sid=document.getElementById('asSid').value.trim();const name=document.getElementById('asName').value.trim();const desig=document.getElementById('asDesig').value.trim();if(!sid||!name)return toast('Required','error');const staff=Cache.get('staff',{})||{};if(Object.values(staff).find(s=>s.sid===sid))return toast('Exists','error');const nid=Math.max(...Object.values(staff).map(s=>Number(s.id)||0),0)+1;staff[nid]={id:nid,sid,name,designation:desig,status:'Active'};Cache.set('staff',staff);const users=Cache.get('users',{})||{};users[sid.toLowerCase()]={username:sid.toLowerCase(),password:'staff123',role:'staff',staff_id:nid,active:true};Cache.set('users',users);audit('CREATE_STAFF','staff',null,name);document.querySelector('.modal').remove();toast('Added · Login: '+sid.toLowerCase()+'/staff123');render();}
-function toggleStaff(id){const staff=Cache.get('staff',{})||{};const s=staff[id];if(!s)return;s.status=s.status==='Active'?'Inactive':'Active';Cache.set('staff',staff);toast('Updated');render();}
+/* ============================================================
+   👥 STAFF
+   ============================================================ */
+function viewStaff() {
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const isSup = S.user.role === 'supervisor';
 
-function viewLeave(){const leave=Object.values(Cache.get('leave',{})||{});const staff=Object.values(Cache.get('staff',{})||{});const isSup=S.user.role==='supervisor';return `${isSup?`<div class="card"><h2>Add Leave</h2><select id="lStaff">${staff.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><select id="lType"><option>EL</option><option>CPL</option><option>CL</option><option>GH</option><option>Sick</option></select><div class="grid2"><input id="lStart" type="date"><input id="lEnd" type="date"></div><input id="lRem" placeholder="Remarks"><button class="block" onclick="addLeave()">Add</button></div>`:''}<div class="card"><h2>Leaves (${leave.length})</h2>${leave.length?leave.map(l=>{const s=staff.find(x=>String(x.id)===String(l.staff_id));return `<div style="padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px"><div style="flex:1"><div style="font-weight:600">${esc(s?.name||'?')}</div><div style="font-size:11px;color:#888">${l.type} · ${l.start} → ${l.end}</div></div><span class="badge b-${l.status.toLowerCase()}">${l.status}</span>${isSup?`<button class="danger sm" onclick="delLeave('${l.id}')">🗑</button>`:''}</div>`;}).join(''):'<div class="empty">No leaves</div>'}</div>`;}
-function addLeave(){const sid=Number(document.getElementById('lStaff').value);const type=document.getElementById('lType').value;const start=document.getElementById('lStart').value;const end=document.getElementById('lEnd').value;const rem=document.getElementById('lRem').value;if(!start||!end)return toast('Dates required','error');const leave=Cache.get('leave',{})||{};const id='l_'+uid();leave[id]={id,staff_id:sid,type,start,end,status:'Approved',remarks:rem};Cache.set('leave',leave);toast('Added');render();}
-function delLeave(id){if(!confirm('Delete?'))return;const leave=Cache.get('leave',{})||{};delete leave[id];Cache.set('leave',leave);toast('Deleted');render();}
+  return `
+    <div class="card">
+      <h2><span class="ico">👥</span> Staff (${staff.length})</h2>
+      ${isSup ? `<button class="block success" onclick="showAddStaff()">➕ Add New Staff</button>` : ''}
+      <div class="divider"></div>
+      ${staff.length ? staff.map(s => `
+        <div class="staff-card">
+          <div class="avatar">${initials(s.name)}</div>
+          <div class="info">
+            <div class="name">${esc(s.name)}</div>
+            <div class="detail">${esc(s.designation||'Phlebotomist')} · 📱 ${esc(s.mobile||s.sid||'')}</div>
+            <div style="margin-top:4px">
+              <span class="chip ${s.status==='Active'?'green':'red'}">${s.status}</span>
+              ${s.shiftType === 'fixed' ? `<span class="chip blue">${s.fixedShift||''}</span>` : (s.priorityShifts?`<span class="chip">${Object.values(s.priorityShifts).slice(0,3).join('›')}</span>`:'')}
+              ${s.gender?`<span class="chip">${s.gender}</span>`:''}
+            </div>
+          </div>
+          ${isSup ? `
+            <div class="actions">
+              <button class="sec sm" onclick="editStaff('${s.id}')">✏️</button>
+              <button class="danger sm" onclick="toggleStaff('${s.id}')">${s.status==='Active'?'⏸':'▶'}</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('') : '<div class="empty"><div class="big">👥</div>No staff added yet</div>'}
+    </div>`;
+}
 
-function viewOvertime(){const ot=Object.values(Cache.get('overtime',{})||{});const staff=Object.values(Cache.get('staff',{})||{});const isSup=S.user.role==='supervisor';return `${isSup?`<div class="card"><h2>Add Overtime</h2><select id="oStaff">${staff.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><input id="oDate" type="date" value="${today()}"><div class="grid2"><input id="oStart" type="time" value="18:00"><input id="oEnd" type="time" value="22:00"></div><input id="oReason" placeholder="Reason"><button class="block" onclick="addOt()">Add</button></div>`:''}<div class="card"><h2>Overtime (${ot.length})</h2>${ot.length?ot.map(o=>{const s=staff.find(x=>String(x.id)===String(o.staff_id));return `<div style="padding:10px;border-bottom:1px solid #eee"><div style="font-weight:600">${esc(s?.name||'?')}</div><div style="font-size:11px;color:#888">${o.date} · ${o.start} → ${o.end} · <b>${o.hours}h</b></div></div>`;}).join(''):'<div class="empty">No records</div>'}</div>`;}
-function addOt(){const sid=Number(document.getElementById('oStaff').value);const date=document.getElementById('oDate').value;const start=document.getElementById('oStart').value;const end=document.getElementById('oEnd').value;const reason=document.getElementById('oReason').value;if(!date||!start||!end)return toast('Required','error');const[sh,sm]=start.split(':').map(Number);const[eh,em]=end.split(':').map(Number);let m=(eh*60+em)-(sh*60+sm);if(m<0)m+=24*60;const h=+(m/60).toFixed(2);const ot=Cache.get('overtime',{})||{};const id='o_'+uid();ot[id]={id,staff_id:sid,date,start,end,hours:h,reason,approved_by:S.user.username};Cache.set('overtime',ot);toast('Added '+h+'h');render();}
+function showAddStaff() {
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+  const activeShifts = Object.values(shifts).filter(s => !['O','EL','CPL','CL','GH','SL','AL','ML'].includes(s.code));
+  
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>➕ Add New Staff</h2>
+    <div class="help">* = Mandatory</div>
+    
+    <div class="grid2">
+      <input id="nsName" placeholder="Full Name *">
+      <select id="nsGender">
+        <option value="">Gender *</option>
+        <option>Male</option>
+        <option>Female</option>
+      </select>
+    </div>
+    <div class="grid2">
+      <input id="nsMobile" placeholder="Mobile Number *" inputmode="tel">
+      <input id="nsEmpId" placeholder="Employee ID *">
+    </div>
+    <div class="grid2">
+      <input id="nsDesig" placeholder="Designation *" value="Phlebotomist">
+      <input id="nsContact" placeholder="Alternate Contact">
+    </div>
+    <input id="nsJoinDate" type="date" placeholder="Joining Date">
 
-function viewExchange(){const ex=Object.values(Cache.get('exchanges',{})||{});const staff=Object.values(Cache.get('staff',{})||{});const isSup=S.user.role==='supervisor';const isStaff=S.user.role==='staff';const mine=isStaff?ex.filter(e=>String(e.requester_id)===String(S.user.staff_id)||String(e.target_id)===String(S.user.staff_id)):ex;return `${isStaff?`<div class="card"><h2>Request Exchange</h2><select id="xTarget">${staff.filter(s=>String(s.id)!==String(S.user.staff_id)).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><input id="xDate" type="date"><div class="grid2"><input id="xOrig" placeholder="My duty"><input id="xReq" placeholder="Their duty"></div><input id="xReason" placeholder="Reason"><button class="block" onclick="addExchange()">Submit</button></div>`:''}<div class="card"><h2>Exchanges (${mine.length})</h2>${mine.length?mine.map(e=>{const r=staff.find(x=>String(x.id)===String(e.requester_id));const t=staff.find(x=>String(x.id)===String(e.target_id));let a='';if(isStaff&&String(e.target_id)===String(S.user.staff_id)&&e.staff_resp==='Pending')a=`<button class="success sm" onclick="respondX('${e.id}','Accepted')">Accept</button><button class="danger sm" onclick="respondX('${e.id}','Rejected')">Reject</button>`;else if(isSup&&e.staff_resp==='Accepted'&&e.sup_resp==='Pending')a=`<button class="success sm" onclick="approveX('${e.id}','Approved')">Approve</button><button class="danger sm" onclick="approveX('${e.id}','Rejected')">Reject</button>`;return `<div style="padding:10px;border-bottom:1px solid #eee"><div style="font-weight:600">${esc(r?.name||'?')} ↔ ${esc(t?.name||'?')}</div><div style="font-size:11px;color:#888">${e.date} · ${e.orig} ↔ ${e.req}</div><div style="font-size:11px;margin:4px 0">Staff: ${e.staff_resp} · Sup: ${e.sup_resp}</div><div><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></div><div style="margin-top:6px;display:flex;gap:6px">${a}</div></div>`;}).join(''):'<div class="empty">No exchanges</div>'}</div>`;}
-function addExchange(){const tid=Number(document.getElementById('xTarget').value);const date=document.getElementById('xDate').value;const orig=document.getElementById('xOrig').value.toUpperCase();const req=document.getElementById('xReq').value.toUpperCase();const reason=document.getElementById('xReason').value;if(!date||!orig||!req)return toast('Required','error');const ex=Cache.get('exchanges',{})||{};const id='x_'+uid();ex[id]={id,requester_id:S.user.staff_id,target_id:tid,date,orig,req,reason,staff_resp:'Pending',sup_resp:'Pending',status:'Pending',at:new Date().toISOString()};Cache.set('exchanges',ex);toast('Submitted');render();}
-function respondX(id,resp){const ex=Cache.get('exchanges',{})||{};const e=ex[id];if(!e)return;e.staff_resp=resp;if(resp==='Rejected'){e.status='Rejected';e.sup_resp='Rejected';}Cache.set('exchanges',ex);toast(resp);render();}
-function approveX(id,resp){const ex=Cache.get('exchanges',{})||{};const e=ex[id];if(!e)return;e.sup_resp=resp;e.status=resp;if(resp==='Approved'){const asg=Cache.get('assignments',{})||{};const periods=Cache.get('periods',{})||{};const p=Object.values(periods).find(pp=>pp.start<=e.date&&pp.end>=e.date);if(p&&asg[p.id]){const rk=e.requester_id+'_'+e.date;const tk=e.target_id+'_'+e.date;const rd=asg[p.id][rk]||e.orig;const td=asg[p.id][tk]||e.req;asg[p.id][rk]=td;asg[p.id][tk]=rd;Cache.set('assignments',asg);}}Cache.set('exchanges',ex);toast(resp);render();}
+    <div class="divider"></div>
+    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">⏰ Shift Type *</div>
+    <div class="row auto">
+      <button type="button" class="pill on" id="shiftTypeFixed" onclick="setShiftType('fixed')">Fixed Shift</button>
+      <button type="button" class="pill" id="shiftTypeMulti" onclick="setShiftType('multi')">Multiple Shifts</button>
+    </div>
 
-function viewReports(){const periods=Object.values(Cache.get('periods',{})||{});const staff=Object.values(Cache.get('staff',{})||{});const asg=Cache.get('assignments',{})||{};const ot=Object.values(Cache.get('overtime',{})||{});const pid=S.periodId||(periods[0]?.id);const p=periods.find(x=>x.id===pid);const pd=asg[pid]||{};let rows=[];if(p){const dates=datesBetween(p.start,p.end);staff.filter(s=>s.status==='Active').forEach(s=>{const c={M:0,E:0,N:0,O:0,PH:0,CPL:0,EL:0,total:0};dates.forEach(d=>{const code=pd[s.id+'_'+d]||'';if(code==='M')c.M++;else if(code==='E'||code==='E4')c.E++;else if(['N','N12','EN'].includes(code))c.N++;else if(code==='O')c.O++;else if(code==='PH')c.PH++;else if(code==='CPL')c.CPL++;else if(code==='EL')c.EL++;if(code)c.total++;});rows.push({name:s.name,...c});});}return `<div class="card"><h2>📊 Monthly Summary</h2>${p?`<div style="font-size:12px;color:#666;margin-bottom:8px">${esc(p.name)}</div>`:''}<div class="scroll-x"><table><thead><tr><th>Staff</th><th>M</th><th>E</th><th>N</th><th>O</th><th>PH</th><th>CPL</th><th>EL</th><th>Tot</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="text-align:left;max-width:110px;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</td><td>${r.M}</td><td>${r.E}</td><td>${r.N}</td><td>${r.O}</td><td>${r.PH}</td><td>${r.CPL}</td><td>${r.EL}</td><td><b>${r.total}</b></td></tr>`).join('')}</tbody></table></div></div><div class="card"><h2>⏱ Overtime</h2>${ot.length?ot.slice(0,20).map(o=>{const s=staff.find(x=>String(x.id)===String(o.staff_id));return `<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px"><b>${esc(s?.name||'?')}</b> · ${o.date} · ${o.hours}h</div>`;}).join(''):'<div class="empty">No data</div>'}</div>`;}
+    <div id="fixedShiftBox">
+      <div style="font-size:12px;color:#666;margin-bottom:6px">Select ONE fixed shift:</div>
+      <div id="fixedShiftList">
+        ${activeShifts.map(s => `<button type="button" class="pill" data-fixed="${s.code}" onclick="pickFixed('${s.code}')">${s.code} (${s.name})</button>`).join('')}
+      </div>
+    </div>
 
-function viewAudit(){if(S.user.role!=='supervisor')return '<div class="card"><div class="empty">Access denied</div></div>';const log=Object.values(Cache.get('audit',{})||{});return `<div class="card"><h2>📜 History (${log.length})</h2>${log.length?log.slice(0,100).map(l=>`<div style="padding:8px;border-bottom:1px solid #eee;font-size:11px"><div><b>${esc(l.action)}</b> · ${esc(l.user)}</div><div style="color:#888">${new Date(l.at).toLocaleString()}</div>${l.old||l.new?`<div>${esc(l.old||'')} → ${esc(l.new||'')}</div>`:''}</div>`).join(''):'<div class="empty">No history</div>'}</div>`;}
+    <div id="multiShiftBox" style="display:none">
+      <div style="font-size:12px;color:#666;margin-bottom:6px">Add shifts in priority order (🥇 = highest):</div>
+      <div id="priorityList"></div>
+      <button type="button" class="sec block" onclick="addPriorityRow()">➕ Add Shift</button>
+    </div>
 
-function viewSettings(){const s=Cache.get('settings',{})||{};const users=Object.values(Cache.get('users',{})||{});return `<div class="card"><h2>⚙ Settings</h2><input id="stHosp" placeholder="Hospital" value="${esc(s.hospital_name||'')}"><input id="stDept" placeholder="Department" value="${esc(s.department||'')}"><input id="stWa" placeholder="WhatsApp Bot" value="${esc(s.whatsapp_bot||'')}"><button class="block" onclick="saveSettings()">Save</button></div><div class="card"><h2>👤 Users (${users.length})</h2>${users.map(u=>`<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px"><b>${esc(u.username)}</b> · ${esc(u.role)}</div>`).join('')}</div><div class="card"><h2>💾 Data</h2><button class="sec block" onclick="exportAllData()" style="margin-bottom:8px">📤 Export JSON</button><button class="sec block" onclick="importAllData()">📥 Import JSON</button></div>`;}
-function saveSettings(){const s=Cache.get('settings',{})||{};s.hospital_name=document.getElementById('stHosp').value;s.department=document.getElementById('stDept').value;s.whatsapp_bot=document.getElementById('stWa').value;Cache.set('settings',s);toast('Saved');render();}
-function exportAllData(){const data={};['users','staff','duties','periods','assignments','leave','overtime','exchanges','audit','settings'].forEach(k=>data[k]=Cache.get(k));const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='phleb-backup-'+today()+'.json';a.click();toast('Downloaded');}
-function importAllData(){const inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const data=JSON.parse(ev.target.result);Object.keys(data).forEach(k=>{if(data[k])Cache.set(k,data[k]);});toast('Imported');setTimeout(()=>render(),500);}catch(err){toast('Invalid','error');}};r.readAsText(f);};inp.click();}
+    <div class="divider"></div>
+    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">🏖 Special Off Dates (Optional)</div>
+    <div id="specialOffList"></div>
+    <button type="button" class="sec block" onclick="addSpecialOff()">➕ Add Special Off</button>
 
-function exportExcel(){const periods=Object.values(Cache.get('periods',{})||{});const p=periods.find(x=>x.id===S.periodId);if(!p)return toast('No period','error');const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');const dates=datesBetween(p.start,p.end);const pd=(Cache.get('assignments',{})[p.id])||{};const aoa=[];aoa.push([Cache.get('settings',{}).hospital_name]);aoa.push(['Monthly Duty Roster',p.name]);aoa.push([]);aoa.push(['Sr.','Name',...dates,'OFF','PH','CPL','EL','TOTAL']);staff.forEach((s,i)=>{const row=[i+1,s.name];let o=0,ph=0,cpl=0,el=0;dates.forEach(d=>{const c=pd[s.id+'_'+d]||'';row.push(c);if(c==='O')o++;else if(c==='PH')ph++;else if(c==='CPL')cpl++;else if(c==='EL')el++;});row.push(o,ph,cpl,el,o+ph+cpl+el);aoa.push(row);});const ws=XLSX.utils.aoa_to_sheet(aoa);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Roster');XLSX.writeFile(wb,'roster-'+p.name.replace(/\s+/g,'_')+'.xlsx');toast('Downloaded');}
+    <div class="divider"></div>
+    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">📱 Login Credentials</div>
+    <input id="nsUsername" placeholder="Username (= Mobile Number)" readonly style="background:#F0F2F5">
+    <input id="nsPassword" placeholder="Password" value="123456">
+    <div class="help">Default password: 123456 (staff can change)</div>
 
-function showImportDialog(){const m=document.createElement('div');m.className='modal';m.innerHTML=`<div class="modal-c"><h2>📥 Import Excel</h2><p style="font-size:12px;color:#666;margin-bottom:12px">Select Excel file</p><input type="file" id="impFile" accept=".xlsx,.xls"><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button onclick="doImport()">Import</button></div><div id="impStatus" style="margin-top:12px;font-size:12px"></div></div>`;document.body.appendChild(m);}
-function doImport(){const f=document.getElementById('impFile').files[0];if(!f)return toast('Select file','error');const periods=Cache.get('periods',{})||{};const p=periods[S.periodId];if(!p)return toast('Create period first','error');const st=document.getElementById('impStatus');st.textContent='Reading…';const r=new FileReader();r.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,defval:''});let hi=-1;for(let i=0;i<Math.min(15,rows.length);i++){if(rows[i].some(c=>String(c).trim()==='Name')){hi=i;break;}}if(hi<0){st.innerHTML='<span style="color:#c0392b">Header not found</span>';return;}const h=rows[hi];const nc=h.findIndex(c=>String(c).trim()==='Name');const dc=[];for(let i=nc+1;i<h.length;i++){const v=String(h[i]).trim();if(/^\d{1,2}$/.test(v))dc.push({col:i,day:Number(v)});else if(['OFF','PH','CPL','EL','TOTAL'].includes(v))break;}const sd=new Date(p.start+'T00:00:00');const ed=new Date(p.end+'T00:00:00');const d2d={};dc.forEach(({day})=>{const sc=new Date(sd);let last=null;while(sc<=ed){if(sc.getDate()===day)last=new Date(sc);sc.setDate(sc.getDate()+1);}if(last)d2d[day]=last.toISOString().slice(0,10);});const staff=Cache.get('staff',{})||{};const users=Cache.get('users',{})||{};const asg=Cache.get('assignments',{})||{};const pd=asg[p.id]||{};let si=0,ai=0;for(let r=hi+1;r<rows.length;r++){const row=rows[r];const name=String(row[nc]||'').trim();if(!name)continue;if(/^(Morning|Evening|X|N|EN|ME|PH|CPL|EL|OFF)$/i.test(name))continue;if(/^\d+$/.test(name))continue;let s=Object.values(staff).find(x=>x.name===name);if(!s){const nid=Math.max(...Object.values(staff).map(x=>Number(x.id)||0),0)+1;const sid='PH-'+String(nid).padStart(3,'0');s={id:nid,sid,name,designation:'Phlebotomist',status:'Active'};staff[nid]=s;users[sid.toLowerCase()]={username:sid.toLowerCase(),password:'staff123',role:'staff',staff_id:nid,active:true};si++;}dc.forEach(({col,day})=>{const dt=d2d[day];if(!dt)return;let c=String(row[col]||'').trim().toUpperCase();if(!c)c='O';if(c==='OFF')c='O';pd[s.id+'_'+dt]=c;ai++;});}Cache.set('staff',staff);Cache.set('users',users);asg[p.id]=pd;Cache.set('assignments',asg);audit('IMPORT_EXCEL','period',null,si+' staff, '+ai+' assign');st.innerHTML=`<span style="color:#27ae60">✓ ${si} new staff, ${ai} assignments</span>`;setTimeout(()=>{document.querySelector('.modal').remove();render();},1500);}catch(err){st.innerHTML='<span style="color:#c0392b">Error: '+esc(err.message)+'</span>';}};r.readAsArrayBuffer(f);}
+    <div class="row" style="margin-top:12px">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button class="success" onclick="saveNewStaff()">💾 Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+  
+  window._shiftType = 'fixed';
+  window._fixedShift = null;
+  window._priorityShifts = [];
+  window._specialOffs = [];
+  
+  document.getElementById('nsMobile').addEventListener('input', e => {
+    document.getElementById('nsUsername').value = e.target.value;
+  });
+}
 
-function exportPDF(){const periods=Object.values(Cache.get('periods',{})||{});const p=periods.find(x=>x.id===S.periodId);if(!p)return toast('No period','error');const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');const dates=datesBetween(p.start,p.end);const pd=(Cache.get('assignments',{})[p.id])||{};const s=Cache.get('settings',{});const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'landscape',unit:'pt',format:'a4'});doc.setFontSize(14).setTextColor('#1a3a6b');doc.text(s.hospital_name||'',40,40);doc.setFontSize(10).setTextColor('#333');doc.text(s.department||'',40,58);doc.setFontSize(11);doc.text('Monthly Duty Roster: '+p.name,40,76);doc.setFontSize(8).setTextColor('#666');doc.text('Period: '+p.start+' to '+p.end,40,90);const head=[['Name',...dates.map(d=>d.slice(8)),'O','PH','CPL','EL','Tot']];const body=staff.map(x=>{const row=[x.name];let o=0,ph=0,cpl=0,el=0;dates.forEach(d=>{const c=pd[x.id+'_'+d]||'';row.push(c);if(c==='O')o++;else if(c==='PH')ph++;else if(c==='CPL')cpl++;else if(c==='EL')el++;});row.push(o,ph,cpl,el,o+ph+cpl+el);return row;});doc.autoTable({head,body,startY:105,styles:{fontSize:6,cellPadding:2,halign:'center'},headStyles:{fillColor:[26,58,107],textColor:255,fontSize:6},columnStyles:{0:{halign:'left',cellWidth:100}},margin:{left:20,right:20}});doc.setFontSize(8).setTextColor('#333');const fy=doc.lastAutoTable.finalY+20;doc.text('Generated: '+today(),40,fy);doc.text('Prepared: __________',300,fy);doc.text('Approved: __________',500,fy);doc.save('roster-'+p.name.replace(/\s+/g,'_')+'.pdf');toast('PDF downloaded');}
+function setShiftType(type) {
+  window._shiftType = type;
+  document.getElementById('shiftTypeFixed').classList.toggle('on', type === 'fixed');
+  document.getElementById('shiftTypeMulti').classList.toggle('on', type === 'multi');
+  document.getElementById('fixedShiftBox').style.display = type === 'fixed' ? 'block' : 'none';
+  document.getElementById('multiShiftBox').style.display = type === 'multi' ? 'block' : 'none';
+}
 
-function shareWhatsApp(scope){const periods=Object.values(Cache.get('periods',{})||{});const p=periods.find(x=>x.id===S.periodId);if(!p)return toast('No period','error');const staff=Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');const dates=datesBetween(p.start,p.end);const pd=(Cache.get('assignments',{})[p.id])||{};const s=Cache.get('settings',{});let text=`*${s.hospital_name}*\n*${s.department}*\n*Roster:* ${p.name}\n*Period:* ${p.start} → ${p.end}\n\n`;if(scope==='staff'){const me=staff.find(x=>String(x.id)===String(S.user.staff_id));if(!me)return toast('No profile','error');text+=`*${me.name}* — Schedule:\n`;dates.forEach(d=>{const c=pd[me.id+'_'+d]||'-';text+=`${d.slice(8)}: ${c}  `;});}else{staff.forEach(x=>{text+=`*${x.name}*: `;const parts=[];dates.forEach(d=>{const c=pd[x.id+'_'+d]||'-';parts.push(`${d.slice(8)}:${c}`);});text+=parts.join(' | ')+'\n\n';});}text+=`\n_Shared via ${s.whatsapp_bot||'FlipBotMe'}_`;const url='https://wa.me/?text='+encodeURIComponent(text);window.open(url,'_blank');}
+function pickFixed(code) {
+  window._fixedShift = code;
+  document.querySelectorAll('[data-fixed]').forEach(b => b.classList.toggle('on', b.dataset.fixed === code));
+}
 
+function addPriorityRow() {
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+  const activeShifts = Object.values(shifts).filter(s => !['O','EL','CPL','CL','GH','SL','AL','ML'].includes(s.code));
+  const idx = window._priorityShifts.length;
+  const div = document.createElement('div');
+  div.className = 'priority-row';
+  div.dataset.idx = idx;
+  div.innerHTML = `
+    <span class="rank">${['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'][idx]||'•'}</span>
+    <select onchange="window._priorityShifts[${idx}]=this.value">
+      <option value="">-- Select Shift --</option>
+      ${activeShifts.map(s => `<option value="${s.code}">${s.code} (${s.name})</option>`).join('')}
+    </select>
+    <button type="button" class="danger" onclick="this.parentElement.remove();window._priorityShifts[${idx}]=''">✕</button>
+  `;
+  document.getElementById('priorityList').appendChild(div);
+  window._priorityShifts.push('');
+}
+
+function addSpecialOff() {
+  const div = document.createElement('div');
+  div.className = 'special-off-row';
+  const idx = window._specialOffs.length;
+  div.innerHTML = `
+    <input type="date" onchange="window._specialOffs[${idx}]=this.value">
+    <button type="button" class="danger" onclick="this.parentElement.remove();window._specialOffs[${idx}]=''">✕</button>
+  `;
+  document.getElementById('specialOffList').appendChild(div);
+  window._specialOffs.push('');
+}
+
+async function saveNewStaff() {
+  const name = document.getElementById('nsName').value.trim();
+  const gender = document.getElementById('nsGender').value;
+  const mobile = document.getElementById('nsMobile').value.trim();
+  const empId = document.getElementById('nsEmpId').value.trim();
+  const desig = document.getElementById('nsDesig').value.trim();
+  const contact = document.getElementById('nsContact').value.trim();
+  const joinDate = document.getElementById('nsJoinDate').value;
+  const password = document.getElementById('nsPassword').value || '123456';
+
+  if (!name || !gender || !mobile || !empId || !desig) {
+    return toast('All mandatory fields required','error');
+  }
+  if (window._shiftType === 'fixed' && !window._fixedShift) {
+    return toast('Select a fixed shift','error');
+  }
+  if (window._shiftType === 'multi') {
+    const valid = window._priorityShifts.filter(x => x);
+    if (valid.length < 1) return toast('Add at least 1 shift','error');
+  }
+
+  const staff = Cache.get('staff', {}) || {};
+  if (Object.values(staff).find(s => s.mobile === mobile)) {
+    return toast('Mobile already registered','error');
+  }
+  if (Object.values(staff).find(s => s.empId === empId)) {
+    return toast('Employee ID already exists','error');
+  }
+
+  const newId = 's_' + uid();
+  staff[newId] = {
+    id: newId,
+    name, gender, mobile,
+    empId, designation: desig, contact, joinDate,
+    status: 'Active',
+    shiftType: window._shiftType,
+    fixedShift: window._shiftType === 'fixed' ? window._fixedShift : null,
+    priorityShifts: window._shiftType === 'multi' ? window._priorityShifts.filter(x=>x) : [],
+    specialOffs: window._specialOffs.filter(x => x),
+    cplBalance: 0,
+    createdAt: new Date().toISOString()
+  };
+  await Cache.set('staff', staff);
+
+  const users = Cache.get('users', {}) || {};
+  users[mobile] = {
+    username: mobile, password,
+    role: 'staff', staff_id: newId,
+    name, mobile, active: true
+  };
+  await Cache.set('users', users);
+
+  audit('CREATE_STAFF', 'staff', null, name);
+  notifyAll('New Staff Added', `${name} (${desig}) added to team`, 'staff');
+  document.querySelector('.modal').remove();
+  toast('Staff added ✅');
+  render();
+}
+
+function editStaff(id) {
+  const staff = Cache.get('staff',{}) || {};
+  const s = staff[id];
+  if (!s) return;
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>✏️ Edit Staff</h2>
+    <input id="esName" value="${esc(s.name)}" placeholder="Name">
+    <div class="grid2">
+      <select id="esGender">
+        <option ${s.gender==='Male'?'selected':''}>Male</option>
+        <option ${s.gender==='Female'?'selected':''}>Female</option>
+      </select>
+      <input id="esMobile" value="${esc(s.mobile||'')}" placeholder="Mobile" readonly style="background:#F0F2F5">
+    </div>
+    <div class="grid2">
+      <input id="esEmpId" value="${esc(s.empId||'')}" placeholder="Employee ID">
+      <input id="esDesig" value="${esc(s.designation||'')}" placeholder="Designation">
+    </div>
+    <input id="esContact" value="${esc(s.contact||'')}" placeholder="Alternate Contact">
+    <div class="grid2">
+      <input id="esCPL" type="number" step="0.5" value="${s.cplBalance||0}" placeholder="CPL Balance">
+      <select id="esStatus">
+        <option ${s.status==='Active'?'selected':''}>Active</option>
+        <option ${s.status==='Inactive'?'selected':''}>Inactive</option>
+      </select>
+    </div>
+    <div class="help">Current Shifts: ${s.shiftType==='fixed'?s.fixedShift:Object.values(s.priorityShifts||{}).join(' › ')}</div>
+    <div class="row">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button class="success" onclick="saveEditStaff('${id}')">💾 Save</button>
+    </div>
+    <div class="divider"></div>
+    <button class="danger block" onclick="resetStaffPassword('${id}')">🔑 Reset Password to 123456</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveEditStaff(id) {
+  const staff = Cache.get('staff',{}) || {};
+  const s = staff[id];
+  if (!s) return;
+  s.name = document.getElementById('esName').value.trim();
+  s.gender = document.getElementById('esGender').value;
+  s.empId = document.getElementById('esEmpId').value.trim();
+  s.designation = document.getElementById('esDesig').value.trim();
+  s.contact = document.getElementById('esContact').value.trim();
+  s.cplBalance = parseFloat(document.getElementById('esCPL').value) || 0;
+  s.status = document.getElementById('esStatus').value;
+  await Cache.set('staff', staff);
+  audit('EDIT_STAFF', 'staff', null, s.name);
+  document.querySelector('.modal').remove();
+  toast('Updated ✅');
+  render();
+}
+
+async function toggleStaff(id) {
+  const staff = Cache.get('staff',{}) || {};
+  const s = staff[id];
+  if (!s) return;
+  s.status = s.status === 'Active' ? 'Inactive' : 'Active';
+  await Cache.set('staff', staff);
+  audit('TOGGLE_STAFF', 'staff', null, `${s.name}: ${s.status}`);
+  toast(s.status);
+  render();
+}
+
+async function resetStaffPassword(id) {
+  const staff = Cache.get('staff',{}) || {};
+  const s = staff[id];
+  if (!s) return;
+  const users = Cache.get('users', {}) || {};
+  const u = users[s.mobile];
+  if (u) { u.password = '123456'; await Cache.set('users', users); }
+  audit('RESET_PASSWORD', 'user', null, s.mobile);
+  toast('Password reset to 123456');
+}
+
+/* ============================================================
+   📅 ROSTER
+   ============================================================ */
+function viewRoster() {
+  const periodsObj = Cache.get('periods',{}) || {};
+  const periods = Object.values(periodsObj).sort((a,b)=>b.start.localeCompare(a.start));
+  const isSup = S.user.role === 'supervisor';
+
+  if (!periods.length) {
+    if (!isSup) return '<div class="card"><div class="empty">No roster published</div></div>';
+    return `<div class="card">
+      <h2><span class="ico">📅</span> Create First Roster Period</h2>
+      <input id="pName" placeholder="Name" value="Aug-Sep 2026">
+      <div class="grid2">
+        <input id="pStart" type="date" value="2026-08-26">
+        <input id="pEnd" type="date" value="2026-09-25">
+      </div>
+      <button class="block success" onclick="createPeriod()">Create Period</button>
+    </div>`;
+  }
+
+  if (!S.periodId) S.periodId = periods[0].id;
+  const period = periods.find(p => p.id === S.periodId) || periods[0];
+  S.periodId = period.id;
+
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
+  const dates = datesBetween(period.start, period.end);
+  const asg = Cache.get('assignments',{}) || {};
+  const pd = asg[period.id] || {};
+  const locked = period.status === 'Locked';
+
+  let grid = `<div class="scroll-x"><table><thead><tr><th>Name</th>${dates.map(d => 
+    `<th style="${isSundayOrHoliday(d)?'background:#E67E22':''}">${d.slice(8)}<br><span style="font-size:9px;opacity:.8">${dayOfWeek(d)}</span></th>`
+  ).join('')}<th>O</th><th>CPL</th><th>EL</th><th>Tot</th></tr></thead><tbody>`;
+
+  staff.forEach(s => {
+    const counts = { O:0, CPL:0, EL:0 };
+    grid += `<tr><td style="text-align:left;max-width:130px;overflow:hidden;text-overflow:ellipsis;${S.user.staff_id===s.id?'background:#FFF3E0;font-weight:700':''}">${esc(s.name)}</td>`;
+    dates.forEach(d => {
+      const code = pd[s.id + '_' + d] || '';
+      if (counts[code] !== undefined) counts[code]++;
+      const cls = code ? 'd-' + code : '';
+      grid += `<td><span class="cell ${cls}" onclick="editCell('${s.id}','${d}')">${code || '·'}</span></td>`;
+    });
+    const tot = counts.O + counts.CPL + counts.EL;
+    grid += `<td>${counts.O}</td><td>${counts.CPL}</td><td>${counts.EL}</td><td><b>${tot}</b></td></tr>`;
+  });
+  grid += '</tbody></table></div>';
+
+  const opts = periods.map(p => `<option value="${p.id}" ${p.id===period.id?'selected':''}>${esc(p.name)}</option>`).join('');
+
+  return `
+    <div class="card">
+      <div class="row">
+        <select onchange="S.periodId=this.value;render()">${opts}</select>
+        <span class="badge b-${period.status.toLowerCase()}">${period.status}</span>
+      </div>
+      <div style="color:#666;font-size:12px;margin-bottom:10px">${fmtDate(period.start)} → ${fmtDate(period.end)}</div>
+      ${isSup ? `
+        <div class="grid2">
+          <button class="success" onclick="autoGenerate()">⚡ Auto Generate</button>
+          <button class="sec" onclick="showImportDialog()">📥 Import Excel</button>
+          <button class="sec" onclick="publishRoster()">📢 Publish</button>
+          ${locked 
+            ? `<button class="warning" onclick="unlockRoster()">🔓 Unlock</button>`
+            : `<button class="danger" onclick="lockRoster()">🔒 Lock</button>`}
+          <button class="sec" onclick="exportExcel()">📊 Excel</button>
+          <button class="sec" onclick="exportPDF()">📄 PDF</button>
+          <button class="sec" onclick="newPeriodModal()">➕ New Period</button>
+          <button class="sec" onclick="shareWhatsApp('full')">💬 WhatsApp</button>
+        </div>
+      ` : `
+        <div class="grid2">
+          <button class="sec" onclick="shareWhatsApp('staff')">💬 Share My Duties</button>
+          <button onclick="go('exchange')">🔄 Exchange</button>
+        </div>
+      `}
+    </div>
+    <div class="card">
+      <h2><span class="ico">📋</span> Roster Grid</h2>
+      <div class="legend">
+        <span class="d-M">M</span><span class="d-E">E</span>
+        <span class="d-N12">N12</span><span class="d-D">D</span>
+        <span class="d-X">X</span><span class="d-O">O</span>
+        <span class="d-CPL">CPL</span><span class="d-EL">EL</span>
+      </div>
+      ${isSup?'<div class="help">Tap cell to change duty</div>':''}
+      ${grid}
+    </div>`;
+}
+
+function createPeriod() {
+  const name = document.getElementById('pName').value.trim();
+  const start = document.getElementById('pStart').value;
+  const end = document.getElementById('pEnd').value;
+  if (!name || !start || !end) return toast('All fields required','error');
+  if (start > end) return toast('Start must be before end','error');
+  const id = 'p_' + uid();
+  const periods = Cache.get('periods',{}) || {};
+  periods[id] = { id, name, start, end, status:'Draft', created:new Date().toISOString() };
+  Cache.set('periods', periods);
+  S.periodId = id;
+  audit('CREATE_PERIOD', 'period', null, name);
+  toast('Period created');
+  render();
+}
+
+function newPeriodModal() {
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>➕ New Roster Period</h2>
+    <input id="npName" placeholder="Name e.g. Oct-Nov 2026">
+    <div class="grid2">
+      <input id="npStart" type="date">
+      <input id="npEnd" type="date">
+    </div>
+    <div class="row">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button class="success" onclick="createPeriod2()">Create</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function createPeriod2() {
+  const name = document.getElementById('npName').value.trim();
+  const start = document.getElementById('npStart').value;
+  const end = document.getElementById('npEnd').value;
+  if (!name || !start || !end) return toast('All fields required','error');
+  const id = 'p_' + uid();
+  const periods = Cache.get('periods',{}) || {};
+  periods[id] = { id, name, start, end, status:'Draft', created:new Date().toISOString() };
+  Cache.set('periods', periods);
+  S.periodId = id;
+  audit('CREATE_PERIOD', 'period', null, name);
+  toast('Period created');
+  document.querySelector('.modal').remove();
+  render();
+}
+
+function editCell(staffId, date) {
+  if (S.user.role !== 'supervisor') return toast('Only supervisor can edit','error');
+  const periods = Cache.get('periods',{}) || {};
+  const period = periods[S.periodId];
+  if (!period) return;
+  if (period.status === 'Locked') return toast('Roster is locked','error');
+
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+  const asg = Cache.get('assignments',{}) || {};
+  const pd = asg[period.id] || {};
+  const current = pd[staffId + '_' + date] || '';
+
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>Change Duty</h2>
+    <div style="color:#666;font-size:12px;margin-bottom:10px">${fmtDate(date)} — Current: <b>${current || 'none'}</b></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+      ${Object.values(shifts).map(d => 
+        `<button class="pill ${d.code===current?'on':''}" onclick="setDuty('${staffId}','${date}','${d.code}')">${d.code}<br><span style="font-size:9px">${d.name}</span></button>`
+      ).join('')}
+    </div>
+    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function setDuty(staffId, date, code) {
+  const asg = Cache.get('assignments',{}) || {};
+  const pd = asg[S.periodId] || {};
+  const old = pd[staffId + '_' + date] || null;
+  if (old === code) { document.querySelector('.modal').remove(); return; }
+  pd[staffId + '_' + date] = code;
+  asg[S.periodId] = pd;
+  await Cache.set('assignments', asg);
+  audit('EDIT_DUTY', 'assignment', old, code);
+  
+  const staff = Cache.get('staff',{})[staffId];
+  if (staff) {
+    notifyAll('Duty Changed', `${staff.name}'s ${fmtDate(date)} duty changed from ${old||'—'} to ${code}`, 'duty');
+  }
+  
+  document.querySelector('.modal').remove();
+  toast('Updated');
+  render();
+}
+
+async function publishRoster() {
+  const periods = Cache.get('periods',{}) || {};
+  const p = periods[S.periodId];
+  if (!p) return;
+  p.status = 'Published';
+  p.published = new Date().toISOString();
+  await Cache.set('periods', periods);
+  audit('PUBLISH_ROSTER', 'period', 'Draft', 'Published');
+  notifyAll('Roster Published', `${p.name} roster is now live`, 'roster');
+  toast('Published ✅');
+  render();
+}
+
+async function lockRoster() {
+  if (!confirm('Lock this roster? Staff cannot exchange duties.')) return;
+  const periods = Cache.get('periods',{}) || {};
+  const p = periods[S.periodId];
+  if (!p) return;
+  p.status = 'Locked';
+  p.locked = new Date().toISOString();
+  await Cache.set('periods', periods);
+  audit('LOCK_ROSTER', 'period', 'Published', 'Locked');
+  toast('Locked');
+  render();
+}
+
+async function unlockRoster() {
+  const reason = prompt('Reason for unlocking:');
+  if (!reason) return;
+  const periods = Cache.get('periods',{}) || {};
+  const p = periods[S.periodId];
+  if (!p) return;
+  p.status = 'Published';
+  p.locked = null;
+  await Cache.set('periods', periods);
+  audit('UNLOCK_ROSTER', 'period', 'Locked', 'Published', reason);
+  toast('Unlocked');
+  render();
+}
+
+/* ============================================================
+   ⚡ AUTO GENERATE ROSTER
+   ============================================================ */
+async function autoGenerate() {
+  if (!confirm('Auto Generate roster? Existing assignments for this period will be replaced.')) return;
+  const periods = Cache.get('periods',{}) || {};
+  const p = periods[S.periodId];
+  if (!p) return;
+
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  if (!staff.length) return toast('No active staff','error');
+
+  const leaves = Object.values(Cache.get('leave',{})||{}).filter(l => l.status === 'Approved');
+  const config = Cache.get('config',{}) || DEFAULT_CONFIG;
+  const dates = datesBetween(p.start, p.end);
+
+  const result = {};
+  const stats = {};
+  staff.forEach(s => {
+    stats[s.id] = { total:0, counts:{}, lastDate:null, lastDuty:null, weekly:{} };
+  });
+
+  const weekKey = (d) => {
+    const dt = new Date(d + 'T00:00:00');
+    const jan1 = new Date(dt.getFullYear(), 0, 1);
+    return dt.getFullYear() + '-W' + Math.ceil(((dt - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+  };
+
+  const onLeave = (sid, d) => leaves.find(l => l.staff_id === sid && d >= l.start && d <= l.end);
+  const onSpecialOff = (staff, d) => (staff.specialOffs||[]).includes(d);
+  const availableStaff = staff.length;
+
+  // Pick config based on available staff
+  let dayCfg;
+  if (availableStaff >= 12) dayCfg = config.phlebo_12;
+  else if (availableStaff === 11) dayCfg = config.phlebo_11;
+  else if (availableStaff === 10) dayCfg = config.phlebo_10;
+  else dayCfg = config.phlebo_9;
+
+  for (const date of dates) {
+    const wk = weekKey(date);
+    const sundayOrHoliday = isSundayOrHoliday(date);
+
+    // Determine required shifts
+    let required = [];
+    if (sundayOrHoliday) {
+      // Sunday/Holiday: 2 M + 2 E + 1 N
+      for (let i = 0; i < config.sunday.M; i++) required.push('M');
+      for (let i = 0; i < config.sunday.E; i++) required.push('E');
+      for (let i = 0; i < config.sunday.N; i++) required.push('N');
+    } else {
+      // Normal day
+      for (let i = 0; i < dayCfg.M; i++) required.push('M');
+      for (let i = 0; i < dayCfg.D; i++) required.push('D');
+      for (let i = 0; i < dayCfg.E; i++) required.push('E');
+      for (let i = 0; i < (dayCfg.X||0); i++) required.push('X');
+      const night = dayCfg.N12 ? 'N12' : (dayCfg.N ? 'N' : null);
+      if (night) required.push(night);
+    }
+
+    // Sort required: hard shifts first (N, N12, D, E4, X) then easy (M, E)
+    const hardOrder = { N:0, N12:0, D:1, E4:1, X:2, M:3, E:3 };
+    required.sort((a,b) => (hardOrder[a]||9) - (hardOrder[b]||9));
+
+    const assignedToday = new Set();
+
+    for (const code of required) {
+      // Build eligible list
+      const eligible = staff.filter(s => {
+        if (onLeave(s.id, date)) return false;
+        if (onSpecialOff(s, date)) return false;
+        if (assignedToday.has(s.id)) return false;
+        
+        // Station-based rules
+        if (code === 'D' && s.gender !== 'Female') return false; // D is for Gynee (Female)
+        
+        // Check shift eligibility
+        if (s.shiftType === 'fixed') {
+          // Fixed staff: only their fixed shift (with fallback)
+          const fixed = s.fixedShift;
+          // Special: on Sunday/Holiday, only M, E, N
+          if (sundayOrHoliday && !['M','E','N'].includes(fixed)) return false;
+          if (!sundayOrHoliday && code === 'N' && fixed !== 'N') return false;
+          if (!sundayOrHoliday && code !== fixed) {
+            // Allow fallback if fixed shift not needed
+            return false;
+          }
+        } else {
+          // Multiple shifts: check priority list
+          const prio = s.priorityShifts || [];
+          if (!prio.includes(code)) return false;
+        }
+        
+        // Weekly limit
+        stats[s.id].weekly[wk] = stats[s.id].weekly[wk] || 0;
+        if (stats[s.id].weekly[wk] >= 7) return false;
+        
+        // Rest
+        if (stats[s.id].lastDate === date) return false;
+        
+        return true;
+      });
+
+      // Sort by priority (1st priority gets bonus)
+      eligible.sort((a,b) => {
+        const aPrio = (a.priorityShifts||[]).indexOf(code);
+        const bPrio = (b.priorityShifts||[]).indexOf(code);
+        const aScore = aPrio >= 0 ? aPrio : (a.fixedShift === code ? 0 : 99);
+        const bScore = bPrio >= 0 ? bPrio : (b.fixedShift === code ? 0 : 99);
+        
+        // Priority score first
+        if (aScore !== bScore) return aScore - bScore;
+        
+        // Then least duty count for this shift
+        const aC = stats[a.id].counts[code] || 0;
+        const bC = stats[b.id].counts[code] || 0;
+        if (aC !== bC) return aC - bC;
+        
+        // Then least total
+        return stats[a.id].total - stats[b.id].total;
+      });
+
+      const chosen = eligible[0];
+      if (chosen) {
+        result[chosen.id + '_' + date] = code;
+        assignedToday.add(chosen.id);
+        stats[chosen.id].counts[code] = (stats[chosen.id].counts[code]||0) + 1;
+        stats[chosen.id].total++;
+        stats[chosen.id].weekly[wk]++;
+        stats[chosen.id].lastDate = date;
+        stats[chosen.id].lastDuty = code;
+      }
+    }
+
+    // Fill remaining with OFF or their leave
+    staff.forEach(s => {
+      if (result[s.id + '_' + date]) return;
+      const lv = onLeave(s.id, date);
+      if (lv) result[s.id + '_' + date] = lv.type || 'EL';
+      else result[s.id + '_' + date] = 'O';
+    });
+
+    // If Sunday/Holiday and X still unassigned, convert to OFF
+    if (sundayOrHoliday) {
+      staff.forEach(s => {
+        if (result[s.id + '_' + date] === 'X') result[s.id + '_' + date] = 'O';
+      });
+    }
+  }
+
+  const asg = Cache.get('assignments',{}) || {};
+  asg[p.id] = result;
+  await Cache.set('assignments', asg);
+  audit('GENERATE_ROSTER', 'period', null, Object.keys(result).length + ' assignments');
+  notifyAll('Roster Generated', `${Object.keys(result).length} assignments created for ${p.name}`, 'roster');
+  toast('Generated ' + Object.keys(result).length + ' assignments ✅');
+  render();
+}
+
+/* ============================================================
+   📥 EXCEL IMPORT
+   ============================================================ */
+function showImportDialog() {
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>📥 Import Excel Roster</h2>
+    <p style="font-size:12px;color:#666;margin-bottom:12px">Select your Excel file (e.g. Phle Aug - Sep2026.xlsx). Staff not in system will be auto-created with mobile from "Contact" column if available.</p>
+    <input type="file" id="impFile" accept=".xlsx,.xls">
+    <div class="row" style="margin-top:10px">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button class="success" onclick="doImport()">Import</button>
+    </div>
+    <div id="impStatus" style="margin-top:12px;font-size:12px"></div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+function doImport() {
+  const f = document.getElementById('impFile').files[0];
+  if (!f) return toast('Select a file','error');
+  const periods = Cache.get('periods',{}) || {};
+  const p = periods[S.periodId];
+  if (!p) return toast('Create period first','error');
+  const st = document.getElementById('impStatus');
+  st.textContent = 'Reading file...';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb = XLSX.read(data, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+
+      let headerIdx = -1;
+      for (let i = 0; i < Math.min(15, rows.length); i++) {
+        if (rows[i].some(c => String(c).trim() === 'Name')) { headerIdx = i; break; }
+      }
+      if (headerIdx < 0) { st.innerHTML = '<span style="color:#C0392B">Header "Name" not found</span>'; return; }
+
+      const header = rows[headerIdx];
+      const nameCol = header.findIndex(c => String(c).trim() === 'Name');
+      const dayCols = [];
+      for (let i = nameCol + 1; i < header.length; i++) {
+        const v = String(header[i]).trim();
+        if (/^\d{1,2}$/.test(v)) dayCols.push({ col: i, day: Number(v) });
+        else if (['OFF','PH','CPL','EL','TOTAL','Balance'].includes(v)) break;
+      }
+
+      const sd = new Date(p.start + 'T00:00:00');
+      const ed = new Date(p.end + 'T00:00:00');
+      const dayToDate = {};
+      dayCols.forEach(({ day }) => {
+        const scan = new Date(sd);
+        let last = null;
+        while (scan <= ed) {
+          if (scan.getDate() === day) last = new Date(scan);
+          scan.setDate(scan.getDate() + 1);
+        }
+        if (last) dayToDate[day] = last.toISOString().slice(0, 10);
+      });
+
+      const staff = Cache.get('staff',{}) || {};
+      const users = Cache.get('users',{}) || {};
+      const asg = Cache.get('assignments',{}) || {};
+      const pd = asg[p.id] || {};
+      let si = 0, ai = 0;
+
+      for (let r = headerIdx + 1; r < rows.length; r++) {
+        const row = rows[r];
+        const name = String(row[nameCol] || '').trim();
+        if (!name) continue;
+        if (/^(Morning|Evening|X|N|EN|ME|PH|CPL|EL|OFF)$/i.test(name)) continue;
+        if (/^\d+$/.test(name)) continue;
+
+        let s = Object.values(staff).find(x => x.name === name);
+        if (!s) {
+          const newId = 's_' + uid();
+          const mobile = '0300' + String(1000000 + Math.floor(Math.random()*8999999)).slice(-7);
+          s = {
+            id: newId, name,
+            gender: name.match(/Noreen|Habiba|Qurat|Donia|Bushra|Tasleem|Fatima|Ain/i) ? 'Female' : 'Male',
+            mobile, empId: 'PH-' + String(Object.keys(staff).length + 1).padStart(3,'0'),
+            designation: 'Phlebotomist', status: 'Active',
+            shiftType: 'multi', priorityShifts: ['M','E','E4','N12','D','X'],
+            specialOffs: [], cplBalance: 0,
+            createdAt: new Date().toISOString()
+          };
+          staff[newId] = s;
+          users[mobile] = { username:mobile, password:'123456', role:'staff', staff_id:newId, name, mobile, active:true };
+          si++;
+        }
+
+        dayCols.forEach(({ col, day }) => {
+          const dt = dayToDate[day];
+          if (!dt) return;
+          let c = String(row[col] || '').trim().toUpperCase();
+          if (!c) c = 'O';
+          if (c === 'OFF') c = 'O';
+          pd[s.id + '_' + dt] = c;
+          ai++;
+        });
+      }
+
+      await Cache.set('staff', staff);
+      await Cache.set('users', users);
+      asg[p.id] = pd;
+      await Cache.set('assignments', asg);
+      audit('IMPORT_EXCEL', 'period', null, si + ' staff, ' + ai + ' assign');
+      st.innerHTML = `<span style="color:#27AE60">✅ Imported: ${si} new staff, ${ai} assignments</span>`;
+      setTimeout(() => { document.querySelector('.modal').remove(); render(); }, 1500);
+    } catch (err) {
+      st.innerHTML = '<span style="color:#C0392B">Error: ' + esc(err.message) + '</span>';
+    }
+  };
+  reader.readAsArrayBuffer(f);
+}
+
+/* ============================================================
+   🔔 NOTIFICATIONS
+   ============================================================ */
+function viewNotifications() {
+  const notifs = Cache.get('notifications',{}) || {};
+  const arr = Object.values(notifs).sort((a,b) => new Date(b.at) - new Date(a.at)).slice(0, 100);
+
+  return `
+    <div class="card">
+      <h2><span class="ico">🔔</span> Notifications (${arr.length})</h2>
+      ${arr.length ? arr.map(n => `
+        <div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}')">
+          <div class="title">${esc(n.title)}</div>
+          <div class="desc">${esc(n.body)}</div>
+          <div class="time">${fmtTime(n.at)}</div>
+        </div>
+      `).join('') : '<div class="empty"><div class="big">🔔</div>No notifications</div>'}
+      ${arr.length ? '<button class="sec block" onclick="clearNotifs()">🗑 Clear All</button>' : ''}
+    </div>`;
+}
+
+async function markRead(id) {
+  const notifs = Cache.get('notifications',{}) || {};
+  if (notifs[id]) { notifs[id].read = true; await Cache.set('notifications', notifs); render(); }
+}
+
+async function clearNotifs() {
+  if (!confirm('Clear all notifications?')) return;
+  await Cache.set('notifications', {});
+  toast('Cleared');
+  render();
+}
+
+/* ============================================================
+   🏖 LEAVE
+   ============================================================ */
+function viewLeave() {
+  const leave = Object.values(Cache.get('leave',{})||{});
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const isSup = S.user.role === 'supervisor';
+
+  return `
+    ${isSup ? `<div class="card">
+      <h2><span class="ico">🏖</span> Add Leave</h2>
+      <select id="lStaff">${staff.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
+      <select id="lType">
+        <option>EL</option><option>CPL</option><option>CL</option><option>GH</option>
+        <option>SL</option><option>AL</option><option>ML</option>
+      </select>
+      <div class="grid2">
+        <input id="lStart" type="date">
+        <input id="lEnd" type="date">
+      </div>
+      <input id="lRem" placeholder="Remarks">
+      <button class="block success" onclick="addLeave()">➕ Add Leave</button>
+    </div>` : ''}
+    <div class="card">
+      <h2><span class="ico">📋</span> Leave Records (${leave.length})</h2>
+      ${leave.length ? leave.map(l => {
+        const s = staff.find(x => x.id === l.staff_id);
+        return `<div style="padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px">
+          <div style="flex:1">
+            <div style="font-weight:700">${esc(s?s.name:'?')}</div>
+            <div style="font-size:11px;color:#888">${l.type} · ${fmtDate(l.start)} → ${fmtDate(l.end)}</div>
+            ${l.remarks?`<div style="font-size:11px;color:#666">${esc(l.remarks)}</div>`:''}
+          </div>
+          <span class="badge b-${l.status.toLowerCase()}">${l.status}</span>
+          ${isSup ? `<button class="danger sm" onclick="delLeave('${l.id}')">🗑</button>` : ''}
+        </div>`;
+      }).join('') : '<div class="empty"><div class="big">🏖</div>No leave records</div>'}
+    </div>`;
+}
+
+async function addLeave() {
+  const staff_id = document.getElementById('lStaff').value;
+  const type = document.getElementById('lType').value;
+  const start = document.getElementById('lStart').value;
+  const end = document.getElementById('lEnd').value;
+  const remarks = document.getElementById('lRem').value;
+  if (!start || !end) return toast('Dates required','error');
+  if (start > end) return toast('Start must be before end','error');
+
+  const leave = Cache.get('leave',{}) || {};
+  const id = 'l_' + uid();
+  leave[id] = { id, staff_id, type, start, end, status:'Approved', remarks, at:new Date().toISOString() };
+  await Cache.set('leave', leave);
+  audit('ADD_LEAVE', 'leave', null, type);
+  
+  const staff = Cache.get('staff',{})[staff_id];
+  if (staff) notifyAll('Leave Approved', `${staff.name}: ${type} from ${fmtDate(start)} to ${fmtDate(end)}`, 'leave');
+  toast('Leave added ✅');
+  render();
+}
+
+async function delLeave(id) {
+  if (!confirm('Delete this leave?')) return;
+  const leave = Cache.get('leave',{}) || {};
+  delete leave[id];
+  await Cache.set('leave', leave);
+  audit('DELETE_LEAVE', 'leave', id, null);
+  toast('Deleted');
+  render();
+}
+
+/* ============================================================
+   ⏱ OVERTIME
+   ============================================================ */
+function viewOvertime() {
+  const ot = Object.values(Cache.get('overtime',{})||{});
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const isSup = S.user.role === 'supervisor';
+
+  return `
+    ${isSup ? `<div class="card">
+      <h2><span class="ico">⏱</span> Add Overtime</h2>
+      <select id="oStaff">${staff.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
+      <input id="oDate" type="date" value="${today()}">
+      <div class="grid2">
+        <input id="oStart" type="time" value="18:00">
+        <input id="oEnd" type="time" value="22:00">
+      </div>
+      <input id="oReason" placeholder="Reason (e.g. Emergency)">
+      <div class="help">CPL = Hours × 0.125 (8h = 1 CPL)</div>
+      <button class="block success" onclick="addOt()">➕ Add Overtime</button>
+    </div>` : ''}
+    <div class="card">
+      <h2><span class="ico">📋</span> Overtime Records (${ot.length})</h2>
+      ${ot.length ? ot.map(o => {
+        const s = staff.find(x => x.id === o.staff_id);
+        return `<div style="padding:10px;border-bottom:1px solid #eee">
+          <div style="font-weight:700">${esc(s?s.name:'?')}</div>
+          <div style="font-size:11px;color:#888">${fmtDate(o.date)} · ${o.start} → ${o.end}</div>
+          <div style="font-size:12px;margin-top:4px">
+            <span class="chip green">${o.hours}h</span>
+            <span class="chip orange">+${o.cpl} CPL</span>
+          </div>
+          ${o.reason?`<div style="font-size:11px;color:#666;margin-top:3px">${esc(o.reason)}</div>`:''}
+        </div>`;
+      }).join('') : '<div class="empty"><div class="big">⏱</div>No overtime records</div>'}
+    </div>`;
+}
+
+async function addOt() {
+  const staff_id = document.getElementById('oStaff').value;
+  const date = document.getElementById('oDate').value;
+  const start = document.getElementById('oStart').value;
+  const end = document.getElementById('oEnd').value;
+  const reason = document.getElementById('oReason').value;
+  if (!date || !start || !end) return toast('All fields required','error');
+
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  let mins = (eh * 60 + em) - (sh * 60 + sm);
+  if (mins < 0) mins += 24 * 60;
+  const hours = +(mins / 60).toFixed(2);
+
+  const cfg = Cache.get('config',{}) || DEFAULT_CONFIG;
+  const cpl = +(hours * (cfg.cpl_per_hour || 0.125)).toFixed(3);
+
+  const ot = Cache.get('overtime',{}) || {};
+  const id = 'o_' + uid();
+  ot[id] = { id, staff_id, date, start, end, hours, cpl, reason, by:S.user.name, at:new Date().toISOString() };
+  await Cache.set('overtime', ot);
+
+  // Add CPL to staff balance
+  const staff = Cache.get('staff',{}) || {};
+  const s = staff[staff_id];
+  if (s) {
+    s.cplBalance = +((s.cplBalance || 0) + cpl).toFixed(3);
+    await Cache.set('staff', staff);
+  }
+
+  audit('ADD_OT', 'overtime', null, `${hours}h, +${cpl} CPL`);
+  notifyAll('Overtime Added', `${s?s.name:'Staff'}: ${hours}h overtime (+${cpl} CPL)`, 'overtime');
+  toast(`Added ${hours}h (+${cpl} CPL) ✅`);
+  render();
+}
+
+/* ============================================================
+   🔄 EXCHANGE
+   ============================================================ */
+function viewExchange() {
+  const ex = Object.values(Cache.get('exchanges',{})||{});
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const isSup = S.user.role === 'supervisor';
+  const isStaff = S.user.role === 'staff';
+
+  const mine = isStaff 
+    ? ex.filter(e => e.requester_id === S.user.staff_id || e.target_id === S.user.staff_id)
+    : ex;
+  const pending = mine.filter(e => e.status === 'Pending');
+  const completed = mine.filter(e => e.status !== 'Pending');
+
+  const renderEx = (e) => {
+    const req = staff.find(x => x.id === e.requester_id);
+    const tgt = staff.find(x => x.id === e.target_id);
+    let actions = '';
+    if (isStaff && e.target_id === S.user.staff_id && e.staff_resp === 'Pending') {
+      actions = `<button class="success sm" onclick="respondX('${e.id}','Accepted')">✅ Accept</button>
+                 <button class="danger sm" onclick="respondX('${e.id}','Rejected')">❌ Reject</button>`;
+    } else if (isSup && e.staff_resp === 'Accepted' && e.sup_resp === 'Pending') {
+      actions = `<button class="success sm" onclick="approveX('${e.id}','Approved')">✅ Approve</button>
+                 <button class="danger sm" onclick="approveX('${e.id}','Rejected')">❌ Reject</button>`;
+    }
+    return `<div style="padding:12px;border-bottom:1px solid #eee">
+      <div style="font-weight:700">${esc(req?req.name:'?')} ↔ ${esc(tgt?tgt.name:'?')}</div>
+      <div style="font-size:12px;color:#888;margin:4px 0">${fmtDate(e.date)} · ${e.orig} ↔ ${e.req}</div>
+      ${e.reason?`<div style="font-size:11px;color:#666">📝 ${esc(e.reason)}</div>`:''}
+      <div style="font-size:11px;margin:6px 0">
+        <span class="chip ${e.staff_resp==='Accepted'?'green':e.staff_resp==='Rejected'?'red':''}">Staff: ${e.staff_resp}</span>
+        <span class="chip ${e.sup_resp==='Approved'?'green':e.sup_resp==='Rejected'?'red':''}">Supervisor: ${e.sup_resp}</span>
+      </div>
+      <div><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></div>
+      ${actions?`<div style="margin-top:8px;display:flex;gap:6px">${actions}</div>`:''}
+    </div>`;
+  };
+
+  return `
+    ${isStaff ? `<div class="card">
+      <h2><span class="ico">🔄</span> Request Exchange</h2>
+      <select id="xTarget">${staff.filter(s => s.id !== S.user.staff_id).map(s => 
+        `<option value="${s.id}">${esc(s.name)}</option>`
+      ).join('')}</select>
+      <input id="xDate" type="date">
+      <div class="grid2">
+        <input id="xOrig" placeholder="My duty (e.g. N12)">
+        <input id="xReq" placeholder="Their duty (e.g. M)">
+      </div>
+      <input id="xReason" placeholder="Reason">
+      <button class="block success" onclick="addExchange()">📤 Submit Request</button>
+    </div>` : ''}
+    <div class="card">
+      <h2><span class="ico">⏳</span> Pending (${pending.length})</h2>
+      ${pending.length ? pending.map(renderEx).join('') : '<div class="empty">No pending exchanges</div>'}
+    </div>
+    <div class="card">
+      <h2><span class="ico">✅</span> History (${completed.length})</h2>
+      ${completed.length ? completed.slice(0, 30).map(renderEx).join('') : '<div class="empty">No history</div>'}
+    </div>`;
+}
+
+async function addExchange() {
+  const target_id = document.getElementById('xTarget').value;
+  const date = document.getElementById('xDate').value;
+  const orig = document.getElementById('xOrig').value.toUpperCase().trim();
+  const req = document.getElementById('xReq').value.toUpperCase().trim();
+  const reason = document.getElementById('xReason').value.trim();
+  if (!date || !orig || !req) return toast('All fields required','error');
+
+  const ex = Cache.get('exchanges',{}) || {};
+  const id = 'x_' + uid();
+  ex[id] = {
+    id, requester_id: S.user.staff_id, target_id, date,
+    orig, req, reason,
+    staff_resp: 'Pending', sup_resp: 'Pending', status: 'Pending',
+    at: new Date().toISOString()
+  };
+  await Cache.set('exchanges', ex);
+
+  const staff = Cache.get('staff',{}) || {};
+  const requester = staff[S.user.staff_id];
+  const target = staff[target_id];
+  notifyAll('Exchange Request', `${requester?requester.name:'Staff'} requested exchange with ${target?target.name:'Staff'} on ${fmtDate(date)}`, 'exchange');
+  audit('CREATE_EXCHANGE', 'exchange', null, `${orig}↔${req}`);
+  toast('Request submitted ✅');
+  render();
+}
+
+async function respondX(id, resp) {
+  const ex = Cache.get('exchanges',{}) || {};
+  const e = ex[id];
+  if (!e) return;
+  e.staff_resp = resp;
+  if (resp === 'Rejected') { e.status = 'Rejected'; e.sup_resp = 'Rejected'; }
+  await Cache.set('exchanges', ex);
+  audit('EXCHANGE_RESPONSE', 'exchange', null, resp);
+  toast(resp);
+  render();
+}
+
+async function approveX(id, resp) {
+  const ex = Cache.get('exchanges',{}) || {};
+  const e = ex[id];
+  if (!e) return;
+  e.sup_resp = resp;
+  e.status = resp;
+
+  if (resp === 'Approved') {
+    const asg = Cache.get('assignments',{}) || {};
+    const periods = Cache.get('periods',{}) || {};
+    const p = Object.values(periods).find(pp => pp.start <= e.date && pp.end >= e.date);
+    if (p && asg[p.id]) {
+      const rk = e.requester_id + '_' + e.date;
+      const tk = e.target_id + '_' + e.date;
+      const rd = asg[p.id][rk] || e.orig;
+      const td = asg[p.id][tk] || e.req;
+      asg[p.id][rk] = td;
+      asg[p.id][tk] = rd;
+      await Cache.set('assignments', asg);
+    }
+  }
+  await Cache.set('exchanges', ex);
+  
+  const staff = Cache.get('staff',{}) || {};
+  const r = staff[e.requester_id];
+  const t = staff[e.target_id];
+  notifyAll('Exchange ' + resp, `${r?r.name:'Staff'} ↔ ${t?t.name:'Staff'} — ${resp}`, 'exchange');
+  audit('EXCHANGE_DECISION', 'exchange', null, resp);
+  toast(resp);
+  render();
+}
+
+/* ============================================================
+   💬 CHAT
+   ============================================================ */
+function viewChat() {
+  const chat = Cache.get('chat',{}) || {};
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const isSup = S.user.role === 'supervisor';
+
+  if (S.chatType === 'group') {
+    const msgs = Object.values(chat.group || {}).sort((a,b) => new Date(a.at) - new Date(b.at));
+    return `
+      <div class="card">
+        <h2><span class="ico">💬</span> Group Chat</h2>
+        <div class="tabs">
+          <button class="active" onclick="S.chatType='group';render()">👥 Group</button>
+          <button onclick="S.chatType='individual';render()">👤 Individual</button>
+        </div>
+        <div style="max-height:50vh;overflow-y:auto;padding:8px 0">
+          ${msgs.length ? msgs.map(m => `
+            <div class="chat-msg ${m.user_id===S.user.staff_id||m.user===S.user.username?'me':'other'}">
+              <div class="meta">${esc(m.user_name)} · ${fmtTime(m.at)}</div>
+              ${m.text?`<div>${esc(m.text)}</div>`:''}
+              ${m.image?`<img src="${m.image}" alt="img">`:''}
+            </div>
+          `).join('') : '<div class="empty">No messages yet</div>'}
+        </div>
+      </div>
+      <div class="chat-input-bar">
+        <input type="file" id="chatFile" accept="image/*" class="file-input" onchange="sendChatImage('group',null)">
+        <label for="chatFile" class="attach" style="width:44px;height:44px;border-radius:50%;background:#E8EBF2;color:#1E5BA8;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">📎</label>
+        <input id="chatInput" placeholder="Type message..." onkeydown="if(event.key==='Enter')sendChatMsg('group',null)">
+        <button onclick="sendChatMsg('group',null)">➤</button>
+      </div>`;
+  } else {
+    // Individual
+    const myId = S.user.staff_id || 'admin';
+    const others = isSup ? staff : staff.filter(s => s.id !== S.user.staff_id);
+    const withId = S.chatWith || (others[0]?.id || null);
+    const withStaff = staff.find(s => s.id === withId);
+    
+    const roomKey = [myId, withId].sort().join('_');
+    const msgs = Object.values(chat[roomKey] || {}).sort((a,b) => new Date(a.at) - new Date(b.at));
+
+    return `
+      <div class="card">
+        <h2><span class="ico">💬</span> Individual Chat</h2>
+        <div class="tabs">
+          <button onclick="S.chatType='group';render()">👥 Group</button>
+          <button class="active" onclick="S.chatType='individual';render()">👤 Individual</button>
+        </div>
+        <select onchange="S.chatWith=this.value;render()">
+          ${others.map(s => `<option value="${s.id}" ${s.id===withId?'selected':''}>${esc(s.name)}</option>`).join('')}
+        </select>
+        <div style="max-height:45vh;overflow-y:auto;padding:8px 0;margin-top:8px">
+          ${msgs.length ? msgs.map(m => `
+            <div class="chat-msg ${(m.user_id===myId)?'me':'other'}">
+              <div class="meta">${esc(m.user_name)} · ${fmtTime(m.at)}</div>
+              ${m.text?`<div>${esc(m.text)}</div>`:''}
+              ${m.image?`<img src="${m.image}" alt="img">`:''}
+            </div>
+          `).join('') : '<div class="empty">No messages yet</div>'}
+        </div>
+      </div>
+      ${withId ? `<div class="chat-input-bar">
+        <input type="file" id="chatFile2" accept="image/*" class="file-input" onchange="sendChatImage('individual','${roomKey}')">
+        <label for="chatFile2" class="attach" style="width:44px;height:44px;border-radius:50%;background:#E8EBF2;color:#1E5BA8;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">📎</label>
+        <input id="chatInput2" placeholder="Type message..." onkeydown="if(event.key==='Enter')sendChatMsg('individual','${roomKey}')">
+        <button onclick="sendChatMsg('individual','${roomKey}')">➤</button>
+      </div>` : ''}`;
+  }
+}
+
+async function sendChatMsg(type, roomKey) {
+  const input = document.getElementById(type === 'group' ? 'chatInput' : 'chatInput2');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+
+  const chat = Cache.get('chat',{}) || {};
+  const key = type === 'group' ? 'group' : roomKey;
+  if (!chat[key]) chat[key] = {};
+
+  const msgId = 'm_' + uid();
+  chat[key][msgId] = {
+    id: msgId,
+    user: S.user.username,
+    user_id: S.user.staff_id || 'admin',
+    user_name: S.user.name || S.user.username,
+    text,
+    at: new Date().toISOString()
+  };
+
+  await Cache.set('chat', chat);
+  input.value = '';
+  render();
+}
+
+async function sendChatImage(type, roomKey) {
+  const fileInput = document.getElementById(type === 'group' ? 'chatFile' : 'chatFile2');
+  const file = fileInput?.files?.[0];
+  if (!file) return;
+
+  if (file.size > 500000) return toast('Image too large (max 500KB)','error');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const chat = Cache.get('chat',{}) || {};
+    const key = type === 'group' ? 'group' : roomKey;
+    if (!chat[key]) chat[key] = {};
+
+    const msgId = 'm_' + uid();
+    chat[key][msgId] = {
+      id: msgId,
+      user: S.user.username,
+      user_id: S.user.staff_id || 'admin',
+      user_name: S.user.name || S.user.username,
+      image: e.target.result,
+      at: new Date().toISOString()
+    };
+
+    await Cache.set('chat', chat);
+    fileInput.value = '';
+    render();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============================================================
+   💬 WHATSAPP SHARE (Manual)
+   ============================================================ */
+function shareWhatsApp(scope) {
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const p = periods.find(x => x.id === S.periodId);
+  if (!p) return toast('No period','error');
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  const dates = datesBetween(p.start, p.end);
+  const pd = (Cache.get('assignments',{})[p.id]) || {};
+  const s = Cache.get('settings',{}) || {};
+  const t = today();
+
+  let text = `*${s.hospital_name}*\n*${s.department}*\n*Roster:* ${p.name}\n\n`;
+
+  if (scope === 'staff') {
+    const me = staff.find(x => x.id === S.user.staff_id);
+    if (!me) return toast('No profile','error');
+    text += `*${me.name}* — Your Schedule:\n`;
+    dates.forEach(d => {
+      const c = pd[me.id + '_' + d] || '-';
+      text += `${fmtDate(d)} (${dayOfWeek(d)}): *${c}*\n`;
+    });
+  } else if (scope === 'today') {
+    text += `*Duties for ${fmtDate(t)}:*\n`;
+    staff.forEach(x => {
+      const c = pd[x.id + '_' + t] || '-';
+      text += `• ${x.name}: *${c}*\n`;
+    });
+  } else {
+    text += `*Full Roster:*\n\n`;
+    staff.forEach(x => {
+      text += `*${x.name}*:\n`;
+      const parts = [];
+      dates.forEach(d => {
+        const c = pd[x.id + '_' + d] || '-';
+        parts.push(`${d.slice(8)}:${c}`);
+      });
+      text += parts.join(' | ') + '\n\n';
+    });
+  }
+
+  text += `\n_Shared via ${s.whatsapp_bot||'FlipBotMe'}_`;
+
+  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
+  toast('WhatsApp opening...');
+}
+
+async function shareWhatsAppToStaff(staffId, message) {
+  const staff = Cache.get('staff',{})[staffId];
+  if (!staff) return;
+  const mobile = (staff.mobile||'').replace(/\D/g,'');
+  const url = 'https://wa.me/' + (mobile.startsWith('92')?mobile:'92'+mobile.replace(/^0/,'')) + '?text=' + encodeURIComponent(message);
+  window.open(url, '_blank');
+}
+
+/* ============================================================
+   📊 EXCEL EXPORT
+   ============================================================ */
+function exportExcel() {
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const p = periods.find(x => x.id === S.periodId);
+  if (!p) return toast('No period','error');
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  const dates = datesBetween(p.start, p.end);
+  const pd = (Cache.get('assignments',{})[p.id]) || {};
+  const settings = Cache.get('settings',{}) || {};
+
+  const aoa = [];
+  // Row 1: Hospital name (bold, large)
+  aoa.push([settings.hospital_name]);
+  aoa.push([settings.department + ' — Phlebotomist Duty Roster']);
+  aoa.push([]);
+  aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
+  aoa.push([]);
+  // Header
+  const headerRow = ['Sr.', 'Name', 'Mobile'];
+  dates.forEach(d => headerRow.push(d.slice(8)));
+  headerRow.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'EL', 'TOTAL');
+  aoa.push(headerRow);
+
+  // Staff rows
+  staff.forEach((s, i) => {
+    const row = [i + 1, s.name, s.mobile || ''];
+    const counts = { M:0, E:0, E4:0, N12:0, D:0, X:0, O:0, CPL:0, EL:0 };
+    dates.forEach(d => {
+      const c = pd[s.id + '_' + d] || '';
+      row.push(c);
+      if (counts[c] !== undefined) counts[c]++;
+    });
+    const total = dates.filter(d => pd[s.id + '_' + d]).length;
+    row.push(counts.M, counts.E, counts.E4, counts.N12, counts.D, counts.X, counts.O, counts.CPL, counts.EL, total);
+    aoa.push(row);
+  });
+
+  // Footer
+  aoa.push([]);
+  aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
+  aoa.push(['Prepared by:', S.user.name || S.user.username]);
+  aoa.push(['Approved by:', '____________________']);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  // Column widths
+  ws['!cols'] = [
+    { wch: 5 }, { wch: 22 }, { wch: 14 },
+    ...dates.map(() => ({ wch: 5 })),
+    { wch: 4 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 5 }, { wch: 4 }, { wch: 6 }
+  ];
+  // Merge title cells
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Roster');
+  XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g,'_') + '.xlsx');
+  audit('EXPORT_EXCEL', 'period', null, p.name);
+  toast('Excel downloaded ✅');
+}
+
+/* ============================================================
+   📄 PDF EXPORT
+   ============================================================ */
+function exportPDF() {
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const p = periods.find(x => x.id === S.periodId);
+  if (!p) return toast('No period','error');
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  const dates = datesBetween(p.start, p.end);
+  const pd = (Cache.get('assignments',{})[p.id]) || {};
+  const settings = Cache.get('settings',{}) || {};
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  // Header - Hospital name in red
+  doc.setFontSize(18).setTextColor('#C8102E').setFont(undefined, 'bold');
+  doc.text(settings.hospital_name || 'Hospital', 40, 40);
+  doc.setFontSize(11).setTextColor('#1E5BA8').setFont(undefined, 'normal');
+  doc.text(settings.department || '', 40, 58);
+  doc.setFontSize(13).setTextColor('#222').setFont(undefined, 'bold');
+  doc.text('Phlebotomist Duty Roster — ' + p.name, 40, 78);
+  doc.setFontSize(9).setTextColor('#666').setFont(undefined, 'normal');
+  doc.text(`Period: ${fmtDate(p.start)} to ${fmtDate(p.end)}  |  Generated: ${new Date().toLocaleString('en-GB')}`, 40, 92);
+
+  // Draw red line
+  doc.setDrawColor(200, 16, 46).setLineWidth(2);
+  doc.line(40, 100, doc.internal.pageSize.width - 40, 100);
+
+  // Table
+  const head = [['Name', ...dates.map(d => d.slice(8)), 'O', 'CPL', 'EL', 'Tot']];
+  const body = staff.map(s => {
+    const row = [s.name];
+    let o = 0, cpl = 0, el = 0, tot = 0;
+    dates.forEach(d => {
+      const c = pd[s.id + '_' + d] || '';
+      row.push(c);
+      if (c === 'O') o++;
+      else if (c === 'CPL') cpl++;
+      else if (c === 'EL') el++;
+      if (c) tot++;
+    });
+    row.push(o, cpl, el, tot);
+    return row;
+  });
+
+  doc.autoTable({
+    head, body, startY: 115,
+    styles: { fontSize: 5.5, cellPadding: 1.8, halign: 'center', lineColor: [232, 235, 242], lineWidth: 0.2 },
+    headStyles: { fillColor: [200, 16, 46], textColor: 255, fontSize: 5.5, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [250, 251, 253] },
+    columnStyles: { 0: { halign: 'left', cellWidth: 95, fontStyle: 'bold' } },
+    margin: { left: 20, right: 20, top: 40 }
+  });
+
+  // Footer
+  const fy = doc.lastAutoTable.finalY + 25;
+  doc.setFontSize(9).setTextColor('#333');
+  doc.text(`Generated: ${new Date().toLocaleDateString('en-GB')}`, 40, fy);
+  doc.text(`Prepared by: ${S.user.name || S.user.username}`, 250, fy);
+  doc.text('Approved by: ____________________', 480, fy);
+  
+  doc.setFontSize(7).setTextColor('#999');
+  doc.text(`${settings.hospital_name} | ${settings.address || ''}`, 40, fy + 20);
+
+  doc.save('roster-' + p.name.replace(/\s+/g,'_') + '.pdf');
+  audit('EXPORT_PDF', 'period', null, p.name);
+  toast('PDF downloaded ✅');
+}
+
+/* ============================================================
+   📊 REPORTS
+   ============================================================ */
+function viewReports() {
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const staff = Object.values(Cache.get('staff',{})||{});
+  const asg = Cache.get('assignments',{})||{};
+  const leave = Object.values(Cache.get('leave',{})||{});
+  const ot = Object.values(Cache.get('overtime',{})||{});
+  const ex = Object.values(Cache.get('exchanges',{})||{});
+
+  const pid = S.periodId || (periods[0]?.id);
+  const p = periods.find(x => x.id === pid);
+  const pd = asg[pid] || {};
+
+  let rows = [];
+  if (p) {
+    const dates = datesBetween(p.start, p.end);
+    staff.filter(s => s.status === 'Active').forEach(s => {
+      const c = { M:0, E:0, N:0, D:0, X:0, O:0, CPL:0, EL:0, total:0 };
+      dates.forEach(d => {
+        const code = pd[s.id + '_' + d] || '';
+        if (code === 'M') c.M++;
+        else if (code === 'E') c.E++;
+        else if (['N','N12'].includes(code)) c.N++;
+        else if (code === 'D') c.D++;
+        else if (code === 'X') c.X++;
+        else if (code === 'O') c.O++;
+        else if (code === 'CPL') c.CPL++;
+        else if (code === 'EL') c.EL++;
+        if (code) c.total++;
+      });
+      rows.push({ name: s.name, cplBalance: s.cplBalance || 0, ...c });
+    });
+  }
+
+  const totalOT = ot.reduce((sum, o) => sum + (o.hours || 0), 0);
+  const totalOTcpl = ot.reduce((sum, o) => sum + (o.cpl || 0), 0);
+
+  return `
+    <div class="card">
+      <h2><span class="ico">📊</span> Monthly Summary</h2>
+      ${p ? `<div style="font-size:12px;color:#666;margin-bottom:8px">${esc(p.name)} (${fmtDate(p.start)} → ${fmtDate(p.end)})</div>` : ''}
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Staff</th><th>M</th><th>E</th><th>N</th><th>D</th><th>X</th><th>O</th><th>CPL</th><th>EL</th><th>Tot</th><th>CPL Bal</th></tr></thead>
+          <tbody>${rows.map(r => `<tr>
+            <td style="text-align:left;max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</td>
+            <td>${r.M}</td><td>${r.E}</td><td>${r.N}</td>
+            <td>${r.D}</td><td>${r.X}</td><td>${r.O}</td>
+            <td>${r.CPL}</td><td>${r.EL}</td><td><b>${r.total}</b></td>
+            <td><b style="color:${r.cplBalance>0?'#27AE60':'#666'}">${r.cplBalance.toFixed(2)}</b></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">⏱</span> Overtime Report</h2>
+      <div class="stats" style="grid-template-columns:1fr 1fr">
+        <div class="stat green"><div class="num">${totalOT.toFixed(1)}h</div><div class="label">Total OT Hours</div></div>
+        <div class="stat orange"><div class="num">${totalOTcpl.toFixed(2)}</div><div class="label">CPL Earned</div></div>
+      </div>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Staff</th><th>Date</th><th>Hours</th><th>CPL</th><th>Reason</th></tr></thead>
+          <tbody>${ot.slice(0, 30).map(o => {
+            const s = staff.find(x => x.id === o.staff_id);
+            return `<tr>
+              <td>${esc(s?s.name:'?')}</td>
+              <td>${fmtDate(o.date)}</td>
+              <td><b>${o.hours}h</b></td>
+              <td><span class="chip orange">+${o.cpl}</span></td>
+              <td>${esc(o.reason||'')}</td>
+            </tr>`;
+          }).join('') || '<tr><td colspan="5">No data</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🏖</span> Leave Report</h2>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Staff</th><th>Type</th><th>Start</th><th>End</th><th>Days</th><th>Status</th></tr></thead>
+          <tbody>${leave.slice(0, 30).map(l => {
+            const s = staff.find(x => x.id === l.staff_id);
+            const days = Math.ceil((new Date(l.end) - new Date(l.start)) / 86400000) + 1;
+            return `<tr>
+              <td>${esc(s?s.name:'?')}</td>
+              <td><span class="chip">${l.type}</span></td>
+              <td>${fmtDate(l.start)}</td>
+              <td>${fmtDate(l.end)}</td>
+              <td><b>${days}</b></td>
+              <td><span class="badge b-${l.status.toLowerCase()}">${l.status}</span></td>
+            </tr>`;
+          }).join('') || '<tr><td colspan="6">No data</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🔄</span> Exchange Report</h2>
+      <div class="scroll-x">
+        <table>
+          <thead><tr><th>Requester</th><th>Target</th><th>Date</th><th>Orig</th><th>Req</th><th>Staff</th><th>Sup</th><th>Status</th></tr></thead>
+          <tbody>${ex.slice(0, 30).map(e => {
+            const r = staff.find(x => x.id === e.requester_id);
+            const t = staff.find(x => x.id === e.target_id);
+            return `<tr>
+              <td>${esc(r?r.name:'?')}</td>
+              <td>${esc(t?t.name:'?')}</td>
+              <td>${fmtDate(e.date)}</td>
+              <td>${e.orig}</td>
+              <td>${e.req}</td>
+              <td>${e.staff_resp}</td>
+              <td>${e.sup_resp}</td>
+              <td><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></td>
+            </tr>`;
+          }).join('') || '<tr><td colspan="8">No data</td></tr>'}</tbody>
+        </table>
+      </div>
+    </div>
+
+    ${S.user.role === 'supervisor' ? `<div class="card">
+      <h2><span class="ico">📤</span> Export Reports</h2>
+      <div class="grid2">
+        <button onclick="exportExcel()">📊 Excel</button>
+        <button class="blue" onclick="exportPDF()">📄 PDF</button>
+      </div>
+    </div>` : ''}`;
+}
+
+/* ============================================================
+   🔬 TECHNOLOGIST ROSTER (الگ tab)
+   ============================================================ */
+function viewTechnologist() {
+  const isSup = S.user.role === 'supervisor';
+  const techs = Object.values(Cache.get('technologists',{})||{});
+  const periods = Object.values(Cache.get('techPeriods',{})||{}).sort((a,b) => b.start.localeCompare(a.start));
+
+  return `
+    <div class="card">
+      <h2><span class="ico">🔬</span> Technologist Roster</h2>
+      <div class="help">Separate roster for Lab Technologists. Same rules as Phlebotomist.</div>
+      <div class="empty" style="padding:20px">
+        <div class="big">🔬</div>
+        <div style="font-weight:700;color:#666;margin-bottom:6px">Coming Soon</div>
+        <div style="font-size:12px;color:#999">Technologist roster structure is ready.<br>Staff and shifts will be configured later.</div>
+        ${isSup ? `<button class="sec" style="margin-top:14px" onclick="go('settings')">⚙ Configure in Settings</button>` : ''}
+      </div>
+    </div>
+    ${techs.length ? `<div class="card"><h2>Technologists (${techs.length})</h2>${techs.map(t => `<div class="staff-card"><div class="avatar">${initials(t.name)}</div><div class="info"><div class="name">${esc(t.name)}</div><div class="detail">${esc(t.designation||'Technologist')}</div></div></div>`).join('')}</div>` : ''}
+    ${periods.length ? `<div class="card"><h2>Periods</h2>${periods.map(p => `<div style="padding:8px;border-bottom:1px solid #eee"><b>${esc(p.name)}</b> <span class="badge b-${p.status.toLowerCase()}">${p.status}</span></div>`).join('')}</div>` : ''}`;
+}
+
+/* ============================================================
+   📜 AUDIT LOG
+   ============================================================ */
+function viewAudit() {
+  if (S.user.role !== 'supervisor') return '<div class="card"><div class="empty">Access denied</div></div>';
+  const log = Object.values(Cache.get('audit',{})||{}).sort((a,b) => new Date(b.at) - new Date(a.at));
+  
+  return `
+    <div class="card">
+      <h2><span class="ico">📜</span> Audit Log (${log.length})</h2>
+      <input id="auditSearch" placeholder="🔍 Search..." oninput="filterAudit()">
+      <div style="max-height:70vh;overflow-y:auto" id="auditList">
+        ${log.slice(0, 100).map(l => `
+          <div class="notif-item" data-search="${esc((l.action + ' ' + l.user_name + ' ' + (l.new||'')).toLowerCase())}">
+            <div class="title">${esc(l.action)}</div>
+            <div class="desc">
+              👤 ${esc(l.user_name||l.user)} 
+              ${l.old||l.new ? `· <span style="color:#888">${esc(l.old||'—')} → ${esc(l.new||'—')}</span>` : ''}
+            </div>
+            <div class="time">${fmtTime(l.at)}</div>
+          </div>
+        `).join('')}
+      </div>
+      <button class="sec block" style="margin-top:10px" onclick="clearAudit()">🗑 Clear Old Logs</button>
+    </div>`;
+}
+
+function filterAudit() {
+  const q = document.getElementById('auditSearch').value.toLowerCase();
+  document.querySelectorAll('#auditList .notif-item').forEach(el => {
+    el.style.display = el.dataset.search.includes(q) ? 'block' : 'none';
+  });
+}
+
+async function clearAudit() {
+  if (!confirm('Clear audit logs older than 30 days?')) return;
+  const log = Cache.get('audit',{}) || {};
+  const cutoff = Date.now() - 30*24*60*60*1000;
+  const filtered = {};
+  Object.values(log).forEach(l => {
+    if (new Date(l.at).getTime() > cutoff) filtered[l.id] = l;
+  });
+  await Cache.set('audit', filtered);
+  toast('Old logs cleared');
+  render();
+}
+
+/* ============================================================
+   ⚙ SETTINGS
+   ============================================================ */
+function viewSettings() {
+  if (S.user.role !== 'supervisor') return '<div class="card"><div class="empty">Access denied</div></div>';
+  const s = Cache.get('settings',{}) || {};
+  const holidays = Object.values(Cache.get('holidays',{})||{});
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+
+  return `
+    <div class="card">
+      <h2><span class="ico">🏥</span> Hospital Settings</h2>
+      <input id="stHosp" placeholder="Hospital Name" value="${esc(s.hospital_name||'')}">
+      <input id="stDept" placeholder="Department" value="${esc(s.department||'')}">
+      <input id="stAddr" placeholder="Address" value="${esc(s.address||'')}">
+      <input id="stWa" placeholder="WhatsApp Bot Name" value="${esc(s.whatsapp_bot||'')}">
+      <button class="block success" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">🎉</span> Gazetted Holidays (2026)</h2>
+      <div class="help">Roster will apply Sunday rules on these dates</div>
+      ${holidays.length ? holidays.map(h => `
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #eee">
+          <div style="flex:1">
+            <b>${esc(h.name)}</b>
+            <div style="font-size:11px;color:#888">${fmtDate(h.date)}</div>
+          </div>
+          <button class="danger sm" onclick="delHoliday('${h.id}')">🗑</button>
+        </div>
+      `).join('') : '<div class="empty">No holidays added</div>'}
+      <button class="sec block" onclick="showAddHoliday()">➕ Add Holiday</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">⏰</span> Shift Timings</h2>
+      ${Object.values(shifts).slice(0, 8).map(sh => `
+        <div style="padding:8px;border-bottom:1px solid #eee;font-size:12px">
+          <b>${sh.code}</b> — ${sh.name}
+          <span style="color:#888">${sh.start||''}${sh.end?' - '+sh.end:''}</span>
+        </div>
+      `).join('')}
+      <button class="sec block" onclick="showEditShifts()">✏️ Edit Shifts</button>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">💾</span> Data Backup</h2>
+      <button class="sec block" style="margin-bottom:8px" onclick="exportAllData()">📤 Export Backup (JSON)</button>
+      <button class="sec block" onclick="importAllData()">📥 Import Backup</button>
+      <div class="help" style="margin-top:8px">Firebase auto-backup is always active.</div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">👤</span> User Accounts (${Object.keys(Cache.get('users',{})||{}).length})</h2>
+      <div style="max-height:300px;overflow-y:auto">
+        ${Object.values(Cache.get('users',{})||{}).map(u => `
+          <div style="padding:8px;border-bottom:1px solid #eee;font-size:12px">
+            <b>${esc(u.name || u.username)}</b>
+            <span class="chip">${u.role}</span>
+            <div style="color:#888;font-size:11px">📱 ${esc(u.username)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="ico">ℹ</span> About</h2>
+      <div style="font-size:12px;color:#666;line-height:1.7">
+        <b>${esc(s.app_title||'Phlebotomist Roster')}</b><br>
+        Version 2.0<br>
+        ${esc(s.hospital_name||'')}<br>
+        Data synced via Firebase
+      </div>
+    </div>`;
+}
+
+async function saveSettings() {
+  const s = Cache.get('settings',{}) || {};
+  s.hospital_name = document.getElementById('stHosp').value;
+  s.department = document.getElementById('stDept').value;
+  s.address = document.getElementById('stAddr').value;
+  s.whatsapp_bot = document.getElementById('stWa').value;
+  await Cache.set('settings', s);
+  audit('EDIT_SETTINGS', 'settings', null, s.hospital_name);
+  toast('Saved ✅');
+  render();
+}
+
+function showAddHoliday() {
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>➕ Add Gazetted Holiday</h2>
+    <input id="hName" placeholder="Holiday Name (e.g. Pakistan Day)">
+    <input id="hDate" type="date">
+    <div class="row">
+      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
+      <button class="success" onclick="saveHoliday()">Save</button>
+    </div>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function saveHoliday() {
+  const name = document.getElementById('hName').value.trim();
+  const date = document.getElementById('hDate').value;
+  if (!name || !date) return toast('All fields required','error');
+  const holidays = Cache.get('holidays',{}) || {};
+  const id = 'h_' + uid();
+  holidays[id] = { id, name, date, active: true };
+  await Cache.set('holidays', holidays);
+  audit('ADD_HOLIDAY', 'holiday', null, `${name} (${date})`);
+  document.querySelector('.modal').remove();
+  toast('Holiday added ✅');
+  render();
+}
+
+async function delHoliday(id) {
+  if (!confirm('Delete this holiday?')) return;
+  const holidays = Cache.get('holidays',{}) || {};
+  delete holidays[id];
+  await Cache.set('holidays', holidays);
+  toast('Deleted');
+  render();
+}
+
+function showEditShifts() {
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div class="modal-c">
+    <h2>✏️ Edit Shift Timings</h2>
+    ${Object.values(shifts).slice(0, 8).map(sh => `
+      <div style="padding:10px;border-bottom:1px solid #eee;margin-bottom:8px">
+        <b>${sh.code}</b> — ${sh.name}
+        <div class="grid2" style="margin-top:6px">
+          <input type="time" value="${sh.start||''}" onchange="updateShift('${sh.code}','start',this.value)">
+          <input type="time" value="${sh.end||''}" onchange="updateShift('${sh.code}','end',this.value)">
+        </div>
+      </div>
+    `).join('')}
+    <button class="success block" onclick="this.closest('.modal').remove();toast('Saved')">✅ Done</button>
+  </div>`;
+  document.body.appendChild(m);
+}
+
+async function updateShift(code, field, value) {
+  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+  if (shifts[code]) {
+    shifts[code][field] = value;
+    await Cache.set('shifts', shifts);
+  }
+}
+
+async function exportAllData() {
+  const data = {};
+  ['users','staff','technologists','duties','periods','assignments','techPeriods','techAssignments',
+   'leave','overtime','exchanges','audit','settings','notifications','chat','holidays','shifts',
+   'stations','config'].forEach(k => data[k] = Cache.get(k));
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'phleb-backup-' + today() + '.json';
+  a.click();
+  audit('EXPORT_BACKUP', 'system', null, null);
+  toast('Backup downloaded ✅');
+}
+
+function importAllData() {
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = '.json';
+  inp.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    if (!confirm('This will REPLACE all current data. Continue?')) return;
+    const r = new FileReader();
+    r.onload = async (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        for (const k of Object.keys(data)) {
+          if (data[k]) await Cache.set(k, data[k]);
+        }
+        audit('IMPORT_BACKUP', 'system', null, null);
+        toast('Backup restored ✅');
+        setTimeout(() => render(), 500);
+      } catch (err) { toast('Invalid file','error'); }
+    };
+    r.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ============================================================
+   🚀 BOOT
+   ============================================================ */
 Cache.init();
-try{const sv=localStorage.getItem('phleb_user');if(sv)S.user=JSON.parse(sv);}catch{}
-setTimeout(()=>{render();},1200);
+
+try {
+  const saved = localStorage.getItem('phleb_user');
+  if (saved) S.user = JSON.parse(saved);
+} catch {}
+
+setTimeout(() => {
+  render();
+  setInterval(() => { if (S.user) render(); }, 15000);
+}, 1200);
+
 </script>
 </body>
 </html>
