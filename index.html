@@ -72,7 +72,6 @@ tr:nth-child(even) td{background:#FAFBFD}
 .d-D{background:#BDB2FF;color:#4A1D96}
 .d-X{background:#CAFFBF;color:#1E8449}
 .d-ME{background:#FDFFB6;color:#7D6608}
-.d-EN{background:#9BF6FF;color:#0B7285}
 .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase}
 .b-draft{background:#FFF3B0;color:#7D6608}
 .b-published{background:#CAFFBF;color:#1E8449}
@@ -84,6 +83,7 @@ tr:nth-child(even) td{background:#FAFBFD}
 .toast.show{opacity:1}
 .toast.error{background:#C0392B}
 .toast.info{background:#1E5BA8}
+.toast.warning{background:#E67E22}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:1000}
 .modal-c{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto}
 .modal-c h2{color:#C8102E;margin-bottom:14px;font-size:17px}
@@ -114,15 +114,6 @@ tr:nth-child(even) td{background:#FAFBFD}
 .chip.red{background:#FFEBEE;color:#C8102E}
 .chip.green{background:#E8F5E9;color:#27AE60}
 .chip.orange{background:#FFF3E0;color:#E67E22}
-.chat-msg{padding:10px 14px;border-radius:16px;margin-bottom:8px;max-width:80%;word-wrap:break-word;font-size:13px}
-.chat-msg.me{background:#C8102E;color:#fff;margin-left:auto;border-bottom-right-radius:4px}
-.chat-msg.other{background:#F0F2F5;color:#222;border-bottom-left-radius:4px}
-.chat-msg .meta{font-size:10px;opacity:.7;margin-bottom:3px}
-.chat-msg img{max-width:100%;border-radius:10px;margin-top:6px}
-.chat-input-bar{position:fixed;bottom:72px;left:0;right:0;background:#fff;padding:8px 12px;border-top:1px solid #E8EBF2;display:flex;gap:8px;align-items:center;z-index:99}
-.chat-input-bar input{flex:1;margin:0;padding:10px 14px;border-radius:22px}
-.chat-input-bar button{width:44px;height:44px;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.chat-input-bar .attach{background:#E8EBF2;color:#1E5BA8}
 .notif-badge{background:#C8102E;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;font-weight:700}
 .notif-item{padding:12px;border-bottom:1px solid #F0F2F5;cursor:pointer}
 .notif-item.unread{background:#FFF9FA;border-left:3px solid #C8102E}
@@ -171,15 +162,12 @@ const db = firebase.database();
 const Cache = {
   data: {},
   init() {
-    const keys = ['users','staff','technologists','periods','assignments','techPeriods',
-                  'techAssignments','leave','overtime','exchanges','audit','settings',
-                  'notifications','chat','holidays','shifts','stations','config'];
+    const keys = ['users','staff','technologists','periods','assignments','leave','overtime','exchanges','audit','settings','notifications','chat','holidays','shifts','config'];
     keys.forEach(k => {
       db.ref(k).on('value', snap => {
         this.data[k] = snap.val();
         if (k === 'settings' && !this.data[k]) db.ref('settings').set(DEFAULT_SETTINGS);
         if (k === 'shifts' && !this.data[k]) db.ref('shifts').set(DEFAULT_SHIFTS);
-        if (k === 'stations' && !this.data[k]) db.ref('stations').set(DEFAULT_STATIONS);
         if (k === 'config' && !this.data[k]) db.ref('config').set(DEFAULT_CONFIG);
         if (k === 'users' && !this.data[k]) db.ref('users').set({
           admin:{username:'admin',password:'admin123',role:'supervisor',active:true,mobile:'03001234567',name:'Admin'}
@@ -204,11 +192,11 @@ const DEFAULT_SETTINGS = {
 };
 
 const DEFAULT_CONFIG = {
-  staff_12: { M: 4, D: 1, E: 4, N12: 1, E4: 1, X: 1 },
-  staff_11: { M: 4, D: 1, E: 4, N12: 1, E4: 1 },
-  staff_10: { M: 3, D: 1, E: 3, N12: 1, E4: 1, X: 1 },
-  staff_9:  { M: 3, D: 1, E: 3, N12: 1, ME: 1 },
-  sunday:   { M: 2, E: 2, N: 1 },
+  staff_12: { M: 3, E: 3, D: 1, N12: 1, E4: 1, X: 1, OFF: 2 },
+  staff_11: { M: 3, E: 3, D: 1, N12: 1, E4: 1, OFF: 2 },
+  staff_10: { M: 3, E: 3, D: 1, N12: 1, E4: 1, OFF: 1 },
+  staff_9:  { M: 3, E: 3, D: 1, N12: 1, OFF: 1 },
+  sunday:   { M: 2, E: 2, N: 1, OFF: 7 },
   cpl_per_hour: 0.125
 };
 
@@ -219,10 +207,9 @@ const DEFAULT_SHIFTS = {
   N:   { code:'N',   name:'Night',          start:'23:00', end:'07:00' },
   N12: { code:'N12', name:'Night12',        start:'00:00', end:'08:00' },
   D:   { code:'D',   name:'Day (Gynee)',    start:'09:00', end:'21:00' },
-  ME:  { code:'ME',  name:'ME (12hrs)',     start:'09:00', end:'21:00' },
   X:   { code:'X',   name:'Extra/Floating', start:'',      end:'' },
-  O:   { code:'O',   name:'OFF',            start:'',      end:'' },
   OFF: { code:'OFF', name:'Weekly Off',     start:'',      end:'' },
+  O:   { code:'O',   name:'OFF',            start:'',      end:'' },
   EL:  { code:'EL',  name:'Earned Leave',   start:'',      end:'' },
   CPL: { code:'CPL', name:'Comp. Leave',    start:'',      end:'' },
   CL:  { code:'CL',  name:'Casual Leave',   start:'',      end:'' },
@@ -230,13 +217,6 @@ const DEFAULT_SHIFTS = {
   SL:  { code:'SL',  name:'Sick Leave',     start:'',      end:'' },
   AL:  { code:'AL',  name:'Annual Leave',   start:'',      end:'' },
   ML:  { code:'ML',  name:'Maternity Leave',start:'',      end:'' }
-};
-
-const DEFAULT_STATIONS = {
-  first_floor: { name:'First Floor', code:'FF', active:true },
-  basement:    { name:'Basement',    code:'BM', active:true },
-  diagnostic:  { name:'Diagnostic',  code:'DG', active:true, timing:'09:00-21:00', rotation:'weekly' },
-  gynee:       { name:'Gynee',       code:'GY', active:true, timing:'09:00-21:00', rotation:'weekly', gender:'Female' }
 };
 
 /* ============================================================
@@ -248,7 +228,7 @@ const S = { user: null, view: 'dashboard', periodId: null, chatWith: null, chatT
    🛠 HELPERS
    ============================================================ */
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function toast(msg,type='success'){const t=document.createElement('div');t.className='toast '+(type==='error'?'error':type==='info'?'info':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),20);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2800);}
+function toast(msg,type='success'){const t=document.createElement('div');t.className='toast '+(type==='error'?'error':type==='info'?'info':type==='warning'?'warning':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),20);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2800);}
 function datesBetween(s,e){const out=[];const d=new Date(s+'T00:00:00');const end=new Date(e+'T00:00:00');while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}return out;}
 function today(){return new Date().toISOString().slice(0,10);}
 function uid(){return Date.now()+Math.floor(Math.random()*1000);}
@@ -260,6 +240,7 @@ function isHoliday(d){const h=Cache.get('holidays',{})||{};return Object.values(
 function isSundayOrHoliday(d){return isSunday(d)||isHoliday(d);}
 function getSetting(k){return (Cache.get('settings',{})||{})[k]||'';}
 function initials(name){return (name||'?').split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();}
+function getWeekKey(d){const dt=new Date(d+'T00:00:00');const jan1=new Date(dt.getFullYear(),0,1);return dt.getFullYear()+'-W'+Math.ceil(((dt-jan1)/86400000+jan1.getDay()+1)/7);}
 
 function audit(action, entity, oldv, newv, reason){
   const log = Cache.get('audit', {}) || {};
@@ -289,7 +270,7 @@ function renderLogin(){
       <input id="p" type="password" placeholder="Password">
       <button onclick="doLogin()">🔐 Login</button>
       <div class="forgot"><a onclick="showForgot()">Forgot Password?</a></div>
-      <div class="hint">Admin: 03001234567 / admin123</div>
+      <div class="hint">Admin: admin / admin123</div>
     </div></div>`;
   document.getElementById('p').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 }
@@ -299,7 +280,7 @@ function doLogin(){
   const p = document.getElementById('p').value;
   if (!u || !p) return toast('Enter mobile and password','error');
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => x.username === u && x.password === p);
+  const user = Object.values(users).find(x => (x.username === u || x.mobile === u) && x.password === p);
   if (!user) return toast('Invalid credentials','error');
   if (user.active === false) return toast('Account disabled','error');
   S.user = { username:user.username, name:user.name||user.username, role:user.role, staff_id:user.staff_id||null, mobile:user.mobile||user.username };
@@ -328,7 +309,7 @@ function sendOTP(){
   const mobile = document.getElementById('fgMobile').value.trim();
   if (!mobile) return toast('Enter mobile','error');
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => x.username === mobile);
+  const user = Object.values(users).find(x => x.username === mobile || x.mobile === mobile);
   if (!user) { document.getElementById('fgStatus').innerHTML = '<span style="color:#C0392B">Mobile not registered</span>'; return; }
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   sessionStorage.setItem('otp_' + mobile, otp);
@@ -348,7 +329,7 @@ function verifyOTP(mobile){
   if (entered !== savedOTP) return toast('Invalid OTP','error');
   if (!newPass || newPass.length < 6) return toast('Password 6+ chars','error');
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => x.username === mobile);
+  const user = Object.values(users).find(x => x.username === mobile || x.mobile === mobile);
   user.password = newPass;
   Cache.set('users', users);
   audit('PASSWORD_RESET', 'user', null, mobile);
@@ -363,15 +344,15 @@ function verifyOTP(mobile){
 function render(){
   if (!S.user) return renderLogin();
   const v = S.view;
-  const body = v === 'dashboard' ? viewDashboard() : v === 'roster' ? viewRoster() : v === 'staff' ? viewStaff() : v === 'leave' ? viewLeave() : v === 'overtime' ? viewOvertime() : v === 'exchange' ? viewExchange() : v === 'chat' ? viewChat() : v === 'notifications' ? viewNotifications() : v === 'reports' ? viewReports() : v === 'technologist' ? viewTechnologist() : v === 'audit' ? viewAudit() : v === 'settings' ? viewSettings() : '<div class="empty">Unknown</div>';
+  const body = v === 'dashboard' ? viewDashboard() : v === 'roster' ? viewRoster() : v === 'staff' ? viewStaff() : v === 'leave' ? viewLeave() : v === 'overtime' ? viewOvertime() : v === 'exchange' ? viewExchange() : v === 'notifications' ? viewNotifications() : v === 'reports' ? viewReports() : v === 'technologist' ? viewTechnologist() : v === 'audit' ? viewAudit() : v === 'settings' ? viewSettings() : '<div class="empty">Unknown</div>';
   const isSup = S.user.role === 'supervisor';
   const navItems = isSup ? [
     ['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['technologist','🔬','Techno'],
-    ['leave','🏖','Leave'],['exchange','🔄','Exchange'],['overtime','⏱','OT'],['chat','💬','Chat'],
+    ['leave','🏖','Leave'],['exchange','🔄','Exchange'],['overtime','⏱','OT'],
     ['notifications','🔔','Bell'],['reports','📊','Reports'],['audit','📜','Audit'],['settings','⚙','Set']
   ] : [
     ['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave'],
-    ['exchange','🔄','Exchange'],['chat','💬','Chat'],['notifications','🔔','Bell']
+    ['exchange','🔄','Exchange'],['notifications','🔔','Bell']
   ];
   const unreadNum = Object.values(Cache.get('notifications',{})||{}).filter(n=>!n.read).length;
   document.getElementById('app').innerHTML = `
@@ -412,7 +393,7 @@ function viewDashboard(){
     </div>
     ${sundayHoliday?`<div class="card" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">
       <h2 style="color:#E67E22">🎉 ${isSunday(t)?'Sunday':'Gazetted Holiday'}</h2>
-      <div style="font-size:13px;color:#7D4A00">Today: 2 M + 2 E + 1 N = 5 ON</div>
+      <div style="font-size:13px;color:#7D4A00">Today: 2 M + 2 E + 1 N = 5 ON | First Floor + Basement only</div>
     </div>`:''}
     <div class="card">
       <h2>📅 Current Period</h2>
@@ -445,7 +426,7 @@ function viewStaff(){
             <div class="detail">${esc(s.designation||'Phlebotomist')} · 📱 ${esc(s.mobile||'')}</div>
             <div style="margin-top:4px">
               <span class="chip ${s.status==='Active'?'green':'red'}">${s.status}</span>
-              ${s.shiftType==='fixed'?`<span class="chip blue">${s.fixedShift||''}</span>`:(s.priorityShifts?`<span class="chip">${s.priorityShifts.slice(0,3).join('›')}</span>`:'')}
+              ${s.shiftType==='fixed'?`<span class="chip blue">${s.fixedShift||''}</span>`:(s.priorityShifts?`<span class="chip">${s.priorityShifts.slice(0,4).join('›')}</span>`:'')}
               ${s.gender?`<span class="chip">${s.gender}</span>`:''}
             </div>
           </div>
@@ -584,7 +565,7 @@ function editStaff(id){
     <input id="esName" value="${esc(s.name)}" placeholder="Name">
     <div class="grid2">
       <select id="esGender"><option ${s.gender==='Male'?'selected':''}>Male</option><option ${s.gender==='Female'?'selected':''}>Female</option></select>
-      <input id="esMobile" value="${esc(s.mobile||'')}" placeholder="Mobile" readonly style="background:#F0F2F5">
+      <input id="esMobile" value="${esc(s.mobile||'')}" placeholder="Mobile">
     </div>
     <div class="grid2">
       <input id="esEmpId" value="${esc(s.empId||'')}" placeholder="Employee ID">
@@ -608,6 +589,7 @@ async function saveEditStaff(id){
   if (!s) return;
   s.name = document.getElementById('esName').value.trim();
   s.gender = document.getElementById('esGender').value;
+  s.mobile = document.getElementById('esMobile').value.trim();
   s.empId = document.getElementById('esEmpId').value.trim();
   s.designation = document.getElementById('esDesig').value.trim();
   s.contact = document.getElementById('esContact').value.trim();
@@ -643,7 +625,7 @@ async function resetStaffPassword(id){
 }
 
 /* ============================================================
-   📅 ROSTER + AUTO GENERATE
+   📅 ROSTER
    ============================================================ */
 function viewRoster(){
   const periods = Object.values(Cache.get('periods',{})||{}).sort((a,b)=>b.start.localeCompare(a.start));
@@ -652,8 +634,8 @@ function viewRoster(){
     if (!isSup) return '<div class="card"><div class="empty">No roster</div></div>';
     return `<div class="card">
       <h2>📅 Create First Period</h2>
-      <input id="pName" placeholder="Name" value="Aug-Sep 2026">
-      <div class="grid2"><input id="pStart" type="date" value="2026-08-26"><input id="pEnd" type="date" value="2026-09-25"></div>
+      <input id="pName" placeholder="Name" value="Sep 2026">
+      <div class="grid2"><input id="pStart" type="date" value="2026-09-01"><input id="pEnd" type="date" value="2026-09-30"></div>
       <button class="block success" onclick="createPeriod()">Create</button>
     </div>`;
   }
@@ -699,7 +681,7 @@ function viewRoster(){
     </div>
     <div class="card">
       <h2>📋 Roster Grid</h2>
-      <div class="legend"><span class="d-M">M</span><span class="d-E">E</span><span class="d-E4">E4</span><span class="d-N12">N12</span><span class="d-D">D</span><span class="d-X">X</span><span class="d-O">O</span><span class="d-CPL">CPL</span></div>
+      <div class="legend"><span class="d-M">M</span><span class="d-E">E</span><span class="d-E4">E4</span><span class="d-N12">N12</span><span class="d-D">D</span><span class="d-X">X</span><span class="d-OFF">OFF</span><span class="d-CPL">CPL</span></div>
       ${isSup?'<div class="help">Tap cell to change</div>':''}
       ${grid}
     </div>`;
@@ -820,28 +802,31 @@ async function unlockRoster(){
 }
 
 /* ============================================================
-   ⚡ AUTO GENERATE — COMPLETE ALGORITHM
+   ⚡ AUTO GENERATE — COMPLETE ALGORITHM WITH ALL RULES
    ============================================================ */
 async function autoGenerate(){
   if (!confirm('Auto Generate roster? Existing assignments will be replaced.')) return;
   const periods = Cache.get('periods',{}) || {};
   const p = periods[S.periodId];
   if (!p) return;
+  
   let staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
   if (!staff.length) return toast('No active staff','error');
 
-  // Fix old staff without shiftType
+  // Fix old staff
   const staffDB = Cache.get('staff',{}) || {};
   let fixed = false;
   staff.forEach(s => {
-    if (!s.shiftType) {
-      s.shiftType = 'multi';
+    if (!s.shiftType) { s.shiftType = 'multi'; staffDB[s.id] = s; fixed = true; }
+    if (!s.priorityShifts || s.priorityShifts.length === 0) {
       s.priorityShifts = ['M','E','E4','N12','D','X'];
       staffDB[s.id] = s;
       fixed = true;
     }
+    if (!s.gender) { s.gender = 'Male'; staffDB[s.id] = s; fixed = true; }
   });
   if (fixed) await Cache.set('staff', staffDB);
+  staff = Object.values(staffDB).filter(s => s.status === 'Active');
 
   const leaves = Object.values(Cache.get('leave',{})||{}).filter(l => l.status === 'Approved');
   const config = Cache.get('config',{}) || DEFAULT_CONFIG;
@@ -849,63 +834,107 @@ async function autoGenerate(){
 
   const result = {};
   const stats = {};
-  staff.forEach(s => { stats[s.id] = { total:0, counts:{}, lastDate:null, lastDuty:null }; });
+  staff.forEach(s => { 
+    stats[s.id] = { total:0, totalOff:0, counts:{}, weeklyOff:{}, lastDate:null, lastDuty:null }; 
+  });
 
   const onLeave = (sid, d) => leaves.find(l => l.staff_id === sid && d >= l.start && d <= l.end);
   const onSpecialOff = (s, d) => (s.specialOffs||[]).includes(d);
-  const numStaff = staff.length;
+  
+  const sundayCount = dates.filter(d => isSunday(d)).length;
+
+  // Track weekly off rotation index
+  let offRotationIdx = 0;
 
   for (const date of dates){
     const isSH = isSundayOrHoliday(date);
+    const wk = getWeekKey(date);
 
-    // Pick rule based on available staff today
+    // Available staff today
     let availStaff = staff.filter(s => !onLeave(s.id, date) && !onSpecialOff(s, date));
     const availCount = availStaff.length;
 
+    // Get rule for this day
     let rule;
     if (isSH) {
-      rule = { M:2, E:2, N:1 };
-    } else if (availCount >= 12) {
-      rule = config.staff_12;
-    } else if (availCount === 11) {
-      rule = config.staff_11;
-    } else if (availCount === 10) {
-      rule = config.staff_10;
+      rule = { ...config.sunday };
     } else {
-      rule = config.staff_9;
+      // Mon-Sat: 3 M + 3 E + 1 D + 1 N12 + 1 E4 + 1 X + 2 OFF
+      rule = { M:3, E:3, D:1, N12:1, E4:1, X:1, OFF:2 };
     }
 
-    // Build required queue
-    const required = [];
-    Object.entries(rule).forEach(([code, count]) => {
-      if (code === 'OFF') return;
-      for (let i = 0; i < count; i++) required.push(code);
-    });
-
-    // Order: hard shifts first
-    const order = { N:0, N12:0, ME:1, D:1, E4:2, X:3, M:4, E:4 };
-    required.sort((a,b) => (order[a]||9) - (order[b]||9));
+    // Track special assignments for gender rules
+    let gyneeM = false;
+    let gyneeE = false;
+    let n12Assigned = false;
+    let nAssigned = false;
+    let e4Assigned = false;
 
     const assignedToday = new Set();
 
-    for (const code of required){
-      const eligible = availStaff.filter(s => {
-        if (assignedToday.has(s.id)) return false;
-        if (code === 'D' && s.gender !== 'Female') return false; // Gynee female only
+    // Build assignment priority queue (hard first)
+    const shiftQueue = [];
+    if (isSH) {
+      // Sunday: M (2), E (2), N (1)
+      // Priority: N first (male only)
+      for (let i = 0; i < (rule.N||0); i++) shiftQueue.push('N');
+      for (let i = 0; i < (rule.M||0); i++) shiftQueue.push('M');
+      for (let i = 0; i < (rule.E||0); i++) shiftQueue.push('E');
+    } else {
+      // Mon-Sat: N12 (1), D (1), E4 (1), X (1), M (3), E (3)
+      for (let i = 0; i < (rule.N12||0); i++) shiftQueue.push('N12');
+      for (let i = 0; i < (rule.D||0); i++) shiftQueue.push('D');
+      for (let i = 0; i < (rule.E4||0); i++) shiftQueue.push('E4');
+      for (let i = 0; i < (rule.X||0); i++) shiftQueue.push('X');
+      for (let i = 0; i < (rule.M||0); i++) shiftQueue.push('M');
+      for (let i = 0; i < (rule.E||0); i++) shiftQueue.push('E');
+    }
 
-        // Eligibility check
+    // Track Gynee assignments (1 in M + 1 in E, female only)
+    let gyneeMNeeded = !isSH && (rule.M||0) > 0;
+    let gyneeENeeded = !isSH && (rule.E||0) > 0;
+
+    for (const code of shiftQueue){
+      // Filter eligible staff
+      let eligible = availStaff.filter(s => {
+        if (assignedToday.has(s.id)) return false;
+
+        // Gender rules
+        if (code === 'D' && s.gender !== 'Female') return false;
+        if ((code === 'N12' || code === 'N') && s.gender !== 'Male') return false;
+
+        // Gynee rule (1 Female in M, 1 Female in E)
+        if (code === 'M' && gyneeMNeeded && !gyneeM) {
+          if (s.gender !== 'Female') return false;
+        }
+        if (code === 'E' && gyneeENeeded && !gyneeE) {
+          if (s.gender !== 'Female') return false;
+        }
+
+        // E4 male priority
+        if (code === 'E4' && s.gender !== 'Male') {
+          // Check if any male available
+          const maleAvail = availStaff.some(x => 
+            !assignedToday.has(x.id) && x.gender === 'Male' &&
+            (x.priorityShifts||[]).includes('E4')
+          );
+          if (maleAvail) return false;
+        }
+
+        // Shift eligibility
         if (s.shiftType === 'fixed') {
-          if (isSH && !['M','E','N'].includes(s.fixedShift)) return false;
-          if (code !== s.fixedShift && !isSH) return false;
           if (isSH && !['M','E','N'].includes(code)) return false;
+          if (isSH && !['M','E','N'].includes(s.fixedShift)) return false;
+          if (!isSH && code !== s.fixedShift) return false;
         } else {
           const prio = s.priorityShifts || ['M','E','E4','N12','D','X'];
           if (!prio.includes(code)) return false;
         }
+
         return true;
       });
 
-      // Sort by priority + fairness
+      // Sort: priority + fairness
       eligible.sort((a,b) => {
         const aPrio = (a.priorityShifts||[]).indexOf(code);
         const bPrio = (b.priorityShifts||[]).indexOf(code);
@@ -925,24 +954,40 @@ async function autoGenerate(){
         stats[chosen.id].counts[code] = (stats[chosen.id].counts[code]||0) + 1;
         stats[chosen.id].total++;
         stats[chosen.id].lastDate = date;
+        stats[chosen.id].lastDuty = code;
+
+        if (code === 'D') { /* female gynee assigned */ }
+        if (code === 'M' && gyneeMNeeded && !gyneeM) { gyneeM = true; }
+        if (code === 'E' && gyneeENeeded && !gyneeE) { gyneeE = true; }
       }
     }
 
-    // Fill remaining
+    // Fill remaining with OFF or leave
     staff.forEach(s => {
       if (result[s.id+'_'+date]) return;
       const lv = onLeave(s.id, date);
-      if (lv) result[s.id+'_'+date] = lv.type || 'EL';
-      else result[s.id+'_'+date] = isSH ? 'OFF' : 'OFF';
+      if (lv) {
+        result[s.id+'_'+date] = lv.type || 'EL';
+      } else {
+        result[s.id+'_'+date] = 'OFF';
+        stats[s.id].totalOff++;
+        stats[s.id].weeklyOff[wk] = (stats[s.id].weeklyOff[wk] || 0) + 1;
+      }
     });
+
+    // Gynee alert if needed
+    if (!isSH) {
+      if (gyneeMNeeded && !gyneeM) notifyAll('Gynee Alert', `${fmtDate(date)}: Gynee M کے لیے Female نہیں ملی`, 'alert');
+      if (gyneeENeeded && !gyneeE) notifyAll('Gynee Alert', `${fmtDate(date)}: Gynee E کے لیے Female نہیں ملی`, 'alert');
+    }
   }
 
   const asg = Cache.get('assignments',{}) || {};
   asg[p.id] = result;
   await Cache.set('assignments', asg);
   audit('GENERATE_ROSTER', 'period', null, Object.keys(result).length + ' assignments');
-  notifyAll('Roster Generated', `${Object.keys(result).length} assignments`, 'roster');
-  toast('Generated ' + Object.keys(result).length + ' ✅');
+  notifyAll('Roster Generated', `${Object.keys(result).length} assignments for ${p.name}`, 'roster');
+  toast('✅ Generated ' + Object.keys(result).length + ' assignments');
   render();
 }
 
@@ -960,21 +1005,22 @@ function viewLeave(){
       <select id="lType"><option>EL</option><option>CPL</option><option>CL</option><option>GH</option><option>SL</option><option>AL</option><option>ML</option><option>OFF</option></select>
       <div class="grid2"><input id="lStart" type="date"><input id="lEnd" type="date"></div>
       <input id="lRem" placeholder="Remarks">
-      <button class="block success" onclick="addLeave()">➕ Add</button>
+      <button class="block success" onclick="addLeave()">➕ Add Leave</button>
     </div>`:''}
     <div class="card">
-      <h2>📋 Leave (${leave.length})</h2>
+      <h2>📋 Leave Records (${leave.length})</h2>
       ${leave.length?leave.map(l => {
         const s = staff.find(x=>x.id===l.staff_id);
         return `<div style="padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px">
           <div style="flex:1">
             <div style="font-weight:700">${esc(s?s.name:'?')}</div>
             <div style="font-size:11px;color:#888">${l.type} · ${fmtDate(l.start)} → ${fmtDate(l.end)}</div>
+            ${l.remarks?`<div style="font-size:11px;color:#666">${esc(l.remarks)}</div>`:''}
           </div>
           <span class="badge b-${l.status.toLowerCase()}">${l.status}</span>
           ${isSup?`<button class="danger sm" onclick="delLeave('${l.id}')">🗑</button>`:''}
         </div>`;
-      }).join(''):'<div class="empty">No leaves</div>'}
+      }).join(''):'<div class="empty"><div class="big">🏖</div>No leave records</div>'}
     </div>`;
 }
 async function addLeave(){
@@ -1022,15 +1068,16 @@ function viewOvertime(){
       <button class="block success" onclick="addOt()">➕ Add</button>
     </div>`:''}
     <div class="card">
-      <h2>📋 Overtime (${ot.length})</h2>
+      <h2>📋 Overtime Records (${ot.length})</h2>
       ${ot.length?ot.map(o => {
         const s = staff.find(x=>x.id===o.staff_id);
         return `<div style="padding:10px;border-bottom:1px solid #eee">
           <div style="font-weight:700">${esc(s?s.name:'?')}</div>
           <div style="font-size:11px;color:#888">${fmtDate(o.date)} · ${o.start} → ${o.end}</div>
           <div style="margin-top:4px"><span class="chip green">${o.hours}h</span><span class="chip orange">+${o.cpl} CPL</span></div>
+          ${o.reason?`<div style="font-size:11px;color:#666;margin-top:3px">${esc(o.reason)}</div>`:''}
         </div>`;
-      }).join(''):'<div class="empty">No OT</div>'}
+      }).join(''):'<div class="empty"><div class="big">⏱</div>No overtime records</div>'}
     </div>`;
 }
 async function addOt(){
@@ -1074,14 +1121,18 @@ function viewExchange(){
     const tgt = staff.find(x=>x.id===e.target_id);
     let actions = '';
     if (isStaff && e.target_id === S.user.staff_id && e.staff_resp === 'Pending') {
-      actions = `<button class="success sm" onclick="respondX('${e.id}','Accepted')">✅</button><button class="danger sm" onclick="respondX('${e.id}','Rejected')">❌</button>`;
+      actions = `<button class="success sm" onclick="respondX('${e.id}','Accepted')">✅ Accept</button><button class="danger sm" onclick="respondX('${e.id}','Rejected')">❌ Reject</button>`;
     } else if (isSup && e.staff_resp === 'Accepted' && e.sup_resp === 'Pending') {
-      actions = `<button class="success sm" onclick="approveX('${e.id}','Approved')">✅</button><button class="danger sm" onclick="approveX('${e.id}','Rejected')">❌</button>`;
+      actions = `<button class="success sm" onclick="approveX('${e.id}','Approved')">✅ Approve</button><button class="danger sm" onclick="approveX('${e.id}','Rejected')">❌ Reject</button>`;
     }
     return `<div style="padding:12px;border-bottom:1px solid #eee">
       <div style="font-weight:700">${esc(req?req.name:'?')} ↔ ${esc(tgt?tgt.name:'?')}</div>
       <div style="font-size:12px;color:#888;margin:4px 0">${fmtDate(e.date)} · ${e.orig} ↔ ${e.req}</div>
-      <div style="font-size:11px;margin:6px 0"><span class="chip">Staff: ${e.staff_resp}</span><span class="chip">Sup: ${e.sup_resp}</span></div>
+      ${e.reason?`<div style="font-size:11px;color:#666">📝 ${esc(e.reason)}</div>`:''}
+      <div style="font-size:11px;margin:6px 0">
+        <span class="chip ${e.staff_resp==='Accepted'?'green':e.staff_resp==='Rejected'?'red':''}">Staff: ${e.staff_resp}</span>
+        <span class="chip ${e.sup_resp==='Approved'?'green':e.sup_resp==='Rejected'?'red':''}">Supervisor: ${e.sup_resp}</span>
+      </div>
       <div><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></div>
       ${actions?`<div style="margin-top:8px;display:flex;gap:6px">${actions}</div>`:''}
     </div>`;
@@ -1155,93 +1206,6 @@ async function approveX(id, resp){
 }
 
 /* ============================================================
-   💬 CHAT
-   ============================================================ */
-function viewChat(){
-  const chat = Cache.get('chat',{}) || {};
-  const staff = Object.values(Cache.get('staff',{})||{});
-  const isSup = S.user.role === 'supervisor';
-  if (S.chatType === 'group') {
-    const msgs = Object.values(chat.group || {}).sort((a,b)=>new Date(a.at)-new Date(b.at));
-    return `
-      <div class="card">
-        <h2>💬 Group Chat</h2>
-        <div class="tabs"><button class="active" onclick="S.chatType='group';render()">👥 Group</button><button onclick="S.chatType='individual';render()">👤 Individual</button></div>
-        <div style="max-height:50vh;overflow-y:auto;padding:8px 0">
-          ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.user_id===S.user.staff_id||m.user===S.user.username?'me':'other'}">
-            <div class="meta">${esc(m.user_name)} · ${fmtTime(m.at)}</div>
-            ${m.text?`<div>${esc(m.text)}</div>`:''}
-            ${m.image?`<img src="${m.image}">`:''}
-          </div>`).join(''):'<div class="empty">No messages</div>'}
-        </div>
-      </div>
-      <div class="chat-input-bar">
-        <input type="file" id="chatFile" accept="image/*" class="file-input" onchange="sendChatImage('group',null)">
-        <label for="chatFile" class="attach" style="width:44px;height:44px;border-radius:50%;background:#E8EBF2;color:#1E5BA8;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">📎</label>
-        <input id="chatInput" placeholder="Message..." onkeydown="if(event.key==='Enter')sendChatMsg('group',null)">
-        <button onclick="sendChatMsg('group',null)">➤</button>
-      </div>`;
-  } else {
-    const myId = S.user.staff_id || 'admin';
-    const others = isSup ? staff : staff.filter(s => s.id !== S.user.staff_id);
-    const withId = S.chatWith || (others[0]?.id || null);
-    const roomKey = [myId, withId].sort().join('_');
-    const msgs = Object.values(chat[roomKey] || {}).sort((a,b)=>new Date(a.at)-new Date(b.at));
-    return `
-      <div class="card">
-        <h2>💬 Individual</h2>
-        <div class="tabs"><button onclick="S.chatType='group';render()">👥 Group</button><button class="active" onclick="S.chatType='individual';render()">👤 Individual</button></div>
-        <select onchange="S.chatWith=this.value;render()">${others.map(s=>`<option value="${s.id}" ${s.id===withId?'selected':''}>${esc(s.name)}</option>`).join('')}</select>
-        <div style="max-height:45vh;overflow-y:auto;padding:8px 0;margin-top:8px">
-          ${msgs.length?msgs.map(m=>`<div class="chat-msg ${m.user_id===myId?'me':'other'}">
-            <div class="meta">${esc(m.user_name)} · ${fmtTime(m.at)}</div>
-            ${m.text?`<div>${esc(m.text)}</div>`:''}
-            ${m.image?`<img src="${m.image}">`:''}
-          </div>`).join(''):'<div class="empty">No messages</div>'}
-        </div>
-      </div>
-      ${withId?`<div class="chat-input-bar">
-        <input type="file" id="chatFile2" accept="image/*" class="file-input" onchange="sendChatImage('individual','${roomKey}')">
-        <label for="chatFile2" class="attach" style="width:44px;height:44px;border-radius:50%;background:#E8EBF2;color:#1E5BA8;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer">📎</label>
-        <input id="chatInput2" placeholder="Message..." onkeydown="if(event.key==='Enter')sendChatMsg('individual','${roomKey}')">
-        <button onclick="sendChatMsg('individual','${roomKey}')">➤</button>
-      </div>`:''}`;
-  }
-}
-async function sendChatMsg(type, roomKey){
-  const input = document.getElementById(type === 'group' ? 'chatInput' : 'chatInput2');
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-  const chat = Cache.get('chat',{}) || {};
-  const key = type === 'group' ? 'group' : roomKey;
-  if (!chat[key]) chat[key] = {};
-  const msgId = 'm_' + uid();
-  chat[key][msgId] = { id:msgId, user:S.user.username, user_id:S.user.staff_id||'admin', user_name:S.user.name||S.user.username, text, at:new Date().toISOString() };
-  await Cache.set('chat', chat);
-  input.value = '';
-  render();
-}
-async function sendChatImage(type, roomKey){
-  const fileInput = document.getElementById(type === 'group' ? 'chatFile' : 'chatFile2');
-  const file = fileInput?.files?.[0];
-  if (!file) return;
-  if (file.size > 500000) return toast('Image too large (max 500KB)','error');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const chat = Cache.get('chat',{}) || {};
-    const key = type === 'group' ? 'group' : roomKey;
-    if (!chat[key]) chat[key] = {};
-    const msgId = 'm_' + uid();
-    chat[key][msgId] = { id:msgId, user:S.user.username, user_id:S.user.staff_id||'admin', user_name:S.user.name||S.user.username, image:e.target.result, at:new Date().toISOString() };
-    await Cache.set('chat', chat);
-    fileInput.value = '';
-    render();
-  };
-  reader.readAsDataURL(file);
-}
-
-/* ============================================================
    🔔 NOTIFICATIONS
    ============================================================ */
 function viewNotifications(){
@@ -1254,7 +1218,7 @@ function viewNotifications(){
         <div class="title">${esc(n.title)}</div>
         <div class="desc">${esc(n.body)}</div>
         <div class="time">${fmtTime(n.at)}</div>
-      </div>`).join(''):'<div class="empty">No notifications</div>'}
+      </div>`).join(''):'<div class="empty"><div class="big">🔔</div>No notifications</div>'}
       ${arr.length?'<button class="sec block" onclick="clearNotifs()">🗑 Clear All</button>':''}
     </div>`;
 }
@@ -1269,7 +1233,7 @@ async function clearNotifs(){
 }
 
 /* ============================================================
-   💬 WHATSAPP
+   💬 WHATSAPP (Manual Share)
    ============================================================ */
 function shareWhatsApp(scope){
   const periods = Object.values(Cache.get('periods',{})||{});
@@ -1283,21 +1247,157 @@ function shareWhatsApp(scope){
   if (scope === 'staff') {
     const me = staff.find(x => x.id === S.user.staff_id);
     if (!me) return toast('No profile','error');
-    text += `*${me.name}*\n`;
+    text += `*${me.name}* — Your Schedule:\n`;
     dates.forEach(d => { const c = pd[me.id+'_'+d]||'-'; text += `${fmtDate(d)} (${dayOfWeek(d)}): *${c}*\n`; });
   } else {
+    text += `*Full Roster:*\n\n`;
     staff.forEach(x => {
-      text += `*${x.name}*: `;
+      text += `*${x.name}*:\n`;
       const parts = [];
       dates.forEach(d => { parts.push(`${d.slice(8)}:${pd[x.id+'_'+d]||'-'}`); });
-      text += parts.join(' | ') + '\n';
+      text += parts.join(' | ') + '\n\n';
     });
   }
-  text += `\n_${s.whatsapp_bot||'FlipBotMe'}_`;
-  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  text += `\n_Shared via ${s.whatsapp_bot||'FlipBotMe'}_`;
+  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
+  window.open(url, '_blank');
   toast('WhatsApp opening...');
 }
-   
+
+/* ============================================================
+   📊 EXCEL EXPORT (With Kulsum Header)
+   ============================================================ */
+function exportExcel(){
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const p = periods.find(x => x.id === S.periodId);
+  if (!p) return toast('No period','error');
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  const dates = datesBetween(p.start, p.end);
+  const pd = (Cache.get('assignments',{})[p.id]) || {};
+  const settings = Cache.get('settings',{}) || {};
+
+  const aoa = [];
+  // Row 1: Hospital name
+  aoa.push([settings.hospital_name]);
+  // Row 2: Department
+  aoa.push([settings.department + ' — Phlebotomist Duty Roster']);
+  // Row 3: blank
+  aoa.push([]);
+  // Row 4: Period info
+  aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
+  // Row 5: blank
+  aoa.push([]);
+  // Row 6: Header
+  const headerRow = ['Sr.', 'Name', 'Mobile'];
+  dates.forEach(d => headerRow.push(d.slice(8)));
+  headerRow.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
+  aoa.push(headerRow);
+
+  // Staff rows
+  staff.forEach((s, i) => {
+    const row = [i + 1, s.name, s.mobile || ''];
+    const counts = { M:0, E:0, E4:0, N12:0, D:0, X:0, OFF:0, CPL:0 };
+    dates.forEach(d => {
+      const c = pd[s.id + '_' + d] || '';
+      row.push(c);
+      if (counts[c] !== undefined) counts[c]++;
+    });
+    const total = dates.filter(d => pd[s.id + '_' + d]).length;
+    row.push(counts.M, counts.E, counts.E4, counts.N12, counts.D, counts.X, counts.OFF, counts.CPL, total);
+    aoa.push(row);
+  });
+
+  // Footer
+  aoa.push([]);
+  aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
+  aoa.push(['Prepared by:', S.user.name || S.user.username]);
+  aoa.push(['Approved by:', '____________________']);
+
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [
+    { wch: 5 }, { wch: 22 }, { wch: 14 },
+    ...dates.map(() => ({ wch: 5 })),
+    { wch: 4 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 5 }, { wch: 6 }
+  ];
+  ws['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } }
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Roster');
+  XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g,'_') + '.xlsx');
+  audit('EXPORT_EXCEL', 'period', null, p.name);
+  toast('Excel downloaded ✅');
+}
+
+/* ============================================================
+   📄 PDF EXPORT (With Kulsum Colors)
+   ============================================================ */
+function exportPDF(){
+  const periods = Object.values(Cache.get('periods',{})||{});
+  const p = periods.find(x => x.id === S.periodId);
+  if (!p) return toast('No period','error');
+  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  const dates = datesBetween(p.start, p.end);
+  const pd = (Cache.get('assignments',{})[p.id]) || {};
+  const settings = Cache.get('settings',{}) || {};
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+  // Header
+  doc.setFontSize(18).setTextColor('#C8102E');
+  doc.text(settings.hospital_name || 'Hospital', 40, 40);
+  doc.setFontSize(11).setTextColor('#1E5BA8');
+  doc.text(settings.department || '', 40, 58);
+  doc.setFontSize(13).setTextColor('#222');
+  doc.text('Phlebotomist Duty Roster — ' + p.name, 40, 78);
+  doc.setFontSize(9).setTextColor('#666');
+  doc.text('Period: ' + fmtDate(p.start) + ' to ' + fmtDate(p.end) + '  |  Generated: ' + new Date().toLocaleString('en-GB'), 40, 92);
+
+  // Red line
+  doc.setDrawColor(200, 16, 46).setLineWidth(2);
+  doc.line(40, 100, doc.internal.pageSize.width - 40, 100);
+
+  // Table
+  const head = [['Name', ...dates.map(d => d.slice(8)), 'O', 'CPL', 'Tot']];
+  const body = staff.map(s => {
+    const row = [s.name];
+    let o = 0, cpl = 0, tot = 0;
+    dates.forEach(d => {
+      const c = pd[s.id+'_'+d] || '';
+      row.push(c);
+      if (c === 'O' || c === 'OFF') o++;
+      else if (c === 'CPL') cpl++;
+      if (c) tot++;
+    });
+    row.push(o, cpl, tot);
+    return row;
+  });
+
+  doc.autoTable({
+    head, body, startY: 115,
+    styles: { fontSize: 5.5, cellPadding: 1.8, halign: 'center', lineColor: [232, 235, 242], lineWidth: 0.2 },
+    headStyles: { fillColor: [200, 16, 46], textColor: 255, fontSize: 5.5, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [250, 251, 253] },
+    columnStyles: { 0: { halign: 'left', cellWidth: 95, fontStyle: 'bold' } },
+    margin: { left: 20, right: 20 }
+  });
+
+  // Footer
+  const fy = doc.lastAutoTable.finalY + 25;
+  doc.setFontSize(9).setTextColor('#333');
+  doc.text('Generated: ' + new Date().toLocaleDateString('en-GB'), 40, fy);
+  doc.text('Prepared by: ' + S.user.name, 250, fy);
+  doc.text('Approved by: ____________________', 480, fy);
+  doc.setFontSize(7).setTextColor('#999');
+  doc.text(settings.hospital_name + ' | ' + (settings.address || ''), 40, fy + 20);
+
+  doc.save('roster-' + p.name.replace(/\s+/g,'_') + '.pdf');
+  audit('EXPORT_PDF', 'period', null, p.name);
+  toast('PDF downloaded ✅');
+}
+
 /* ============================================================
    📊 REPORTS
    ============================================================ */
@@ -1316,7 +1416,7 @@ function viewReports(){
   if (p) {
     const dates = datesBetween(p.start, p.end);
     staff.filter(s => s.status === 'Active').forEach(s => {
-      const c = { M:0, E:0, N:0, D:0, X:0, O:0, CPL:0, EL:0, total:0 };
+      const c = { M:0, E:0, N:0, D:0, X:0, OFF:0, CPL:0, EL:0, total:0 };
       dates.forEach(d => {
         const code = pd[s.id+'_'+d] || '';
         if (code === 'M') c.M++;
@@ -1324,7 +1424,7 @@ function viewReports(){
         else if (['N','N12'].includes(code)) c.N++;
         else if (code === 'D') c.D++;
         else if (code === 'X') c.X++;
-        else if (code === 'O' || code === 'OFF') c.O++;
+        else if (code === 'O' || code === 'OFF') c.OFF++;
         else if (code === 'CPL') c.CPL++;
         else if (code === 'EL') c.EL++;
         if (code) c.total++;
@@ -1342,11 +1442,11 @@ function viewReports(){
       ${p?`<div style="font-size:12px;color:#666;margin-bottom:8px">${esc(p.name)}</div>`:''}
       <div class="scroll-x">
         <table>
-          <thead><tr><th>Staff</th><th>M</th><th>E</th><th>N</th><th>D</th><th>X</th><th>O</th><th>CPL</th><th>EL</th><th>Tot</th><th>CPL Bal</th></tr></thead>
+          <thead><tr><th>Staff</th><th>M</th><th>E</th><th>N</th><th>D</th><th>X</th><th>OFF</th><th>CPL</th><th>EL</th><th>Tot</th><th>CPL Bal</th></tr></thead>
           <tbody>${rows.map(r => `<tr>
             <td style="text-align:left;max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</td>
             <td>${r.M}</td><td>${r.E}</td><td>${r.N}</td><td>${r.D}</td><td>${r.X}</td>
-            <td>${r.O}</td><td>${r.CPL}</td><td>${r.EL}</td><td><b>${r.total}</b></td>
+            <td>${r.OFF}</td><td>${r.CPL}</td><td>${r.EL}</td><td><b>${r.total}</b></td>
             <td><b style="color:${r.cplBalance>0?'#27AE60':'#666'}">${r.cplBalance.toFixed(2)}</b></td>
           </tr>`).join('')}</tbody>
         </table>
@@ -1395,109 +1495,7 @@ function viewReports(){
 }
 
 /* ============================================================
-   📊 EXCEL EXPORT
-   ============================================================ */
-function exportExcel(){
-  const periods = Object.values(Cache.get('periods',{})||{});
-  const p = periods.find(x => x.id === S.periodId);
-  if (!p) return toast('No period','error');
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
-  const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments',{})[p.id]) || {};
-  const settings = Cache.get('settings',{}) || {};
-
-  const aoa = [];
-  aoa.push([settings.hospital_name]);
-  aoa.push([settings.department + ' — Phlebotomist Duty Roster']);
-  aoa.push([]);
-  aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
-  aoa.push([]);
-  const headerRow = ['Sr.', 'Name', 'Mobile'];
-  dates.forEach(d => headerRow.push(d.slice(8)));
-  headerRow.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
-  aoa.push(headerRow);
-  staff.forEach((s, i) => {
-    const row = [i+1, s.name, s.mobile || ''];
-    const counts = { M:0, E:0, E4:0, N12:0, D:0, X:0, O:0, OFF:0, CPL:0 };
-    dates.forEach(d => {
-      const c = pd[s.id+'_'+d] || '';
-      row.push(c);
-      if (counts[c] !== undefined) counts[c]++;
-    });
-    const total = dates.filter(d => pd[s.id+'_'+d]).length;
-    row.push(counts.M, counts.E, counts.E4, counts.N12, counts.D, counts.X, counts.O+counts.OFF, counts.CPL, total);
-    aoa.push(row);
-  });
-  aoa.push([]);
-  aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
-  aoa.push(['Prepared by:', S.user.name]);
-
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols'] = [{wch:5},{wch:22},{wch:14},...dates.map(()=>({wch:5})),{wch:4},{wch:4},{wch:4},{wch:5},{wch:4},{wch:4},{wch:5},{wch:5},{wch:6}];
-  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:8}},{s:{r:1,c:0},e:{r:1,c:8}}];
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Roster');
-  XLSX.writeFile(wb, 'roster-'+p.name.replace(/\s+/g,'_')+'.xlsx');
-  audit('EXPORT_EXCEL', 'period', null, p.name);
-  toast('Excel downloaded ✅');
-}
-
-/* ============================================================
-   📄 PDF EXPORT
-   ============================================================ */
-function exportPDF(){
-  const periods = Object.values(Cache.get('periods',{})||{});
-  const p = periods.find(x => x.id === S.periodId);
-  if (!p) return toast('No period','error');
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
-  const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments',{})[p.id]) || {};
-  const settings = Cache.get('settings',{}) || {};
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'landscape', unit:'pt', format:'a4' });
-  doc.setFontSize(18).setTextColor('#C8102E');
-  doc.text(settings.hospital_name || 'Hospital', 40, 40);
-  doc.setFontSize(11).setTextColor('#1E5BA8');
-  doc.text(settings.department || '', 40, 58);
-  doc.setFontSize(13).setTextColor('#222');
-  doc.text('Phlebotomist Duty Roster — ' + p.name, 40, 78);
-  doc.setFontSize(9).setTextColor('#666');
-  doc.text('Period: ' + fmtDate(p.start) + ' to ' + fmtDate(p.end) + '  |  Generated: ' + new Date().toLocaleString('en-GB'), 40, 92);
-  doc.setDrawColor(200, 16, 46).setLineWidth(2);
-  doc.line(40, 100, doc.internal.pageSize.width - 40, 100);
-  const head = [['Name', ...dates.map(d => d.slice(8)), 'O', 'CPL', 'Tot']];
-  const body = staff.map(s => {
-    const row = [s.name];
-    let o=0, cpl=0, tot=0;
-    dates.forEach(d => {
-      const c = pd[s.id+'_'+d] || '';
-      row.push(c);
-      if (c === 'O' || c === 'OFF') o++;
-      else if (c === 'CPL') cpl++;
-      if (c) tot++;
-    });
-    row.push(o, cpl, tot);
-    return row;
-  });
-  doc.autoTable({ head, body, startY: 115,
-    styles: { fontSize:5.5, cellPadding:1.8, halign:'center', lineColor:[232,235,242], lineWidth:0.2 },
-    headStyles: { fillColor:[200,16,46], textColor:255, fontSize:5.5 },
-    alternateRowStyles: { fillColor:[250,251,253] },
-    columnStyles: { 0: { halign:'left', cellWidth:95 } },
-    margin: { left:20, right:20 }
-  });
-  const fy = doc.lastAutoTable.finalY + 25;
-  doc.setFontSize(9).setTextColor('#333');
-  doc.text('Generated: ' + new Date().toLocaleDateString('en-GB'), 40, fy);
-  doc.text('Prepared by: ' + S.user.name, 250, fy);
-  doc.text('Approved by: ____________________', 480, fy);
-  doc.save('roster-'+p.name.replace(/\s+/g,'_')+'.pdf');
-  audit('EXPORT_PDF', 'period', null, p.name);
-  toast('PDF downloaded ✅');
-}
-
-/* ============================================================
-   🔬 TECHNOLOGIST
+   🔬 TECHNOLOGIST (الگ tab)
    ============================================================ */
 function viewTechnologist(){
   const isSup = S.user.role === 'supervisor';
@@ -1512,7 +1510,7 @@ function viewTechnologist(){
         <div class="avatar">${initials(t.name)}</div>
         <div class="info">
           <div class="name">${esc(t.name)}</div>
-          <div class="detail">${esc(t.designation||'Technologist')}</div>
+          <div class="detail">${esc(t.designation||'Technologist')} · 📱 ${esc(t.mobile||'')}</div>
         </div>
       </div>`).join(''):'<div class="empty"><div class="big">🔬</div>No technologists added yet</div>'}
     </div>`;
@@ -1603,7 +1601,7 @@ function viewSettings(){
       ${holidays.length?holidays.map(h => `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #eee">
         <div style="flex:1"><b>${esc(h.name)}</b><div style="font-size:11px;color:#888">${fmtDate(h.date)}</div></div>
         <button class="danger sm" onclick="delHoliday('${h.id}')">🗑</button>
-      </div>`).join(''):'<div class="empty">No holidays</div>'}
+      </div>`).join(''):'<div class="empty">No holidays added</div>'}
       <button class="sec block" onclick="showAddHoliday()">➕ Add Holiday</button>
     </div>
     <div class="card">
@@ -1613,15 +1611,18 @@ function viewSettings(){
       </div>`).join('')}
     </div>
     <div class="card">
-      <h2>💾 Backup</h2>
+      <h2>💾 Data Backup</h2>
       <button class="sec block" style="margin-bottom:8px" onclick="exportAllData()">📤 Export Backup (JSON)</button>
       <button class="sec block" onclick="importAllData()">📥 Import Backup</button>
+      <div class="help" style="margin-top:8px">Firebase auto-backup is always active.</div>
     </div>
     <div class="card">
       <h2>ℹ About</h2>
       <div style="font-size:12px;color:#666;line-height:1.7">
         <b>${esc(s.app_title||'Phlebotomist Roster')}</b><br>
-        Version 3.0<br>${esc(s.hospital_name||'')}<br>Data synced via Firebase
+        Version 3.0<br>
+        ${esc(s.hospital_name||'')}<br>
+        Data synced via Firebase
       </div>
     </div>`;
 }
@@ -1632,6 +1633,7 @@ async function saveSettings(){
   s.address = document.getElementById('stAddr').value;
   s.whatsapp_bot = document.getElementById('stWa').value;
   await Cache.set('settings', s);
+  audit('EDIT_SETTINGS', 'settings', null, s.hospital_name);
   toast('Saved ✅');
   render();
 }
@@ -1668,7 +1670,7 @@ async function delHoliday(id){
 }
 async function exportAllData(){
   const data = {};
-  ['users','staff','technologists','periods','assignments','leave','overtime','exchanges','audit','settings','notifications','chat','holidays','shifts','stations','config'].forEach(k => data[k] = Cache.get(k));
+  ['users','staff','technologists','periods','assignments','leave','overtime','exchanges','audit','settings','notifications','holidays','shifts','config'].forEach(k => data[k] = Cache.get(k));
   const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
