@@ -4,144 +4,65 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#C8102E">
-<title>Phlebotomist Roster</title>
+<title>Phlebotomist Roster - KIH</title>
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        kihRed: '#C8102E',
+        kihBlue: '#1E5BA8'
+      }
+    }
+  }
+}
+</script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#F5F7FA;color:#222;font-size:14px;padding-bottom:72px}
-.header{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;padding:12px 14px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.15);display:flex;align-items:center;gap:10px}
-.header .logo-img{width:38px;height:38px;border-radius:8px;background:#fff;padding:3px;object-fit:contain;display:flex;align-items:center;justify-content:center;font-weight:800;color:#C8102E;font-size:14px}
-.header .titles{flex:1;overflow:hidden}
-.header h1{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.header .sub{font-size:10px;opacity:.85}
-.header button{background:rgba(255,255,255,.18);color:#fff;border:none;padding:6px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600}
-.container{padding:12px;max-width:100%}
-.card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:14px;margin-bottom:12px}
-.card h2{color:#C8102E;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:6px;font-weight:700}
-input,select,textarea,button{font-family:inherit;font-size:14px}
-input,select,textarea{width:100%;padding:10px 12px;border:1.5px solid #E0E4EB;border-radius:8px;margin-bottom:8px;background:#fff;color:#222}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#C8102E}
-button{background:#C8102E;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
-button:active{opacity:.8}
-button.sec{background:#E8EBF2;color:#1E5BA8}
-button.blue{background:#1E5BA8}
-button.success{background:#27AE60}
-button.danger{background:#C0392B}
-button.warning{background:#E67E22}
-button.sm{padding:6px 10px;font-size:12px;border-radius:6px}
-button.block{width:100%;padding:14px;font-size:15px;margin-top:6px}
-.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
-.row>*{flex:1;min-width:0}
-.row.auto>*{flex:0 0 auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.stat{background:#fff;border-radius:12px;padding:14px;border-left:5px solid #C8102E;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.stat.blue{border-left-color:#1E5BA8}
-.stat.green{border-left-color:#27AE60}
-.stat.orange{border-left-color:#E67E22}
-.stat .num{font-size:24px;font-weight:800;color:#1E5BA8;line-height:1.1}
-.stat .label{font-size:10px;color:#666;text-transform:uppercase;margin-top:4px;font-weight:600}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:2px solid #F0F2F5;z-index:100;box-shadow:0 -3px 12px rgba(0,0,0,.08);overflow-x:auto}
-.nav::-webkit-scrollbar{display:none}
-.nav button{flex:0 0 auto;background:none;color:#888;border:none;padding:9px 10px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:2px;border-radius:0;min-width:60px;font-weight:600}
-.nav button.active{color:#C8102E}
-.nav button .ico{font-size:18px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th,td{border:1px solid #E8EBF2;padding:6px 5px;text-align:center;white-space:nowrap}
-th{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;font-size:11px;font-weight:600;position:sticky;top:0;z-index:2}
-tr:nth-child(even) td{background:#FAFBFD}
-.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px}
-.scroll-x table{min-width:max-content}
-.cell{display:inline-block;padding:4px 7px;border-radius:5px;min-width:28px;cursor:pointer;font-weight:700;font-size:11px;border:1px solid transparent}
-.cell:active{outline:2px solid #C8102E}
-.d-M{background:#FFF3B0;color:#7D6608}
-.d-E{background:#FFD6A5;color:#7D4A00}
-.d-E4{background:#FFC6FF;color:#8E2DE2}
-.d-N,.d-N12{background:#A0C4FF;color:#0B3D91}
-.d-O,.d-OFF{background:#E5E5E5;color:#555}
-.d-PH,.d-GH{background:#FFADAD;color:#922B21}
-.d-CPL{background:#FFD6A5;color:#7D4A00}
-.d-EL,.d-CL,.d-AL{background:#FDFFB6;color:#7D6608}
-.d-SL{background:#FFC9DE;color:#A61E4D}
-.d-ML{background:#D0BFFF;color:#5F3DC4}
-.d-D{background:#BDB2FF;color:#4A1D96}
-.d-X{background:#CAFFBF;color:#1E8449}
-.d-ME{background:#FDFFB6;color:#7D6608}
-.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:10px;font-weight:700;text-transform:uppercase}
-.b-draft{background:#FFF3B0;color:#7D6608}
-.b-published{background:#CAFFBF;color:#1E8449}
-.b-locked{background:#FFADAD;color:#922B21}
-.b-pending{background:#FFD6A5;color:#7D4A00}
-.b-approved{background:#CAFFBF;color:#1E8449}
-.b-rejected{background:#FFADAD;color:#922B21}
-.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:#27AE60;color:#fff;padding:12px 22px;border-radius:25px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:.3s;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:90%;text-align:center}
-.toast.show{opacity:1}
-.toast.error{background:#C0392B}
-.toast.info{background:#1E5BA8}
-.toast.warning{background:#E67E22}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:1000}
-.modal-c{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto}
-.modal-c h2{color:#C8102E;margin-bottom:14px;font-size:17px}
-.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,rgba(200,16,46,.92),rgba(30,91,168,.92))}
-.login{background:rgba(255,255,255,.98);border-radius:20px;padding:30px 24px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.login .logo{text-align:center;margin-bottom:18px}
-.login .logo-img{width:90px;height:90px;object-fit:contain;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;border-radius:20px;font-size:28px;font-weight:800;box-shadow:0 8px 24px rgba(200,16,46,.3)}
-.login h1{color:#C8102E;text-align:center;font-size:19px;margin-bottom:4px;font-weight:800}
-.login .sub{text-align:center;color:#666;margin-bottom:22px;font-size:11px;font-weight:600}
-.login input{margin-bottom:12px;padding:14px;font-size:15px}
-.login button{width:100%;padding:15px;font-size:16px;margin-top:8px;font-weight:700}
-.login .hint{font-size:11px;color:#999;text-align:center;margin-top:16px}
-.login .forgot{text-align:center;margin-top:12px}
-.login .forgot a{color:#1E5BA8;text-decoration:none;font-size:12px;cursor:pointer;font-weight:600}
-.legend{display:flex;gap:6px;flex-wrap:wrap;font-size:10px;margin-bottom:10px}
-.legend span{padding:4px 8px;border-radius:6px;font-weight:700}
-.empty{text-align:center;color:#AAA;padding:36px 12px;font-size:13px}
-.empty .big{font-size:40px;margin-bottom:8px;opacity:.4}
-.pill{display:inline-block;padding:6px 12px;border-radius:14px;font-size:12px;background:#E8EBF2;color:#1E5BA8;margin:3px;cursor:pointer;font-weight:600;border:1.5px solid transparent}
-.pill.on{background:#C8102E;color:#fff;border-color:#C8102E}
-.help{font-size:11px;color:#888;margin-top:-4px;margin-bottom:8px;font-style:italic}
-.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
-.tabs button{flex:0 0 auto;background:#E8EBF2;color:#666;padding:8px 14px;font-size:12px;border-radius:10px;font-weight:600}
-.tabs button.active{background:#C8102E;color:#fff}
-.divider{height:1px;background:#E8EBF2;margin:12px 0}
-.chip{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;background:#F0F2F5;color:#555;margin:2px}
-.chip.blue{background:#E3F2FD;color:#1E5BA8}
-.chip.red{background:#FFEBEE;color:#C8102E}
-.chip.green{background:#E8F5E9;color:#27AE60}
-.chip.orange{background:#FFF3E0;color:#E67E22}
-.notif-badge{background:#C8102E;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px;font-weight:700}
-.notif-item{padding:12px;border-bottom:1px solid #F0F2F5;cursor:pointer}
-.notif-item.unread{background:#FFF9FA;border-left:3px solid #C8102E}
-.notif-item .title{font-weight:700;font-size:13px;color:#C8102E;margin-bottom:3px}
-.notif-item .desc{font-size:12px;color:#555;margin-bottom:4px}
-.notif-item .time{font-size:10px;color:#AAA}
-.staff-card{padding:12px;border-bottom:1px solid #F0F2F5;display:flex;align-items:center;gap:12px}
-.staff-card .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
-.staff-card .info{flex:1;min-width:0}
-.staff-card .name{font-weight:700;font-size:14px;color:#222;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.staff-card .detail{font-size:11px;color:#888}
-.staff-card .actions{display:flex;gap:4px;flex-shrink:0}
-.priority-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#F9FAFB;padding:8px;border-radius:8px}
-.priority-row .rank{font-size:18px;width:28px;text-align:center}
-.priority-row select{flex:1;margin:0}
-.priority-row button{width:36px;height:36px;padding:0;border-radius:8px;font-size:16px;flex-shrink:0}
-.special-off-row{display:flex;gap:6px;align-items:center;margin-bottom:6px;background:#FFF9FA;padding:8px;border-radius:8px;border-left:3px solid #C8102E}
-.special-off-row input{flex:1;margin:0}
-.special-off-row button{width:36px;height:36px;padding:0;border-radius:8px;flex-shrink:0}
-.file-input{display:none}
-@media (min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}.container{max-width:1200px;margin:0 auto}.nav{justify-content:center}}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F5F7FA; }
+.kih-gradient { background: linear-gradient(135deg, #C8102E 0%, #1E5BA8 100%); }
+.cell { display: inline-block; padding: 4px 6px; border-radius: 4px; min-width: 26px; cursor: pointer; font-weight: 700; font-size: 11px; }
+.cell-M { background: #FFF3B0; color: #7D6608; }
+.cell-E { background: #FFD6A5; color: #7D4A00; }
+.cell-E4 { background: #FFC6FF; color: #8E2DE2; }
+.cell-N, .cell-N12 { background: #A0C4FF; color: #0B3D91; }
+.cell-OFF { background: #E5E5E5; color: #555; }
+.cell-D { background: #BDB2FF; color: #4A1D96; }
+.cell-X { background: #CAFFBF; color: #1E8449; }
+.cell-EL, .cell-CL, .cell-AL { background: #FDFFB6; color: #7D6608; }
+.cell-CPL { background: #FFD6A5; color: #7D4A00; }
+.cell-SL { background: #FFC9DE; color: #A61E4D; }
+.cell-ML { background: #D0BFFF; color: #5F3DC4; }
+.cell-GH { background: #FFADAD; color: #922B21; }
+.cell-empty { background: #FAFBFD; color: #CCC; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); padding: 12px 22px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 9999; opacity: 0; transition: .3s; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 90%; text-align: center; }
+.toast.show { opacity: 1; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 1000; }
+.modal-c { background: #fff; border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; }
+@media (min-width: 768px) { .modal-bg { align-items: center; } .modal-c { border-radius: 16px; max-width: 700px; } }
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
+.scroll-x table { min-width: max-content; }
+input, select, textarea { font-size: 14px; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #C8102E; }
+.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; font-size: 10px; font-weight: 600; color: #888; background: none; border: none; cursor: pointer; border-radius: 0; min-width: 60px; white-space: nowrap; }
+.nav-btn.active { color: #C8102E; }
+.nav-btn .ico { font-size: 18px; }
+.pill { display: inline-block; padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #E8EBF2; color: #1E5BA8; margin: 3px; cursor: pointer; font-weight: 600; border: 1.5px solid transparent; }
+.pill.on { background: #C8102E; color: #fff; border-color: #C8102E; }
+.chat-msg { padding: 10px 14px; border-radius: 16px; margin-bottom: 8px; max-width: 80%; word-wrap: break-word; font-size: 13px; }
+.chat-msg.me { background: #C8102E; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
+.chat-msg.other { background: #F0F2F5; color: #222; border-bottom-left-radius: 4px; }
 </style>
 </head>
 <body>
 <div id="app"></div>
+
 <script>
 /* ============================================================
-   🔥 FIREBASE CONFIG
+   FIREBASE INIT
    ============================================================ */
 const firebaseConfig = {
   apiKey: "AIzaSyB4uyNiVe5CQ-vAZalcYpQxz2XCq4XY17o",
@@ -152,550 +73,636 @@ const firebaseConfig = {
   messagingSenderId: "433203658029",
   appId: "1:433203658029:web:bf2a31f75f4c3273df27a4"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* ============================================================
-   📦 CACHE
+   GLOBAL STATE
+   ============================================================ */
+const S = {
+  user: null,
+  view: 'dashboard',
+  periodId: null,
+  techPeriodId: null,
+  chatWith: null,
+  chatType: 'group'
+};
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function $(id) { return document.getElementById(id); }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid() { return 'id_' + Date.now() + '_' + Math.floor(Math.random() * 1000); }
+function today() { return new Date().toISOString().slice(0, 10); }
+function fmtDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function fmtTime(d) { return new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+function dayName(d) { const dt = new Date(d + 'T00:00:00'); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()]; }
+function isSunday(d) { return new Date(d + 'T00:00:00').getDay() === 0; }
+function isSaturday(d) { return new Date(d + 'T00:00:00').getDay() === 6; }
+function datesBetween(s, e) {
+  const out = [];
+  const d = new Date(s + 'T00:00:00');
+  const end = new Date(e + 'T00:00:00');
+  while (d <= end) {
+    out.push(d.toISOString().slice(0, 10));
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+function initials(name) {
+  return (name || '?').split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
+}
+
+function toast(msg, type) {
+  type = type || 'success';
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.background = type === 'error' ? '#C0392B' : type === 'info' ? '#1E5BA8' : '#27AE60';
+  t.style.color = '#fff';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 20);
+  setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => t.remove(), 300);
+  }, 2800);
+}
+
+/* ============================================================
+   FIREBASE CACHE
    ============================================================ */
 const Cache = {
   data: {},
+  listeners: [],
   init() {
-    const keys = ['users','staff','technologists','periods','assignments','leave','overtime','exchanges','audit','settings','notifications','chat','holidays','shifts','config'];
+    const keys = ['users', 'staff', 'technologists', 'periods', 'assignments',
+                  'techPeriods', 'techAssignments', 'leave', 'overtime', 'exchanges',
+                  'audit', 'settings', 'notifications', 'chat', 'holidays'];
     keys.forEach(k => {
       db.ref(k).on('value', snap => {
         this.data[k] = snap.val();
-        if (k === 'settings' && !this.data[k]) db.ref('settings').set(DEFAULT_SETTINGS);
-        if (k === 'shifts' && !this.data[k]) db.ref('shifts').set(DEFAULT_SHIFTS);
-        if (k === 'config' && !this.data[k]) db.ref('config').set(DEFAULT_CONFIG);
-        if (k === 'users' && !this.data[k]) db.ref('users').set({
-          admin:{username:'admin',password:'admin123',role:'supervisor',active:true,mobile:'03001234567',name:'Admin'}
-        });
+        if (k === 'settings' && !this.data[k]) {
+          db.ref('settings').set({
+            hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
+            department: 'Laboratory and Blood Bank',
+            app_title: 'Phlebotomist Roster',
+            whatsapp_bot: 'FlipBotMe',
+            address: 'Islamabad, Pakistan'
+          });
+        }
+        if (k === 'users' && !this.data[k]) {
+          db.ref('users').set({
+            admin: {
+              username: 'admin',
+              password: 'admin123',
+              role: 'supervisor',
+              active: true,
+              mobile: '03001234567',
+              name: 'Admin'
+            }
+          });
+        }
         if (S.user) render();
       });
     });
   },
   get(k, def) { return this.data[k] ?? def; },
-  set(k, v) { this.data[k] = v; return db.ref(k).set(v); }
+  set(k, v) {
+    this.data[k] = v;
+    return db.ref(k).set(v);
+  },
+  push(k, v) {
+    const ref = db.ref(k).push();
+    return ref.set(v).then(() => ref.key);
+  }
 };
 
 /* ============================================================
-   📊 DEFAULT DATA
+   AUDIT + NOTIFICATIONS
    ============================================================ */
-const DEFAULT_SETTINGS = {
-  hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
-  department: 'Laboratory and Blood Bank',
-  app_title: 'Phlebotomist Roster',
-  whatsapp_bot: 'FlipBotMe',
-  address: 'Islamabad, Pakistan'
-};
-
-const DEFAULT_CONFIG = {
-  staff_12: { M: 3, E: 3, D: 1, N12: 1, E4: 1, X: 1, OFF: 2 },
-  staff_11: { M: 3, E: 3, D: 1, N12: 1, E4: 1, OFF: 2 },
-  staff_10: { M: 3, E: 3, D: 1, N12: 1, E4: 1, OFF: 1 },
-  staff_9:  { M: 3, E: 3, D: 1, N12: 1, OFF: 1 },
-  sunday:   { M: 2, E: 2, N: 1, OFF: 7 },
-  cpl_per_hour: 0.125
-};
-
-const DEFAULT_SHIFTS = {
-  M:   { code:'M',   name:'Morning',        start:'07:00', end:'15:30' },
-  E:   { code:'E',   name:'Evening',        start:'15:00', end:'23:00' },
-  E4:  { code:'E4',  name:'Evening4',       start:'16:00', end:'00:00' },
-  N:   { code:'N',   name:'Night',          start:'23:00', end:'07:00' },
-  N12: { code:'N12', name:'Night12',        start:'00:00', end:'08:00' },
-  D:   { code:'D',   name:'Day (Gynee)',    start:'09:00', end:'21:00' },
-  X:   { code:'X',   name:'Extra/Floating', start:'',      end:'' },
-  OFF: { code:'OFF', name:'Weekly Off',     start:'',      end:'' },
-  O:   { code:'O',   name:'OFF',            start:'',      end:'' },
-  EL:  { code:'EL',  name:'Earned Leave',   start:'',      end:'' },
-  CPL: { code:'CPL', name:'Comp. Leave',    start:'',      end:'' },
-  CL:  { code:'CL',  name:'Casual Leave',   start:'',      end:'' },
-  GH:  { code:'GH',  name:'Gazetted Holiday',start:'',     end:'' },
-  SL:  { code:'SL',  name:'Sick Leave',     start:'',      end:'' },
-  AL:  { code:'AL',  name:'Annual Leave',   start:'',      end:'' },
-  ML:  { code:'ML',  name:'Maternity Leave',start:'',      end:'' }
-};
-
-/* ============================================================
-   🎯 STATE
-   ============================================================ */
-const S = { user: null, view: 'dashboard', periodId: null, chatWith: null, chatType: 'group' };
-
-/* ============================================================
-   🛠 HELPERS
-   ============================================================ */
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function toast(msg,type='success'){const t=document.createElement('div');t.className='toast '+(type==='error'?'error':type==='info'?'info':type==='warning'?'warning':'');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.classList.add('show'),20);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2800);}
-function datesBetween(s,e){const out=[];const d=new Date(s+'T00:00:00');const end=new Date(e+'T00:00:00');while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1);}return out;}
-function today(){return new Date().toISOString().slice(0,10);}
-function uid(){return Date.now()+Math.floor(Math.random()*1000);}
-function fmtDate(d){const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
-function fmtTime(d){return new Date(d).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});}
-function dayOfWeek(d){const dt=new Date(d+'T00:00:00');return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];}
-function isSunday(d){return new Date(d+'T00:00:00').getDay()===0;}
-function isHoliday(d){const h=Cache.get('holidays',{})||{};return Object.values(h).some(x=>x.date===d&&x.active);}
-function isSundayOrHoliday(d){return isSunday(d)||isHoliday(d);}
-function getSetting(k){return (Cache.get('settings',{})||{})[k]||'';}
-function initials(name){return (name||'?').split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();}
-function getWeekKey(d){const dt=new Date(d+'T00:00:00');const jan1=new Date(dt.getFullYear(),0,1);return dt.getFullYear()+'-W'+Math.ceil(((dt-jan1)/86400000+jan1.getDay()+1)/7);}
-
-function audit(action, entity, oldv, newv, reason){
+function audit(action, entity, oldv, newv, reason) {
   const log = Cache.get('audit', {}) || {};
   const arr = Object.values(log);
-  arr.unshift({id:uid(),user:S.user?S.user.username:'system',user_name:S.user?(S.user.name||S.user.username):'system',action,entity,old:oldv??null,new:newv??null,reason:reason||null,at:new Date().toISOString()});
-  const obj = {}; arr.slice(0,1000).forEach(x => { obj[x.id] = x; });
+  const entry = {
+    id: uid(),
+    user: S.user ? S.user.username : 'system',
+    user_name: S.user ? (S.user.name || S.user.username) : 'system',
+    action: action,
+    entity: entity,
+    old: oldv ?? null,
+    new: newv ?? null,
+    reason: reason || null,
+    at: new Date().toISOString()
+  };
+  arr.unshift(entry);
+  const obj = {};
+  arr.slice(0, 1000).forEach(x => { obj[x.id] = x; });
   Cache.set('audit', obj);
 }
 
-function notifyAll(title, body, type='info'){
+function notifyAll(title, body, type) {
   const notifs = Cache.get('notifications', {}) || {};
   const id = 'n_' + uid();
-  notifs[id] = { id, title, body, type, at:new Date().toISOString(), read:false };
+  notifs[id] = {
+    id: id,
+    title: title,
+    body: body,
+    type: type || 'info',
+    at: new Date().toISOString(),
+    read: false
+  };
   Cache.set('notifications', notifs);
 }
 
 /* ============================================================
-   🔐 LOGIN
+   LOGIN
    ============================================================ */
-function renderLogin(){
-  document.getElementById('app').innerHTML = `
-    <div class="login-wrap"><div class="login">
-      <div class="logo"><div class="logo-img">KIH</div></div>
-      <h1>Phlebotomist Roster</h1>
-      <p class="sub">KULSUM INTERNATIONAL HOSPITAL</p>
-      <input id="u" placeholder="Mobile Number" inputmode="tel">
-      <input id="p" type="password" placeholder="Password">
-      <button onclick="doLogin()">🔐 Login</button>
-      <div class="forgot"><a onclick="showForgot()">Forgot Password?</a></div>
-      <div class="hint">Admin: admin / admin123</div>
-    </div></div>`;
-  document.getElementById('p').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+function renderLogin() {
+  const app = $('app');
+  app.innerHTML = `
+    <div class="min-h-screen flex items-center justify-center p-4 kih-gradient">
+      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <div class="text-center mb-6">
+          <div class="w-20 h-20 mx-auto rounded-2xl kih-gradient flex items-center justify-center text-white font-extrabold text-2xl shadow-lg mb-4">KIH</div>
+          <h1 class="text-2xl font-extrabold text-kihRed">Phlebotomist Roster</h1>
+          <p class="text-xs font-semibold text-gray-500 tracking-wide mt-1">KULSUM INTERNATIONAL HOSPITAL</p>
+        </div>
+        <input id="loginUser" type="text" placeholder="Mobile Number / Username" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3 text-base focus:border-kihRed" autocomplete="username">
+        <input id="loginPass" type="password" placeholder="Password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3 text-base focus:border-kihRed" autocomplete="current-password">
+        <button onclick="doLogin()" class="w-full py-3 bg-kihRed text-white rounded-lg font-bold text-base hover:opacity-90">🔐 Login</button>
+        <div class="text-center mt-4">
+          <button onclick="showForgot()" class="text-kihBlue text-sm font-semibold hover:underline">Forgot Password?</button>
+        </div>
+        <div class="text-center text-xs text-gray-400 mt-4">Admin: admin / admin123</div>
+      </div>
+    </div>`;
+  $('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
 }
 
-function doLogin(){
-  const u = document.getElementById('u').value.trim();
-  const p = document.getElementById('p').value;
-  if (!u || !p) return toast('Enter mobile and password','error');
+function doLogin() {
+  const u = $('loginUser').value.trim();
+  const p = $('loginPass').value;
+  if (!u || !p) { toast('Enter mobile and password', 'error'); return; }
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => (x.username === u || x.mobile === u) && x.password === p);
-  if (!user) return toast('Invalid credentials','error');
-  if (user.active === false) return toast('Account disabled','error');
-  S.user = { username:user.username, name:user.name||user.username, role:user.role, staff_id:user.staff_id||null, mobile:user.mobile||user.username };
+  const user = Object.values(users).find(function(x) {
+    return (x.username === u || x.mobile === u) && x.password === p;
+  });
+  if (!user) { toast('Invalid credentials', 'error'); return; }
+  if (user.active === false) { toast('Account disabled', 'error'); return; }
+  S.user = {
+    username: user.username,
+    name: user.name || user.username,
+    role: user.role,
+    staff_id: user.staff_id || null,
+    mobile: user.mobile || user.username
+  };
   localStorage.setItem('phleb_user', JSON.stringify(S.user));
   S.view = 'dashboard';
   toast('Welcome ' + (user.name || user.username));
   render();
 }
 
-function doLogout(){ if(!confirm('Logout?')) return; S.user = null; localStorage.removeItem('phleb_user'); render(); }
+function doLogout() {
+  if (!confirm('Logout?')) return;
+  S.user = null;
+  localStorage.removeItem('phleb_user');
+  render();
+}
 
-function showForgot(){
+function showForgot() {
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>🔑 Forgot Password</h2>
-    <p style="font-size:13px;color:#666;margin-bottom:12px">Enter your registered mobile number.</p>
-    <input id="fgMobile" placeholder="Mobile Number" inputmode="tel">
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button onclick="sendOTP()">Send OTP</button></div>
-    <div id="fgStatus" style="margin-top:12px;font-size:12px"></div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">🔑 Forgot Password</h2>
+      <p class="text-sm text-gray-600 mb-3">Enter your registered mobile number</p>
+      <input id="fgMobile" placeholder="Mobile Number" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3" inputmode="tel">
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold">Cancel</button>
+        <button onclick="sendOTP()" class="flex-1 py-3 bg-kihRed text-white rounded-lg font-semibold">Send OTP</button>
+      </div>
+      <div id="fgStatus" class="mt-3 text-sm"></div>
+    </div>`;
   document.body.appendChild(m);
 }
 
-function sendOTP(){
-  const mobile = document.getElementById('fgMobile').value.trim();
-  if (!mobile) return toast('Enter mobile','error');
+function sendOTP() {
+  const mobile = $('fgMobile').value.trim();
+  if (!mobile) { toast('Enter mobile', 'error'); return; }
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => x.username === mobile || x.mobile === mobile);
-  if (!user) { document.getElementById('fgStatus').innerHTML = '<span style="color:#C0392B">Mobile not registered</span>'; return; }
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const user = Object.values(users).find(function(x) {
+    return x.username === mobile || x.mobile === mobile;
+  });
+  if (!user) {
+    $('fgStatus').innerHTML = '<span class="text-red-600">Mobile not registered</span>';
+    return;
+  }
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
   sessionStorage.setItem('otp_' + mobile, otp);
-  document.getElementById('fgStatus').innerHTML = `
-    <div style="background:#FFF3E0;padding:12px;border-radius:8px;color:#E67E22;font-weight:600">
-      Demo OTP: <span style="font-size:20px;letter-spacing:3px">${otp}</span>
+  $('fgStatus').innerHTML = `
+    <div class="bg-orange-100 p-3 rounded-lg text-orange-700 font-semibold mb-3">
+      Demo OTP: <span class="text-xl tracking-widest">${otp}</span>
     </div>
-    <input id="fgOTP" placeholder="Enter OTP" inputmode="numeric" maxlength="6" style="margin-top:12px">
-    <input id="fgNewPass" type="password" placeholder="New Password (min 6 chars)">
-    <button class="block success" onclick="verifyOTP('${mobile}')">Reset Password</button>`;
+    <input id="fgOTP" placeholder="Enter OTP" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3" inputmode="numeric" maxlength="6">
+    <input id="fgNewPass" type="password" placeholder="New Password (min 6 chars)" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3">
+    <button onclick="verifyOTP('${mobile}')" class="w-full py-3 bg-green-600 text-white rounded-lg font-semibold">Reset Password</button>`;
 }
 
-function verifyOTP(mobile){
-  const entered = document.getElementById('fgOTP').value.trim();
-  const newPass = document.getElementById('fgNewPass').value;
+function verifyOTP(mobile) {
+  const entered = $('fgOTP').value.trim();
+  const newPass = $('fgNewPass').value;
   const savedOTP = sessionStorage.getItem('otp_' + mobile);
-  if (entered !== savedOTP) return toast('Invalid OTP','error');
-  if (!newPass || newPass.length < 6) return toast('Password 6+ chars','error');
+  if (entered !== savedOTP) { toast('Invalid OTP', 'error'); return; }
+  if (!newPass || newPass.length < 6) { toast('Password must be 6+ chars', 'error'); return; }
   const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(x => x.username === mobile || x.mobile === mobile);
+  const user = Object.values(users).find(function(x) {
+    return x.username === mobile || x.mobile === mobile;
+  });
   user.password = newPass;
   Cache.set('users', users);
   audit('PASSWORD_RESET', 'user', null, mobile);
   sessionStorage.removeItem('otp_' + mobile);
-  document.querySelector('.modal').remove();
+  document.querySelector('.modal-bg').remove();
   toast('Password reset! Login now.');
 }
 
 /* ============================================================
-   🎨 RENDER
+   MAIN RENDER
    ============================================================ */
-function render(){
-  if (!S.user) return renderLogin();
+function render() {
+  if (!S.user) { renderLogin(); return; }
   const v = S.view;
-  const body = v === 'dashboard' ? viewDashboard() : v === 'roster' ? viewRoster() : v === 'staff' ? viewStaff() : v === 'leave' ? viewLeave() : v === 'overtime' ? viewOvertime() : v === 'exchange' ? viewExchange() : v === 'notifications' ? viewNotifications() : v === 'reports' ? viewReports() : v === 'technologist' ? viewTechnologist() : v === 'audit' ? viewAudit() : v === 'settings' ? viewSettings() : '<div class="empty">Unknown</div>';
+  let body = '';
+  if (v === 'dashboard') body = viewDashboard();
+  else if (v === 'roster') body = viewRoster();
+  else if (v === 'staff') body = viewStaff();
+  else if (v === 'leave') body = viewLeave();
+  else if (v === 'overtime') body = viewOvertime();
+  else if (v === 'exchange') body = viewExchange();
+  else if (v === 'chat') body = viewChat();
+  else if (v === 'notifications') body = viewNotifications();
+  else if (v === 'reports') body = viewReports();
+  else if (v === 'technologist') body = viewTechnologist();
+  else if (v === 'audit') body = viewAudit();
+  else if (v === 'settings') body = viewSettings();
+  else body = '<div class="text-center text-gray-400 p-10">Unknown view</div>';
+
   const isSup = S.user.role === 'supervisor';
-  const navItems = isSup ? [
-    ['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['technologist','🔬','Techno'],
-    ['leave','🏖','Leave'],['exchange','🔄','Exchange'],['overtime','⏱','OT'],
-    ['notifications','🔔','Bell'],['reports','📊','Reports'],['audit','📜','Audit'],['settings','⚙','Set']
-  ] : [
-    ['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave'],
-    ['exchange','🔄','Exchange'],['notifications','🔔','Bell']
-  ];
-  const unreadNum = Object.values(Cache.get('notifications',{})||{}).filter(n=>!n.read).length;
-  document.getElementById('app').innerHTML = `
-    <div class="header">
-      <div class="logo-img">KIH</div>
-      <div class="titles">
-        <h1>${esc(getSetting('app_title')||'Phlebotomist Roster')}</h1>
-        <div class="sub">${esc(S.user.name)} · ${isSup?'Supervisor':'Staff'}</div>
+  const navItems = isSup
+    ? [['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['technologist','🔬','Techno'],['leave','🏖','Leave'],['exchange','🔄','Exchange'],['overtime','⏱','OT'],['chat','💬','Chat'],['notifications','🔔','Bell'],['reports','📊','Reports'],['audit','📜','Audit'],['settings','⚙','Set']]
+    : [['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave'],['exchange','🔄','Exchange'],['chat','💬','Chat'],['notifications','🔔','Bell']];
+
+  const unreadNum = Object.values(Cache.get('notifications', {}) || {}).filter(n => !n.read).length;
+
+  $('app').innerHTML = `
+    <div class="kih-gradient text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-40 shadow-lg">
+      <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-kihRed font-extrabold text-sm shrink-0">KIH</div>
+      <div class="flex-1 min-w-0">
+        <h1 class="text-sm font-bold truncate">${esc((Cache.get('settings', {}) || {}).app_title || 'Phlebotomist Roster')}</h1>
+        <div class="text-xs opacity-85">${esc(S.user.name)} · ${isSup ? 'Supervisor' : 'Staff'}</div>
       </div>
-      <button onclick="doLogout()">Logout</button>
+      <button onclick="doLogout()" class="bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold">Logout</button>
     </div>
-    <div class="container">${body}</div>
-    <div class="nav">
-      ${navItems.map(([k,i,l]) => `<button class="${S.view===k?'active':''}" onclick="go('${k}')"><span class="ico">${i}</span>${l}${k==='notifications'&&unreadNum?`<span class="notif-badge">${unreadNum}</span>`:''}</button>`).join('')}
-    </div>`;
+    <div class="p-3 max-w-5xl mx-auto" style="padding-bottom: 84px;">${body}</div>
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-100 flex overflow-x-auto z-40 shadow-2xl" style="scrollbar-width:none;">
+      ${navItems.map(function(item) {
+        const k = item[0], i = item[1], l = item[2];
+        const badge = (k === 'notifications' && unreadNum) ? '<span class="bg-kihRed text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 font-bold">' + unreadNum + '</span>' : '';
+        return '<button class="nav-btn ' + (S.view === k ? 'active' : '') + '" onclick="go(\'' + k + '\')"><span class="ico">' + i + '</span>' + l + badge + '</button>';
+      }).join('')}
+    </nav>`;
 }
-function go(v){ S.view = v; render(); window.scrollTo(0,0); }
+
+function go(v) {
+  S.view = v;
+  render();
+  window.scrollTo(0, 0);
+}
 
 /* ============================================================
-   🏠 DASHBOARD
+   DASHBOARD
    ============================================================ */
-function viewDashboard(){
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
-  const periods = Object.values(Cache.get('periods',{})||{});
+function viewDashboard() {
+  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
+  const periods = Object.values(Cache.get('periods', {}) || {});
   const t = today();
   const cp = periods.find(p => p.start <= t && p.end >= t);
-  const asg = Cache.get('assignments',{})||{};
-  const lv = Object.values(Cache.get('leave',{})||{}).filter(l => l.start <= t && l.end >= t && l.status === 'Approved');
-  const ex = Object.values(Cache.get('exchanges',{})||{}).filter(e => e.status === 'Pending');
+  const asg = Cache.get('assignments', {}) || {};
+  const lv = Object.values(Cache.get('leave', {}) || {}).filter(l => l.start <= t && l.end >= t && l.status === 'Approved');
+  const ex = Object.values(Cache.get('exchanges', {}) || {}).filter(e => e.status === 'Pending');
+
   let td = {};
-  if (cp) { const pd = asg[cp.id]||{}; staff.forEach(s => { const c = pd[s.id+'_'+t]; if (c) td[c] = (td[c]||0)+1; }); }
-  const sundayHoliday = isSundayOrHoliday(t);
+  if (cp) {
+    const pd = asg[cp.id] || {};
+    staff.forEach(s => {
+      const c = pd[s.id + '_' + t];
+      if (c) td[c] = (td[c] || 0) + 1;
+    });
+  }
+
+  const sundayHoliday = isSunday(t) || (Object.values(Cache.get('holidays', {}) || {}).some(h => h.date === t && h.active));
+
   return `
-    <div class="stats">
-      <div class="stat"><div class="num">${staff.length}</div><div class="label">Active Staff</div></div>
-      <div class="stat green"><div class="num">${lv.length}</div><div class="label">On Leave</div></div>
-      <div class="stat orange"><div class="num">${ex.length}</div><div class="label">Pending Exchange</div></div>
+    <div class="grid grid-cols-2 gap-3 mb-3">
+      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-kihRed">
+        <div class="text-2xl font-extrabold text-kihBlue">${staff.length}</div>
+        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Active Staff</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
+        <div class="text-2xl font-extrabold text-kihBlue">${lv.length}</div>
+        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">On Leave</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
+        <div class="text-2xl font-extrabold text-kihBlue">${ex.length}</div>
+        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Pending Exchange</div>
+      </div>
+      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-kihBlue">
+        <div class="text-2xl font-extrabold text-kihBlue">${Object.values(Cache.get('overtime', {}) || {}).length}</div>
+        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Overtime</div>
+      </div>
     </div>
-    ${sundayHoliday?`<div class="card" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">
-      <h2 style="color:#E67E22">🎉 ${isSunday(t)?'Sunday':'Gazetted Holiday'}</h2>
-      <div style="font-size:13px;color:#7D4A00">Today: 2 M + 2 E + 1 N = 5 ON | First Floor + Basement only</div>
-    </div>`:''}
-    <div class="card">
-      <h2>📅 Current Period</h2>
-      ${cp?`<div style="font-weight:700;font-size:15px">${esc(cp.name)}</div>
-      <div style="color:#666;font-size:12px;margin:4px 0">${fmtDate(cp.start)} → ${fmtDate(cp.end)}</div>
-      <div>Status: <span class="badge b-${cp.status.toLowerCase()}">${cp.status}</span></div>`:'<div class="empty">No active period</div>'}
+    ${sundayHoliday ? '<div class="bg-orange-50 rounded-xl p-4 mb-3 border border-orange-200"><div class="font-bold text-orange-700 mb-1">🎉 ' + (isSunday(t) ? 'Sunday' : 'Gazetted Holiday') + '</div><div class="text-sm text-orange-600">Today: 5 ON Duty, باقی OFF</div></div>' : ''}
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-2">📅 Current Period</h2>
+      ${cp ? '<div class="font-bold text-base">' + esc(cp.name) + '</div><div class="text-xs text-gray-500 mt-1">' + fmtDate(cp.start) + ' → ' + fmtDate(cp.end) + '</div><div class="mt-2"><span class="text-xs font-bold uppercase px-2 py-1 rounded-full ' + (cp.status === 'Published' ? 'bg-green-100 text-green-700' : cp.status === 'Locked' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + cp.status + '</span></div>' : '<div class="text-center text-gray-400 py-6">No active period</div>'}
     </div>
-    <div class="card">
-      <h2>📊 Today's Duties</h2>
-      ${Object.keys(td).length?`<div class="legend">${Object.entries(td).map(([c,n])=>`<span class="d-${c}">${c}: ${n}</span>`).join('')}</div>`:'<div class="empty"><div class="big">📋</div>No duties today</div>'}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-2">📊 Today's Duties</h2>
+      ${Object.keys(td).length ? '<div class="flex flex-wrap gap-2">' + Object.entries(td).map(e => '<span class="cell cell-' + e[0] + '">' + e[0] + ': ' + e[1] + '</span>').join('') + '</div>' : '<div class="text-center text-gray-400 py-6">No duties today</div>'}
     </div>`;
 }
 
 /* ============================================================
-   👥 STAFF
+   STAFF MANAGEMENT
    ============================================================ */
-function viewStaff(){
-  const staff = Object.values(Cache.get('staff',{})||{});
+function viewStaff() {
+  const staff = Object.values(Cache.get('staff', {}) || {});
   const isSup = S.user.role === 'supervisor';
+
   return `
-    <div class="card">
-      <h2>👥 Staff (${staff.length})</h2>
-      ${isSup ? `<button class="block success" onclick="showAddStaff()">➕ Add New Staff</button>` : ''}
-      <div class="divider"></div>
-      ${staff.length ? staff.map(s => `
-        <div class="staff-card">
-          <div class="avatar">${initials(s.name)}</div>
-          <div class="info">
-            <div class="name">${esc(s.name)}</div>
-            <div class="detail">${esc(s.designation||'Phlebotomist')} · 📱 ${esc(s.mobile||'')}</div>
-            <div style="margin-top:4px">
-              <span class="chip ${s.status==='Active'?'green':'red'}">${s.status}</span>
-              ${s.shiftType==='fixed'?`<span class="chip blue">${s.fixedShift||''}</span>`:(s.priorityShifts?`<span class="chip">${s.priorityShifts.slice(0,4).join('›')}</span>`:'')}
-              ${s.gender?`<span class="chip">${s.gender}</span>`:''}
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">👥 Staff (${staff.length})</h2>
+      ${isSup ? '<button onclick="showAddStaff()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-3">➕ Add New Staff</button>' : ''}
+      <div class="border-t border-gray-100 pt-3">
+        ${staff.length ? staff.map(s => `
+          <div class="flex items-center gap-3 py-3 border-b border-gray-100">
+            <div class="w-11 h-11 rounded-full kih-gradient text-white flex items-center justify-center font-bold shrink-0">${initials(s.name)}</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-sm truncate">${esc(s.name)}</div>
+              <div class="text-xs text-gray-500">${esc(s.designation || 'Phlebotomist')} · 📱 ${esc(s.mobile || '')}</div>
+              <div class="mt-1 flex flex-wrap gap-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${s.status}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">${esc(s.gender || 'Male')}</span>
+              </div>
             </div>
-          </div>
-          ${isSup?`<div class="actions">
-            <button class="sec sm" onclick="editStaff('${s.id}')">✏️</button>
-            <button class="danger sm" onclick="toggleStaff('${s.id}')">${s.status==='Active'?'⏸':'▶'}</button>
-          </div>`:''}
-        </div>`).join('') : '<div class="empty"><div class="big">👥</div>No staff added yet</div>'}
+            ${isSup ? '<div class="flex gap-1"><button onclick="editStaff(\'' + s.id + '\')" class="text-xs bg-gray-200 text-kihBlue px-2 py-1 rounded">✏️</button><button onclick="toggleStaff(\'' + s.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">${s.status === 'Active' ? '⏸' : '▶'}</button></div>' : ''}
+          </div>`).join('') : '<div class="text-center text-gray-400 py-6">No staff added yet</div>'}
+      </div>
     </div>`;
 }
 
-function showAddStaff(){
-  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
-  const activeShifts = Object.values(shifts).filter(s => !['O','OFF','EL','CPL','CL','GH','SL','AL','ML'].includes(s.code));
+function showAddStaff() {
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>➕ Add New Staff</h2>
-    <div class="help">* = Mandatory</div>
-    <div class="grid2">
-      <input id="nsName" placeholder="Full Name *">
-      <select id="nsGender"><option value="">Gender *</option><option>Male</option><option>Female</option></select>
-    </div>
-    <div class="grid2">
-      <input id="nsMobile" placeholder="Mobile Number *" inputmode="tel">
-      <input id="nsEmpId" placeholder="Employee ID *">
-    </div>
-    <div class="grid2">
-      <input id="nsDesig" placeholder="Designation *" value="Phlebotomist">
-      <input id="nsContact" placeholder="Alternate Contact">
-    </div>
-    <input id="nsJoinDate" type="date" placeholder="Joining Date">
-    <div class="divider"></div>
-    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">⏰ Shift Type *</div>
-    <div class="row auto">
-      <button type="button" class="pill on" id="shiftTypeFixed" onclick="setShiftType('fixed')">Fixed</button>
-      <button type="button" class="pill" id="shiftTypeMulti" onclick="setShiftType('multi')">Multiple (Priority)</button>
-    </div>
-    <div id="fixedShiftBox">
-      <div class="help">Select ONE fixed shift:</div>
-      <div id="fixedShiftList">${activeShifts.map(s=>`<button type="button" class="pill" data-fixed="${s.code}" onclick="pickFixed('${s.code}')">${s.code}</button>`).join('')}</div>
-    </div>
-    <div id="multiShiftBox" style="display:none">
-      <div class="help">Add shifts in priority order (🥇 highest):</div>
-      <div id="priorityList"></div>
-      <button type="button" class="sec block" onclick="addPriorityRow()">➕ Add Shift</button>
-    </div>
-    <div class="divider"></div>
-    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">🏖 Special Off (Optional)</div>
-    <div id="specialOffList"></div>
-    <button type="button" class="sec block" onclick="addSpecialOff()">➕ Add Special Off</button>
-    <div class="divider"></div>
-    <div style="font-weight:700;margin-bottom:8px;color:#C8102E">📱 Login</div>
-    <input id="nsUsername" placeholder="Username (= Mobile)" readonly style="background:#F0F2F5">
-    <input id="nsPassword" placeholder="Password" value="123456">
-    <div class="row" style="margin-top:12px">
-      <button class="sec" onclick="this.closest('.modal').remove()">Cancel</button>
-      <button class="success" onclick="saveNewStaff()">💾 Save</button>
-    </div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add New Staff</h2>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <input id="nsName" placeholder="Full Name *" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <select id="nsGender" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+          <option value="">Gender *</option>
+          <option>Male</option>
+          <option>Female</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <input id="nsMobile" placeholder="Mobile *" class="px-3 py-2 border-2 border-gray-200 rounded-lg" inputmode="tel">
+        <input id="nsEmpId" placeholder="Employee ID *" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <input id="nsDesig" placeholder="Designation *" value="Phlebotomist" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <input id="nsPassword" placeholder="Password (default: 123456)" value="123456" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+        <button onclick="saveNewStaff()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
+      </div>
+    </div>`;
   document.body.appendChild(m);
-  window._shiftType = 'fixed'; window._fixedShift = null; window._priorityShifts = []; window._specialOffs = [];
-  document.getElementById('nsMobile').addEventListener('input', e => { document.getElementById('nsUsername').value = e.target.value; });
 }
 
-function setShiftType(type){
-  window._shiftType = type;
-  document.getElementById('shiftTypeFixed').classList.toggle('on', type === 'fixed');
-  document.getElementById('shiftTypeMulti').classList.toggle('on', type === 'multi');
-  document.getElementById('fixedShiftBox').style.display = type === 'fixed' ? 'block' : 'none';
-  document.getElementById('multiShiftBox').style.display = type === 'multi' ? 'block' : 'none';
-}
-function pickFixed(code){ window._fixedShift = code; document.querySelectorAll('[data-fixed]').forEach(b => b.classList.toggle('on', b.dataset.fixed === code)); }
-function addPriorityRow(){
-  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
-  const activeShifts = Object.values(shifts).filter(s => !['O','OFF','EL','CPL','CL','GH','SL','AL','ML'].includes(s.code));
-  const idx = window._priorityShifts.length;
-  const div = document.createElement('div');
-  div.className = 'priority-row';
-  div.innerHTML = `<span class="rank">${['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣'][idx]||'•'}</span>
-    <select onchange="window._priorityShifts[${idx}]=this.value"><option value="">-- Select --</option>${activeShifts.map(s=>`<option value="${s.code}">${s.code} (${s.name})</option>`).join('')}</select>
-    <button type="button" class="danger" onclick="this.parentElement.remove();window._priorityShifts[${idx}]=''">✕</button>`;
-  document.getElementById('priorityList').appendChild(div);
-  window._priorityShifts.push('');
-}
-function addSpecialOff(){
-  const div = document.createElement('div');
-  div.className = 'special-off-row';
-  const idx = window._specialOffs.length;
-  div.innerHTML = `<input type="date" onchange="window._specialOffs[${idx}]=this.value">
-    <button type="button" class="danger" onclick="this.parentElement.remove();window._specialOffs[${idx}]=''">✕</button>`;
-  document.getElementById('specialOffList').appendChild(div);
-  window._specialOffs.push('');
-}
+async function saveNewStaff() {
+  const name = $('nsName').value.trim();
+  const gender = $('nsGender').value;
+  const mobile = $('nsMobile').value.trim();
+  const empId = $('nsEmpId').value.trim();
+  const desig = $('nsDesig').value.trim();
+  const password = $('nsPassword').value || '123456';
 
-async function saveNewStaff(){
-  const name = document.getElementById('nsName').value.trim();
-  const gender = document.getElementById('nsGender').value;
-  const mobile = document.getElementById('nsMobile').value.trim();
-  const empId = document.getElementById('nsEmpId').value.trim();
-  const desig = document.getElementById('nsDesig').value.trim();
-  const contact = document.getElementById('nsContact').value.trim();
-  const joinDate = document.getElementById('nsJoinDate').value;
-  const password = document.getElementById('nsPassword').value || '123456';
-  if (!name || !gender || !mobile || !empId || !desig) return toast('All mandatory fields required','error');
-  if (window._shiftType === 'fixed' && !window._fixedShift) return toast('Select a fixed shift','error');
-  if (window._shiftType === 'multi' && window._priorityShifts.filter(x=>x).length < 1) return toast('Add at least 1 shift','error');
-  const staff = Cache.get('staff',{}) || {};
-  if (Object.values(staff).find(s => s.mobile === mobile)) return toast('Mobile already registered','error');
-  if (Object.values(staff).find(s => s.empId === empId)) return toast('Employee ID exists','error');
+  if (!name || !gender || !mobile || !empId || !desig) {
+    toast('All mandatory fields required', 'error');
+    return;
+  }
+
+  const staff = Cache.get('staff', {}) || {};
+  if (Object.values(staff).find(s => s.mobile === mobile)) {
+    toast('Mobile already registered', 'error');
+    return;
+  }
+
   const newId = 's_' + uid();
-  staff[newId] = { id:newId, name, gender, mobile, empId, designation:desig, contact, joinDate,
-    status:'Active', shiftType:window._shiftType,
-    fixedShift: window._shiftType==='fixed'?window._fixedShift:null,
-    priorityShifts: window._shiftType==='multi'?window._priorityShifts.filter(x=>x):[],
-    specialOffs: window._specialOffs.filter(x=>x), cplBalance:0, createdAt:new Date().toISOString() };
+  staff[newId] = {
+    id: newId,
+    name: name,
+    gender: gender,
+    mobile: mobile,
+    empId: empId,
+    designation: desig,
+    status: 'Active',
+    createdAt: new Date().toISOString()
+  };
   await Cache.set('staff', staff);
-  const users = Cache.get('users',{}) || {};
-  users[mobile] = { username:mobile, password, role:'staff', staff_id:newId, name, mobile, active:true };
+
+  const users = Cache.get('users', {}) || {};
+  users[mobile] = {
+    username: mobile,
+    password: password,
+    role: 'staff',
+    staff_id: newId,
+    name: name,
+    mobile: mobile,
+    active: true
+  };
   await Cache.set('users', users);
+
   audit('CREATE_STAFF', 'staff', null, name);
-  notifyAll('New Staff Added', `${name} (${desig})`, 'staff');
-  document.querySelector('.modal').remove();
+  document.querySelector('.modal-bg').remove();
   toast('Staff added ✅');
   render();
 }
 
-function editStaff(id){
-  const staff = Cache.get('staff',{}) || {};
+function editStaff(id) {
+  const staff = Cache.get('staff', {}) || {};
   const s = staff[id];
   if (!s) return;
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>✏️ Edit Staff</h2>
-    <input id="esName" value="${esc(s.name)}" placeholder="Name">
-    <div class="grid2">
-      <select id="esGender"><option ${s.gender==='Male'?'selected':''}>Male</option><option ${s.gender==='Female'?'selected':''}>Female</option></select>
-      <input id="esMobile" value="${esc(s.mobile||'')}" placeholder="Mobile">
-    </div>
-    <div class="grid2">
-      <input id="esEmpId" value="${esc(s.empId||'')}" placeholder="Employee ID">
-      <input id="esDesig" value="${esc(s.designation||'')}" placeholder="Designation">
-    </div>
-    <input id="esContact" value="${esc(s.contact||'')}" placeholder="Alternate Contact">
-    <div class="grid2">
-      <input id="esCPL" type="number" step="0.5" value="${s.cplBalance||0}" placeholder="CPL Balance">
-      <select id="esStatus"><option ${s.status==='Active'?'selected':''}>Active</option><option ${s.status==='Inactive'?'selected':''}>Inactive</option></select>
-    </div>
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button class="success" onclick="saveEditStaff('${id}')">💾 Save</button></div>
-    <div class="divider"></div>
-    <button class="danger block" onclick="resetStaffPassword('${id}')">🔑 Reset Password to 123456</button>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">✏️ Edit Staff</h2>
+      <input id="esName" value="${esc(s.name)}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <select id="esGender" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+          <option ${s.gender === 'Male' ? 'selected' : ''}>Male</option>
+          <option ${s.gender === 'Female' ? 'selected' : ''}>Female</option>
+        </select>
+        <input id="esMobile" value="${esc(s.mobile || '')}" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <div class="grid grid-cols-2 gap-2 mb-3">
+        <input id="esEmpId" value="${esc(s.empId || '')}" placeholder="Employee ID" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <input id="esDesig" value="${esc(s.designation || '')}" placeholder="Designation" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <select id="esStatus" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
+        <option ${s.status === 'Active' ? 'selected' : ''}>Active</option>
+        <option ${s.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
+      </select>
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+        <button onclick="saveEditStaff('${id}')" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
+      </div>
+    </div>`;
   document.body.appendChild(m);
 }
 
-async function saveEditStaff(id){
-  const staff = Cache.get('staff',{}) || {};
+async function saveEditStaff(id) {
+  const staff = Cache.get('staff', {}) || {};
   const s = staff[id];
   if (!s) return;
-  s.name = document.getElementById('esName').value.trim();
-  s.gender = document.getElementById('esGender').value;
-  s.mobile = document.getElementById('esMobile').value.trim();
-  s.empId = document.getElementById('esEmpId').value.trim();
-  s.designation = document.getElementById('esDesig').value.trim();
-  s.contact = document.getElementById('esContact').value.trim();
-  s.cplBalance = parseFloat(document.getElementById('esCPL').value) || 0;
-  s.status = document.getElementById('esStatus').value;
+  s.name = $('esName').value.trim();
+  s.gender = $('esGender').value;
+  s.mobile = $('esMobile').value.trim();
+  s.empId = $('esEmpId').value.trim();
+  s.designation = $('esDesig').value.trim();
+  s.status = $('esStatus').value;
   await Cache.set('staff', staff);
   audit('EDIT_STAFF', 'staff', null, s.name);
-  document.querySelector('.modal').remove();
+  document.querySelector('.modal-bg').remove();
   toast('Updated ✅');
   render();
 }
 
-async function toggleStaff(id){
-  const staff = Cache.get('staff',{}) || {};
+async function toggleStaff(id) {
+  const staff = Cache.get('staff', {}) || {};
   const s = staff[id];
   if (!s) return;
   s.status = s.status === 'Active' ? 'Inactive' : 'Active';
   await Cache.set('staff', staff);
-  audit('TOGGLE_STAFF', 'staff', null, `${s.name}: ${s.status}`);
   toast(s.status);
   render();
 }
 
-async function resetStaffPassword(id){
-  const staff = Cache.get('staff',{}) || {};
-  const s = staff[id];
-  if (!s) return;
-  const users = Cache.get('users',{}) || {};
-  const u = users[s.mobile];
-  if (u) { u.password = '123456'; await Cache.set('users', users); }
-  audit('RESET_PASSWORD', 'user', null, s.mobile);
-  toast('Password reset to 123456');
-}
-
 /* ============================================================
-   📅 ROSTER
+   ROSTER
    ============================================================ */
-function viewRoster(){
-  const periods = Object.values(Cache.get('periods',{})||{}).sort((a,b)=>b.start.localeCompare(a.start));
+function viewRoster() {
+  const periods = Object.values(Cache.get('periods', {}) || {}).sort((a, b) => b.start.localeCompare(a.start));
   const isSup = S.user.role === 'supervisor';
-  if (!periods.length){
-    if (!isSup) return '<div class="card"><div class="empty">No roster</div></div>';
-    return `<div class="card">
-      <h2>📅 Create First Period</h2>
-      <input id="pName" placeholder="Name" value="Sep 2026">
-      <div class="grid2"><input id="pStart" type="date" value="2026-09-01"><input id="pEnd" type="date" value="2026-09-30"></div>
-      <button class="block success" onclick="createPeriod()">Create</button>
-    </div>`;
+
+  if (!periods.length) {
+    if (!isSup) return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">No roster yet</div>';
+    return `
+      <div class="bg-white rounded-xl p-4 shadow-sm">
+        <h2 class="text-kihRed font-bold mb-3">📅 Create First Period</h2>
+        <input id="pName" placeholder="Name" value="Sep 2026" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+        <div class="grid grid-cols-2 gap-2 mb-3">
+          <input id="pStart" type="date" value="2026-09-01" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+          <input id="pEnd" type="date" value="2026-09-30" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        </div>
+        <button onclick="createPeriod()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">Create</button>
+      </div>`;
   }
+
   if (!S.periodId) S.periodId = periods[0].id;
   const period = periods.find(p => p.id === S.periodId) || periods[0];
   S.periodId = period.id;
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s=>s.status==='Active');
+
+  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
   const dates = datesBetween(period.start, period.end);
-  const asg = Cache.get('assignments',{})||{};
+  const asg = Cache.get('assignments', {}) || {};
   const pd = asg[period.id] || {};
   const locked = period.status === 'Locked';
 
-  let grid = `<div class="scroll-x"><table><thead><tr><th>Name</th>${dates.map(d => `<th style="${isSundayOrHoliday(d)?'background:#E67E22':''}">${d.slice(8)}<br><span style="font-size:9px">${dayOfWeek(d)}</span></th>`).join('')}<th>O</th><th>CPL</th><th>Tot</th></tr></thead><tbody>`;
-  staff.forEach(s => {
-    const counts = { O:0, OFF:0, CPL:0 };
-    grid += `<tr><td style="text-align:left;max-width:130px;overflow:hidden;text-overflow:ellipsis;${S.user.staff_id===s.id?'background:#FFF3E0;font-weight:700':''}">${esc(s.name)}</td>`;
-    dates.forEach(d => {
-      const code = pd[s.id+'_'+d] || '';
-      if (counts[code] !== undefined) counts[code]++;
-      const cls = code ? 'd-'+code : '';
-      grid += `<td><span class="cell ${cls}" onclick="editCell('${s.id}','${d}')">${code||'·'}</span></td>`;
-    });
-    const tot = counts.O + counts.OFF + counts.CPL;
-    grid += `<td>${counts.O+counts.OFF}</td><td>${counts.CPL}</td><td><b>${tot}</b></td></tr>`;
+  let gridHtml = '<div class="scroll-x"><table class="w-full text-xs border-collapse"><thead><tr>';
+  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10 text-left">Name</th>';
+  dates.forEach(function(d) {
+    const sh = isSunday(d) || (Object.values(Cache.get('holidays', {}) || {}).some(h => h.date === d && h.active));
+    gridHtml += '<th class="' + (sh ? 'bg-orange-500' : 'bg-gradient-to-r from-kihRed to-kihBlue') + ' text-white px-1 py-2 text-center text-[10px] sticky top-0 z-10">' + d.slice(8) + '<br><span class="font-normal opacity-80">' + dayName(d) + '</span></th>';
   });
-  grid += '</tbody></table></div>';
+  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10">O</th>';
+  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10">Tot</th>';
+  gridHtml += '</tr></thead><tbody>';
 
-  const opts = periods.map(p => `<option value="${p.id}" ${p.id===period.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  staff.forEach(function(s) {
+    let offCount = 0;
+    let totalCount = 0;
+    gridHtml += '<tr>';
+    const isMe = S.user.staff_id === s.id;
+    gridHtml += '<td class="px-1 py-1 text-left font-bold ' + (isMe ? 'bg-orange-50' : '') + '" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(s.name) + '</td>';
+    dates.forEach(function(d) {
+      const code = pd[s.id + '_' + d] || '';
+      if (code === 'OFF' || code === 'EL' || code === 'CPL' || code === 'CL' || code === 'GH' || code === 'SL' || code === 'AL' || code === 'ML') offCount++;
+      if (code) totalCount++;
+      const cls = code ? 'cell cell-' + code : 'cell cell-empty';
+      gridHtml += '<td class="px-0.5 py-1 text-center border border-gray-100"><span class="' + cls + '" onclick="editCell(\'' + s.id + '\',\'' + d + '\')">' + (code || '·') + '</span></td>';
+    });
+    gridHtml += '<td class="px-1 py-1 text-center font-bold">' + offCount + '</td>';
+    gridHtml += '<td class="px-1 py-1 text-center font-bold">' + totalCount + '</td>';
+    gridHtml += '</tr>';
+  });
+  gridHtml += '</tbody></table></div>';
+
+  const opts = periods.map(p => '<option value="' + p.id + '" ' + (p.id === period.id ? 'selected' : '') + '>' + esc(p.name) + '</option>').join('');
 
   return `
-    <div class="card">
-      <div class="row"><select onchange="S.periodId=this.value;render()">${opts}</select><span class="badge b-${period.status.toLowerCase()}">${period.status}</span></div>
-      <div style="color:#666;font-size:12px;margin-bottom:10px">${fmtDate(period.start)} → ${fmtDate(period.end)}</div>
-      ${isSup?`<div class="grid2">
-        <button class="success" onclick="autoGenerate()">⚡ Auto Generate</button>
-        <button class="sec" onclick="publishRoster()">📢 Publish</button>
-        ${locked?`<button class="warning" onclick="unlockRoster()">🔓 Unlock</button>`:`<button class="danger" onclick="lockRoster()">🔒 Lock</button>`}
-        <button class="sec" onclick="exportExcel()">📊 Excel</button>
-        <button class="sec" onclick="exportPDF()">📄 PDF</button>
-        <button class="sec" onclick="newPeriodModal()">➕ New Period</button>
-        <button class="sec" onclick="shareWhatsApp('full')">💬 WhatsApp</button>
-      </div>`:`<div class="grid2"><button class="sec" onclick="shareWhatsApp('staff')">💬 Share</button></div>`}
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <div class="flex flex-wrap gap-2 items-center mb-3">
+        <select onchange="S.periodId=this.value;render()" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg">${opts}</select>
+        <span class="text-xs font-bold uppercase px-2 py-1 rounded-full ${period.status === 'Published' ? 'bg-green-100 text-green-700' : period.status === 'Locked' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">${period.status}</span>
+      </div>
+      <div class="text-xs text-gray-500 mb-3">${fmtDate(period.start)} → ${fmtDate(period.end)}</div>
+      ${isSup ? `
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="autoGenerate()" class="py-3 bg-green-600 text-white rounded-lg font-bold">⚡ Auto Generate</button>
+          <button onclick="publishRoster()" class="py-3 bg-blue-600 text-white rounded-lg font-bold">📢 Publish</button>
+          ${locked ? '<button onclick="unlockRoster()" class="py-3 bg-orange-500 text-white rounded-lg font-bold">🔓 Unlock</button>' : '<button onclick="lockRoster()" class="py-3 bg-red-600 text-white rounded-lg font-bold">🔒 Lock</button>'}
+          <button onclick="exportExcel()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">📊 Excel</button>
+          <button onclick="exportPDF()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">📄 PDF</button>
+          <button onclick="newPeriodModal()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">➕ New Period</button>
+          <button onclick="shareWhatsApp('full')" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">💬 WhatsApp</button>
+        </div>
+      ` : '<button onclick="shareWhatsApp(\'staff\')" class="w-full py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">💬 Share My Duties</button>'}
     </div>
-    <div class="card">
-      <h2>📋 Roster Grid</h2>
-      <div class="legend"><span class="d-M">M</span><span class="d-E">E</span><span class="d-E4">E4</span><span class="d-N12">N12</span><span class="d-D">D</span><span class="d-X">X</span><span class="d-OFF">OFF</span><span class="d-CPL">CPL</span></div>
-      ${isSup?'<div class="help">Tap cell to change</div>':''}
-      ${grid}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-2">📋 Roster Grid</h2>
+      <div class="flex flex-wrap gap-1 mb-3 text-[10px]">
+        <span class="cell cell-M">M</span><span class="cell cell-E">E</span>
+        <span class="cell cell-E4">E4</span><span class="cell cell-N12">N12</span>
+        <span class="cell cell-D">D</span><span class="cell cell-X">X</span>
+        <span class="cell cell-OFF">OFF</span><span class="cell cell-CPL">CPL</span>
+      </div>
+      ${isSup ? '<div class="text-xs text-gray-500 italic mb-2">Tap cell to change duty</div>' : ''}
+      ${gridHtml}
     </div>`;
 }
 
-async function createPeriod(){
-  const name = document.getElementById('pName').value.trim();
-  const start = document.getElementById('pStart').value;
-  const end = document.getElementById('pEnd').value;
-  if (!name || !start || !end) return toast('All fields required','error');
-  if (start > end) return toast('Start before end','error');
+async function createPeriod() {
+  const name = $('pName').value.trim();
+  const start = $('pStart').value;
+  const end = $('pEnd').value;
+  if (!name || !start || !end) { toast('All fields required', 'error'); return; }
+  if (start > end) { toast('Start before end', 'error'); return; }
   const id = 'p_' + uid();
-  const periods = Cache.get('periods',{}) || {};
-  periods[id] = { id, name, start, end, status:'Draft', created:new Date().toISOString() };
+  const periods = Cache.get('periods', {}) || {};
+  periods[id] = { id: id, name: name, start: start, end: end, status: 'Draft', created: new Date().toISOString() };
   await Cache.set('periods', periods);
   S.periodId = id;
   audit('CREATE_PERIOD', 'period', null, name);
@@ -703,98 +710,114 @@ async function createPeriod(){
   render();
 }
 
-function newPeriodModal(){
+function newPeriodModal() {
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>➕ New Period</h2>
-    <input id="npName" placeholder="Name">
-    <div class="grid2"><input id="npStart" type="date"><input id="npEnd" type="date"></div>
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button class="success" onclick="createPeriod2()">Create</button></div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">➕ New Period</h2>
+      <input id="npName" placeholder="Name" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <input id="npStart" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <input id="npEnd" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+        <button onclick="createPeriod2()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Create</button>
+      </div>
+    </div>`;
   document.body.appendChild(m);
 }
-async function createPeriod2(){
-  const name = document.getElementById('npName').value.trim();
-  const start = document.getElementById('npStart').value;
-  const end = document.getElementById('npEnd').value;
-  if (!name || !start || !end) return toast('All required','error');
+
+async function createPeriod2() {
+  const name = $('npName').value.trim();
+  const start = $('npStart').value;
+  const end = $('npEnd').value;
+  if (!name || !start || !end) { toast('All required', 'error'); return; }
   const id = 'p_' + uid();
-  const periods = Cache.get('periods',{}) || {};
-  periods[id] = { id, name, start, end, status:'Draft', created:new Date().toISOString() };
+  const periods = Cache.get('periods', {}) || {};
+  periods[id] = { id: id, name: name, start: start, end: end, status: 'Draft', created: new Date().toISOString() };
   await Cache.set('periods', periods);
   S.periodId = id;
-  document.querySelector('.modal').remove();
+  document.querySelector('.modal-bg').remove();
   toast('Created');
   render();
 }
 
-function editCell(staffId, date){
-  if (S.user.role !== 'supervisor') return toast('Only supervisor','error');
-  const periods = Cache.get('periods',{}) || {};
+function editCell(staffId, date) {
+  if (S.user.role !== 'supervisor') { toast('Only supervisor', 'error'); return; }
+  const periods = Cache.get('periods', {}) || {};
   const period = periods[S.periodId];
-  if (!period || period.status === 'Locked') return toast('Locked','error');
-  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
-  const asg = Cache.get('assignments',{}) || {};
+  if (!period || period.status === 'Locked') { toast('Locked', 'error'); return; }
+
+  const allCodes = ['M', 'E', 'E4', 'N12', 'N', 'D', 'X', 'OFF', 'EL', 'CPL', 'CL', 'GH', 'SL', 'AL', 'ML'];
+  const asg = Cache.get('assignments', {}) || {};
   const pd = asg[period.id] || {};
-  const cur = pd[staffId+'_'+date] || '';
+  const cur = pd[staffId + '_' + date] || '';
+
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>Change Duty</h2>
-    <div style="color:#666;font-size:12px;margin-bottom:10px">${fmtDate(date)} — Current: <b>${cur||'none'}</b></div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
-      ${Object.values(shifts).map(d => `<button class="pill ${d.code===cur?'on':''}" onclick="setDuty('${staffId}','${date}','${d.code}')">${d.code}</button>`).join('')}
-    </div>
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button></div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-3">Change Duty</h2>
+      <div class="text-xs text-gray-500 mb-3">${fmtDate(date)} — Current: <b>${cur || 'none'}</b></div>
+      <div class="flex flex-wrap gap-2 mb-4">
+        ${allCodes.map(c => '<button class="pill ' + (c === cur ? 'on' : '') + '" onclick="setDuty(\'' + staffId + '\',\'' + date + '\',\'' + c + '\')">' + c + '</button>').join('')}
+      </div>
+      <button onclick="this.closest('.modal-bg').remove()" class="w-full py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+    </div>`;
   document.body.appendChild(m);
 }
 
-async function setDuty(staffId, date, code){
-  const asg = Cache.get('assignments',{}) || {};
+async function setDuty(staffId, date, code) {
+  const asg = Cache.get('assignments', {}) || {};
   const pd = asg[S.periodId] || {};
-  const old = pd[staffId+'_'+date] || null;
-  if (old === code) { document.querySelector('.modal').remove(); return; }
-  pd[staffId+'_'+date] = code;
+  const old = pd[staffId + '_' + date] || null;
+  if (old === code) { document.querySelector('.modal-bg').remove(); return; }
+  pd[staffId + '_' + date] = code;
   asg[S.periodId] = pd;
   await Cache.set('assignments', asg);
   audit('EDIT_DUTY', 'assignment', old, code);
-  const staff = Cache.get('staff',{})[staffId];
-  if (staff) notifyAll('Duty Changed', `${staff.name}'s ${fmtDate(date)} from ${old||'—'} to ${code}`, 'duty');
-  document.querySelector('.modal').remove();
+  const staff = Cache.get('staff', {})[staffId];
+  if (staff) notifyAll('Duty Changed', staff.name + "'s " + fmtDate(date) + " from " + (old || '—') + " to " + code, 'duty');
+  document.querySelector('.modal-bg').remove();
   toast('Updated');
   render();
 }
 
-async function publishRoster(){
-  const periods = Cache.get('periods',{}) || {};
+async function publishRoster() {
+  const periods = Cache.get('periods', {}) || {};
   const p = periods[S.periodId];
   if (!p) return;
-  p.status = 'Published'; p.published = new Date().toISOString();
+  p.status = 'Published';
+  p.published = new Date().toISOString();
   await Cache.set('periods', periods);
   audit('PUBLISH', 'period', 'Draft', 'Published');
-  notifyAll('Roster Published', `${p.name} is live`, 'roster');
+  notifyAll('Roster Published', p.name + ' is live', 'roster');
   toast('Published');
   render();
 }
-async function lockRoster(){
+
+async function lockRoster() {
   if (!confirm('Lock roster?')) return;
-  const periods = Cache.get('periods',{}) || {};
+  const periods = Cache.get('periods', {}) || {};
   const p = periods[S.periodId];
   if (!p) return;
-  p.status = 'Locked'; p.locked = new Date().toISOString();
+  p.status = 'Locked';
+  p.locked = new Date().toISOString();
   await Cache.set('periods', periods);
   toast('Locked');
   render();
 }
-async function unlockRoster(){
+
+async function unlockRoster() {
   const reason = prompt('Reason:');
   if (!reason) return;
-  const periods = Cache.get('periods',{}) || {};
+  const periods = Cache.get('periods', {}) || {};
   const p = periods[S.periodId];
   if (!p) return;
-  p.status = 'Published'; p.locked = null;
+  p.status = 'Published';
+  p.locked = null;
   await Cache.set('periods', periods);
   audit('UNLOCK', 'period', 'Locked', 'Published', reason);
   toast('Unlocked');
@@ -802,108 +825,128 @@ async function unlockRoster(){
 }
 
 /* ============================================================
-   ⚡ AUTO GENERATE — COMPLETE ALGORITHM WITH ALL RULES
+   AUTO GENERATE (FIXED - NO SYNTAX ERRORS)
    ============================================================ */
-async function autoGenerate(){
+async function autoGenerate() {
   if (!confirm('Auto Generate roster? Existing assignments will be replaced.')) return;
-  const periods = Cache.get('periods',{}) || {};
+
+  const periods = Cache.get('periods', {}) || {};
   const p = periods[S.periodId];
   if (!p) return;
-  
-  let staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
-  if (!staff.length) return toast('No active staff','error');
 
-  // Fix old staff
-  const staffDB = Cache.get('staff',{}) || {};
-  let fixed = false;
-  staff.forEach(s => {
-    if (!s.shiftType) { s.shiftType = 'multi'; staffDB[s.id] = s; fixed = true; }
-    if (!s.priorityShifts || s.priorityShifts.length === 0) {
-      s.priorityShifts = ['M','E','E4','N12','D','X'];
-      staffDB[s.id] = s;
-      fixed = true;
-    }
-    if (!s.gender) { s.gender = 'Male'; staffDB[s.id] = s; fixed = true; }
+  let staff = Object.values(Cache.get('staff', {}) || {}).filter(function(s) {
+    return s.status === 'Active';
   });
-  if (fixed) await Cache.set('staff', staffDB);
-  staff = Object.values(staffDB).filter(s => s.status === 'Active');
+  if (!staff.length) { toast('No active staff', 'error'); return; }
 
-  const leaves = Object.values(Cache.get('leave',{})||{}).filter(l => l.status === 'Approved');
-  const config = Cache.get('config',{}) || DEFAULT_CONFIG;
+  const leaves = Object.values(Cache.get('leave', {}) || {}).filter(function(l) {
+    return l.status === 'Approved';
+  });
   const dates = datesBetween(p.start, p.end);
+  const sundaysCount = dates.filter(function(d) { return isSunday(d); }).length;
+  const targetOff = sundaysCount;
 
   const result = {};
   const stats = {};
-  staff.forEach(s => { 
-    stats[s.id] = { total:0, totalOff:0, counts:{}, weeklyOff:{}, lastDate:null, lastDuty:null }; 
+  staff.forEach(function(s) {
+    stats[s.id] = {
+      total: 0,
+      offCount: 0,
+      counts: {},
+      lastDate: null
+    };
   });
 
-  const onLeave = (sid, d) => leaves.find(l => l.staff_id === sid && d >= l.start && d <= l.end);
-  const onSpecialOff = (s, d) => (s.specialOffs||[]).includes(d);
-  
-  const sundayCount = dates.filter(d => isSunday(d)).length;
+  function onLeave(sid, d) {
+    return leaves.find(function(l) {
+      return l.staff_id === sid && d >= l.start && d <= l.end;
+    });
+  }
 
-  // Track weekly off rotation index
-  let offRotationIdx = 0;
+  function isHol(d) {
+    const h = Cache.get('holidays', {}) || {};
+    return Object.values(h).some(function(x) { return x.date === d && x.active; });
+  }
 
-  for (const date of dates){
-    const isSH = isSundayOrHoliday(date);
-    const wk = getWeekKey(date);
+  function isSunHol(d) {
+    return isSunday(d) || isHol(d);
+  }
 
-    // Available staff today
-    let availStaff = staff.filter(s => !onLeave(s.id, date) && !onSpecialOff(s, date));
-    const availCount = availStaff.length;
+  let lastRotationIdx = 0;
 
-    // Get rule for this day
-    let rule;
-    if (isSH) {
-      rule = { ...config.sunday };
+  for (let di = 0; di < dates.length; di++) {
+    const date = dates[di];
+    const sunHol = isSunHol(date);
+    const sat = isSaturday(date) && !sunHol;
+
+    const availStaff = staff.filter(function(s) {
+      return !onLeave(s.id, date);
+    });
+
+    let offToday = 0;
+    if (sunHol) {
+      offToday = Math.max(0, availStaff.length - 5);
+    } else if (sat) {
+      offToday = 2;
     } else {
-      // Mon-Sat: 3 M + 3 E + 1 D + 1 N12 + 1 E4 + 1 X + 2 OFF
-      rule = { M:3, E:3, D:1, N12:1, E4:1, X:1, OFF:2 };
+      const needOff = availStaff.filter(function(s) {
+        return stats[s.id].offCount < targetOff;
+      });
+      if (needOff.length > 0) offToday = 1;
     }
 
-    // Track special assignments for gender rules
+    const offStaffToday = [];
+    if (offToday > 0) {
+      const candidates = availStaff
+        .filter(function(s) { return stats[s.id].offCount < targetOff; })
+        .sort(function(a, b) {
+          if (stats[a.id].offCount !== stats[b.id].offCount) {
+            return stats[a.id].offCount - stats[b.id].offCount;
+          }
+          return stats[a.id].total - stats[b.id].total;
+        });
+      for (let i = 0; i < Math.min(offToday, candidates.length); i++) {
+        offStaffToday.push(candidates[i].id);
+      }
+    }
+
+    const assignedToday = {};
+    let rule;
+    if (sunHol) {
+      rule = { M: 2, E: 2, N: 1 };
+    } else {
+      rule = { M: 3, E: 3, D: 1, N12: 1, E4: 1, X: 1 };
+    }
+
+    const queue = [];
+    if (sunHol) {
+      for (let i = 0; i < rule.N; i++) queue.push('N');
+      for (let i = 0; i < rule.M; i++) queue.push('M');
+      for (let i = 0; i < rule.E; i++) queue.push('E');
+    } else {
+      for (let i = 0; i < rule.N12; i++) queue.push('N12');
+      for (let i = 0; i < rule.D; i++) queue.push('D');
+      for (let i = 0; i < rule.E4; i++) queue.push('E4');
+      for (let i = 0; i < rule.X; i++) queue.push('X');
+      for (let i = 0; i < rule.M; i++) queue.push('M');
+      for (let i = 0; i < rule.E; i++) queue.push('E');
+    }
+
     let gyneeM = false;
     let gyneeE = false;
-    let n12Assigned = false;
-    let nAssigned = false;
-    let e4Assigned = false;
+    const gyneeMNeeded = !sunHol && rule.M > 0;
+    const gyneeENeeded = !sunHol && rule.E > 0;
 
-    const assignedToday = new Set();
+    for (let qi = 0; qi < queue.length; qi++) {
+      const code = queue[qi];
 
-    // Build assignment priority queue (hard first)
-    const shiftQueue = [];
-    if (isSH) {
-      // Sunday: M (2), E (2), N (1)
-      // Priority: N first (male only)
-      for (let i = 0; i < (rule.N||0); i++) shiftQueue.push('N');
-      for (let i = 0; i < (rule.M||0); i++) shiftQueue.push('M');
-      for (let i = 0; i < (rule.E||0); i++) shiftQueue.push('E');
-    } else {
-      // Mon-Sat: N12 (1), D (1), E4 (1), X (1), M (3), E (3)
-      for (let i = 0; i < (rule.N12||0); i++) shiftQueue.push('N12');
-      for (let i = 0; i < (rule.D||0); i++) shiftQueue.push('D');
-      for (let i = 0; i < (rule.E4||0); i++) shiftQueue.push('E4');
-      for (let i = 0; i < (rule.X||0); i++) shiftQueue.push('X');
-      for (let i = 0; i < (rule.M||0); i++) shiftQueue.push('M');
-      for (let i = 0; i < (rule.E||0); i++) shiftQueue.push('E');
-    }
+      const eligible = availStaff.filter(function(s) {
+        if (assignedToday[s.id]) return false;
+        if (offStaffToday.indexOf(s.id) !== -1) return false;
 
-    // Track Gynee assignments (1 in M + 1 in E, female only)
-    let gyneeMNeeded = !isSH && (rule.M||0) > 0;
-    let gyneeENeeded = !isSH && (rule.E||0) > 0;
-
-    for (const code of shiftQueue){
-      // Filter eligible staff
-      let eligible = availStaff.filter(s => {
-        if (assignedToday.has(s.id)) return false;
-
-        // Gender rules
         if (code === 'D' && s.gender !== 'Female') return false;
         if ((code === 'N12' || code === 'N') && s.gender !== 'Male') return false;
 
-        // Gynee rule (1 Female in M, 1 Female in E)
         if (code === 'M' && gyneeMNeeded && !gyneeM) {
           if (s.gender !== 'Female') return false;
         }
@@ -911,139 +954,127 @@ async function autoGenerate(){
           if (s.gender !== 'Female') return false;
         }
 
-        // E4 male priority
         if (code === 'E4' && s.gender !== 'Male') {
-          // Check if any male available
-          const maleAvail = availStaff.some(x => 
-            !assignedToday.has(x.id) && x.gender === 'Male' &&
-            (x.priorityShifts||[]).includes('E4')
-          );
+          const maleAvail = availStaff.some(function(x) {
+            return !assignedToday[x.id] &&
+                   offStaffToday.indexOf(x.id) === -1 &&
+                   x.gender === 'Male';
+          });
           if (maleAvail) return false;
-        }
-
-        // Shift eligibility
-        if (s.shiftType === 'fixed') {
-          if (isSH && !['M','E','N'].includes(code)) return false;
-          if (isSH && !['M','E','N'].includes(s.fixedShift)) return false;
-          if (!isSH && code !== s.fixedShift) return false;
-        } else {
-          const prio = s.priorityShifts || ['M','E','E4','N12','D','X'];
-          if (!prio.includes(code)) return false;
         }
 
         return true;
       });
 
-      // Sort: priority + fairness
-      eligible.sort((a,b) => {
-        const aPrio = (a.priorityShifts||[]).indexOf(code);
-        const bPrio = (b.priorityShifts||[]).indexOf(code);
-        const aScore = aPrio >= 0 ? aPrio : (a.fixedShift === code ? 0 : 99);
-        const bScore = bPrio >= 0 ? bPrio : (b.fixedShift === code ? 0 : 99);
-        if (aScore !== bScore) return aScore - bScore;
+      eligible.sort(function(a, b) {
         const aC = stats[a.id].counts[code] || 0;
         const bC = stats[b.id].counts[code] || 0;
         if (aC !== bC) return aC - bC;
         return stats[a.id].total - stats[b.id].total;
       });
 
-      const chosen = eligible[0];
-      if (chosen){
-        result[chosen.id+'_'+date] = code;
-        assignedToday.add(chosen.id);
-        stats[chosen.id].counts[code] = (stats[chosen.id].counts[code]||0) + 1;
+      if (eligible[0]) {
+        const chosen = eligible[0];
+        result[chosen.id + '_' + date] = code;
+        assignedToday[chosen.id] = true;
+        stats[chosen.id].counts[code] = (stats[chosen.id].counts[code] || 0) + 1;
         stats[chosen.id].total++;
-        stats[chosen.id].lastDate = date;
-        stats[chosen.id].lastDuty = code;
 
-        if (code === 'D') { /* female gynee assigned */ }
-        if (code === 'M' && gyneeMNeeded && !gyneeM) { gyneeM = true; }
-        if (code === 'E' && gyneeENeeded && !gyneeE) { gyneeE = true; }
+        if (code === 'M' && gyneeMNeeded && !gyneeM) gyneeM = true;
+        if (code === 'E' && gyneeENeeded && !gyneeE) gyneeE = true;
       }
     }
 
-    // Fill remaining with OFF or leave
-    staff.forEach(s => {
-      if (result[s.id+'_'+date]) return;
+    staff.forEach(function(s) {
+      if (result[s.id + '_' + date]) return;
       const lv = onLeave(s.id, date);
       if (lv) {
-        result[s.id+'_'+date] = lv.type || 'EL';
+        result[s.id + '_' + date] = lv.type || 'EL';
+        stats[s.id].offCount++;
+      } else if (offStaffToday.indexOf(s.id) !== -1) {
+        result[s.id + '_' + date] = 'OFF';
+        stats[s.id].offCount++;
       } else {
-        result[s.id+'_'+date] = 'OFF';
-        stats[s.id].totalOff++;
-        stats[s.id].weeklyOff[wk] = (stats[s.id].weeklyOff[wk] || 0) + 1;
+        result[s.id + '_' + date] = 'OFF';
       }
     });
 
-    // Gynee alert if needed
-    if (!isSH) {
-      if (gyneeMNeeded && !gyneeM) notifyAll('Gynee Alert', `${fmtDate(date)}: Gynee M کے لیے Female نہیں ملی`, 'alert');
-      if (gyneeENeeded && !gyneeE) notifyAll('Gynee Alert', `${fmtDate(date)}: Gynee E کے لیے Female نہیں ملی`, 'alert');
+    if (!sunHol && gyneeMNeeded && !gyneeM) {
+      notifyAll('Gynee Alert', fmtDate(date) + ': Gynee M needs Female', 'alert');
+    }
+    if (!sunHol && gyneeENeeded && !gyneeE) {
+      notifyAll('Gynee Alert', fmtDate(date) + ': Gynee E needs Female', 'alert');
     }
   }
 
-  const asg = Cache.get('assignments',{}) || {};
+  const asg = Cache.get('assignments', {}) || {};
   asg[p.id] = result;
   await Cache.set('assignments', asg);
   audit('GENERATE_ROSTER', 'period', null, Object.keys(result).length + ' assignments');
-  notifyAll('Roster Generated', `${Object.keys(result).length} assignments for ${p.name}`, 'roster');
+  notifyAll('Roster Generated', Object.keys(result).length + ' assignments for ' + p.name, 'roster');
   toast('✅ Generated ' + Object.keys(result).length + ' assignments');
   render();
 }
 
 /* ============================================================
-   🏖 LEAVE
+   LEAVE
    ============================================================ */
-function viewLeave(){
-  const leave = Object.values(Cache.get('leave',{})||{});
-  const staff = Object.values(Cache.get('staff',{})||{});
+function viewLeave() {
+  const leave = Object.values(Cache.get('leave', {}) || {});
+  const staff = Object.values(Cache.get('staff', {}) || {});
   const isSup = S.user.role === 'supervisor';
+
   return `
-    ${isSup?`<div class="card">
-      <h2>🏖 Add Leave</h2>
-      <select id="lStaff">${staff.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
-      <select id="lType"><option>EL</option><option>CPL</option><option>CL</option><option>GH</option><option>SL</option><option>AL</option><option>ML</option><option>OFF</option></select>
-      <div class="grid2"><input id="lStart" type="date"><input id="lEnd" type="date"></div>
-      <input id="lRem" placeholder="Remarks">
-      <button class="block success" onclick="addLeave()">➕ Add Leave</button>
-    </div>`:''}
-    <div class="card">
-      <h2>📋 Leave Records (${leave.length})</h2>
-      ${leave.length?leave.map(l => {
-        const s = staff.find(x=>x.id===l.staff_id);
-        return `<div style="padding:10px;border-bottom:1px solid #eee;display:flex;align-items:center;gap:10px">
-          <div style="flex:1">
-            <div style="font-weight:700">${esc(s?s.name:'?')}</div>
-            <div style="font-size:11px;color:#888">${l.type} · ${fmtDate(l.start)} → ${fmtDate(l.end)}</div>
-            ${l.remarks?`<div style="font-size:11px;color:#666">${esc(l.remarks)}</div>`:''}
-          </div>
-          <span class="badge b-${l.status.toLowerCase()}">${l.status}</span>
-          ${isSup?`<button class="danger sm" onclick="delLeave('${l.id}')">🗑</button>`:''}
-        </div>`;
-      }).join(''):'<div class="empty"><div class="big">🏖</div>No leave records</div>'}
+    ${isSup ? `
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">🏖 Add Leave</h2>
+      <select id="lStaff" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
+      <select id="lType" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+        <option>EL</option><option>CPL</option><option>CL</option><option>GH</option><option>SL</option><option>AL</option><option>ML</option><option>OFF</option>
+      </select>
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input id="lStart" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <input id="lEnd" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <input id="lRem" placeholder="Remarks" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <button onclick="addLeave()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">➕ Add Leave</button>
+    </div>` : ''}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">📋 Leave Records (${leave.length})</h2>
+      ${leave.length ? leave.map(function(l) {
+        const s = staff.find(x => x.id === l.staff_id);
+        return '<div class="py-3 border-b border-gray-100 flex items-center gap-3">' +
+          '<div class="flex-1"><div class="font-bold text-sm">' + esc(s ? s.name : '?') + '</div>' +
+          '<div class="text-xs text-gray-500">' + l.type + ' · ' + fmtDate(l.start) + ' → ' + fmtDate(l.end) + '</div></div>' +
+          '<span class="text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">' + l.status + '</span>' +
+          (isSup ? '<button onclick="delLeave(\'' + l.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">🗑</button>' : '') +
+          '</div>';
+      }).join('') : '<div class="text-center text-gray-400 py-6">No leave records</div>'}
     </div>`;
 }
-async function addLeave(){
-  const staff_id = document.getElementById('lStaff').value;
-  const type = document.getElementById('lType').value;
-  const start = document.getElementById('lStart').value;
-  const end = document.getElementById('lEnd').value;
-  const remarks = document.getElementById('lRem').value;
-  if (!start || !end) return toast('Dates required','error');
-  if (start > end) return toast('Start before end','error');
-  const leave = Cache.get('leave',{}) || {};
+
+async function addLeave() {
+  const staff_id = $('lStaff').value;
+  const type = $('lType').value;
+  const start = $('lStart').value;
+  const end = $('lEnd').value;
+  const remarks = $('lRem').value;
+  if (!start || !end) { toast('Dates required', 'error'); return; }
+  if (start > end) { toast('Start before end', 'error'); return; }
+  const leave = Cache.get('leave', {}) || {};
   const id = 'l_' + uid();
-  leave[id] = { id, staff_id, type, start, end, status:'Approved', remarks, at:new Date().toISOString() };
+  leave[id] = { id: id, staff_id: staff_id, type: type, start: start, end: end, status: 'Approved', remarks: remarks, at: new Date().toISOString() };
   await Cache.set('leave', leave);
   audit('ADD_LEAVE', 'leave', null, type);
-  const staff = Cache.get('staff',{})[staff_id];
-  if (staff) notifyAll('Leave Approved', `${staff.name}: ${type} ${fmtDate(start)} - ${fmtDate(end)}`, 'leave');
+  const staff = Cache.get('staff', {})[staff_id];
+  if (staff) notifyAll('Leave Approved', staff.name + ': ' + type + ' ' + fmtDate(start) + ' - ' + fmtDate(end), 'leave');
   toast('Added ✅');
   render();
 }
-async function delLeave(id){
+
+async function delLeave(id) {
   if (!confirm('Delete?')) return;
-  const leave = Cache.get('leave',{}) || {};
+  const leave = Cache.get('leave', {}) || {};
   delete leave[id];
   await Cache.set('leave', leave);
   toast('Deleted');
@@ -1051,253 +1082,537 @@ async function delLeave(id){
 }
 
 /* ============================================================
-   ⏱ OVERTIME
+   OVERTIME
    ============================================================ */
-function viewOvertime(){
-  const ot = Object.values(Cache.get('overtime',{})||{});
-  const staff = Object.values(Cache.get('staff',{})||{});
+function viewOvertime() {
+  const ot = Object.values(Cache.get('overtime', {}) || {});
+  const staff = Object.values(Cache.get('staff', {}) || {});
   const isSup = S.user.role === 'supervisor';
+
   return `
-    ${isSup?`<div class="card">
-      <h2>⏱ Add Overtime</h2>
-      <select id="oStaff">${staff.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
-      <input id="oDate" type="date" value="${today()}">
-      <div class="grid2"><input id="oStart" type="time" value="18:00"><input id="oEnd" type="time" value="22:00"></div>
-      <input id="oReason" placeholder="Reason">
-      <div class="help">CPL = hours × 0.125</div>
-      <button class="block success" onclick="addOt()">➕ Add</button>
-    </div>`:''}
-    <div class="card">
-      <h2>📋 Overtime Records (${ot.length})</h2>
-      ${ot.length?ot.map(o => {
-        const s = staff.find(x=>x.id===o.staff_id);
-        return `<div style="padding:10px;border-bottom:1px solid #eee">
-          <div style="font-weight:700">${esc(s?s.name:'?')}</div>
-          <div style="font-size:11px;color:#888">${fmtDate(o.date)} · ${o.start} → ${o.end}</div>
-          <div style="margin-top:4px"><span class="chip green">${o.hours}h</span><span class="chip orange">+${o.cpl} CPL</span></div>
-          ${o.reason?`<div style="font-size:11px;color:#666;margin-top:3px">${esc(o.reason)}</div>`:''}
-        </div>`;
-      }).join(''):'<div class="empty"><div class="big">⏱</div>No overtime records</div>'}
+    ${isSup ? `
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">⏱ Add Overtime</h2>
+      <select id="oStaff" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
+      <input id="oDate" type="date" value="${today()}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input id="oStart" type="time" value="18:00" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <input id="oEnd" type="time" value="22:00" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <input id="oReason" placeholder="Reason" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <div class="text-xs text-gray-500 italic mb-3">CPL = hours × 0.125</div>
+      <button onclick="addOt()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">➕ Add Overtime</button>
+    </div>` : ''}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">📋 Overtime (${ot.length})</h2>
+      ${ot.length ? ot.map(function(o) {
+        const s = staff.find(x => x.id === o.staff_id);
+        return '<div class="py-3 border-b border-gray-100">' +
+          '<div class="font-bold text-sm">' + esc(s ? s.name : '?') + '</div>' +
+          '<div class="text-xs text-gray-500">' + fmtDate(o.date) + ' · ' + o.start + ' → ' + o.end + '</div>' +
+          '<div class="mt-1 flex gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">' + o.hours + 'h</span>' +
+          '<span class="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700">+' + o.cpl + ' CPL</span></div>' +
+          '</div>';
+      }).join('') : '<div class="text-center text-gray-400 py-6">No overtime records</div>'}
     </div>`;
 }
-async function addOt(){
-  const staff_id = document.getElementById('oStaff').value;
-  const date = document.getElementById('oDate').value;
-  const start = document.getElementById('oStart').value;
-  const end = document.getElementById('oEnd').value;
-  const reason = document.getElementById('oReason').value;
-  if (!date || !start || !end) return toast('All required','error');
-  const [sh,sm] = start.split(':').map(Number);
-  const [eh,em] = end.split(':').map(Number);
-  let mins = (eh*60+em) - (sh*60+sm);
-  if (mins < 0) mins += 24*60;
-  const hours = +(mins/60).toFixed(2);
+
+async function addOt() {
+  const staff_id = $('oStaff').value;
+  const date = $('oDate').value;
+  const start = $('oStart').value;
+  const end = $('oEnd').value;
+  const reason = $('oReason').value;
+  if (!date || !start || !end) { toast('All required', 'error'); return; }
+  const sm = start.split(':').map(Number);
+  const em = end.split(':').map(Number);
+  let mins = (em[0] * 60 + em[1]) - (sm[0] * 60 + sm[1]);
+  if (mins < 0) mins += 24 * 60;
+  const hours = +(mins / 60).toFixed(2);
   const cpl = +(hours * 0.125).toFixed(3);
-  const ot = Cache.get('overtime',{}) || {};
+  const ot = Cache.get('overtime', {}) || {};
   const id = 'o_' + uid();
-  ot[id] = { id, staff_id, date, start, end, hours, cpl, reason, by:S.user.name, at:new Date().toISOString() };
+  ot[id] = { id: id, staff_id: staff_id, date: date, start: start, end: end, hours: hours, cpl: cpl, reason: reason, by: S.user.name, at: new Date().toISOString() };
   await Cache.set('overtime', ot);
-  const staff = Cache.get('staff',{}) || {};
+  const staff = Cache.get('staff', {}) || {};
   const s = staff[staff_id];
-  if (s) { s.cplBalance = +((s.cplBalance||0) + cpl).toFixed(3); await Cache.set('staff', staff); }
-  audit('ADD_OT', 'overtime', null, `${hours}h`);
-  toast(`Added ${hours}h (+${cpl} CPL) ✅`);
+  if (s) {
+    s.cplBalance = +((s.cplBalance || 0) + cpl).toFixed(3);
+    await Cache.set('staff', staff);
+  }
+  audit('ADD_OT', 'overtime', null, hours + 'h');
+  toast('Added ' + hours + 'h (+' + cpl + ' CPL) ✅');
   render();
 }
 
 /* ============================================================
-   🔄 EXCHANGE
+   EXCHANGE
    ============================================================ */
-function viewExchange(){
-  const ex = Object.values(Cache.get('exchanges',{})||{});
-  const staff = Object.values(Cache.get('staff',{})||{});
+function viewExchange() {
+  const ex = Object.values(Cache.get('exchanges', {}) || {});
+  const staff = Object.values(Cache.get('staff', {}) || {});
   const isSup = S.user.role === 'supervisor';
   const isStaff = S.user.role === 'staff';
-  const mine = isStaff ? ex.filter(e => e.requester_id === S.user.staff_id || e.target_id === S.user.staff_id) : ex;
-  const pending = mine.filter(e => e.status === 'Pending');
-  const completed = mine.filter(e => e.status !== 'Pending');
-  const renderEx = (e) => {
-    const req = staff.find(x=>x.id===e.requester_id);
-    const tgt = staff.find(x=>x.id===e.target_id);
+
+  const mine = isStaff
+    ? ex.filter(function(e) { return e.requester_id === S.user.staff_id || e.target_id === S.user.staff_id; })
+    : ex;
+  const pending = mine.filter(function(e) { return e.status === 'Pending'; });
+  const done = mine.filter(function(e) { return e.status !== 'Pending'; });
+
+  function renderEx(e) {
+    const req = staff.find(x => x.id === e.requester_id);
+    const tgt = staff.find(x => x.id === e.target_id);
     let actions = '';
     if (isStaff && e.target_id === S.user.staff_id && e.staff_resp === 'Pending') {
-      actions = `<button class="success sm" onclick="respondX('${e.id}','Accepted')">✅ Accept</button><button class="danger sm" onclick="respondX('${e.id}','Rejected')">❌ Reject</button>`;
+      actions = '<button onclick="respondX(\'' + e.id + '\',\'Accepted\')" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-bold">✅ Accept</button>' +
+                '<button onclick="respondX(\'' + e.id + '\',\'Rejected\')" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-bold ml-2">❌ Reject</button>';
     } else if (isSup && e.staff_resp === 'Accepted' && e.sup_resp === 'Pending') {
-      actions = `<button class="success sm" onclick="approveX('${e.id}','Approved')">✅ Approve</button><button class="danger sm" onclick="approveX('${e.id}','Rejected')">❌ Reject</button>`;
+      actions = '<button onclick="approveX(\'' + e.id + '\',\'Approved\')" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-bold">✅ Approve</button>' +
+                '<button onclick="approveX(\'' + e.id + '\',\'Rejected\')" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-bold ml-2">❌ Reject</button>';
     }
-    return `<div style="padding:12px;border-bottom:1px solid #eee">
-      <div style="font-weight:700">${esc(req?req.name:'?')} ↔ ${esc(tgt?tgt.name:'?')}</div>
-      <div style="font-size:12px;color:#888;margin:4px 0">${fmtDate(e.date)} · ${e.orig} ↔ ${e.req}</div>
-      ${e.reason?`<div style="font-size:11px;color:#666">📝 ${esc(e.reason)}</div>`:''}
-      <div style="font-size:11px;margin:6px 0">
-        <span class="chip ${e.staff_resp==='Accepted'?'green':e.staff_resp==='Rejected'?'red':''}">Staff: ${e.staff_resp}</span>
-        <span class="chip ${e.sup_resp==='Approved'?'green':e.sup_resp==='Rejected'?'red':''}">Supervisor: ${e.sup_resp}</span>
-      </div>
-      <div><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></div>
-      ${actions?`<div style="margin-top:8px;display:flex;gap:6px">${actions}</div>`:''}
-    </div>`;
-  };
+    return '<div class="py-3 border-b border-gray-100">' +
+      '<div class="font-bold text-sm">' + esc(req ? req.name : '?') + ' ↔ ' + esc(tgt ? tgt.name : '?') + '</div>' +
+      '<div class="text-xs text-gray-500">' + fmtDate(e.date) + ' · ' + e.orig + ' ↔ ' + e.req + '</div>' +
+      '<div class="mt-1 flex flex-wrap gap-1">' +
+      '<span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-100">Staff: ' + e.staff_resp + '</span>' +
+      '<span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-100">Sup: ' + e.sup_resp + '</span>' +
+      '<span class="text-xs font-bold px-2 py-0.5 rounded-full ' + (e.status === 'Approved' ? 'bg-green-100 text-green-700' : e.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + e.status + '</span>' +
+      '</div>' +
+      (actions ? '<div class="mt-2">' + actions + '</div>' : '') +
+      '</div>';
+  }
+
   return `
-    ${isStaff?`<div class="card">
-      <h2>🔄 Request Exchange</h2>
-      <select id="xTarget">${staff.filter(s=>s.id!==S.user.staff_id).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select>
-      <input id="xDate" type="date">
-      <div class="grid2"><input id="xOrig" placeholder="My duty"><input id="xReq" placeholder="Their duty"></div>
-      <input id="xReason" placeholder="Reason">
-      <button class="block success" onclick="addExchange()">📤 Submit</button>
-    </div>`:''}
-    <div class="card"><h2>⏳ Pending (${pending.length})</h2>${pending.length?pending.map(renderEx).join(''):'<div class="empty">No pending</div>'}</div>
-    <div class="card"><h2>✅ History (${completed.length})</h2>${completed.length?completed.slice(0,20).map(renderEx).join(''):'<div class="empty">No history</div>'}</div>`;
+    ${isStaff ? `
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">🔄 Request Exchange</h2>
+      <select id="xTarget" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.filter(s => s.id !== S.user.staff_id).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
+      <input id="xDate" type="date" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <div class="grid grid-cols-2 gap-2 mb-2">
+        <input id="xOrig" placeholder="My duty" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+        <input id="xReq" placeholder="Their duty" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
+      </div>
+      <input id="xReason" placeholder="Reason" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <button onclick="addExchange()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">📤 Submit</button>
+    </div>` : ''}
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">⏳ Pending (${pending.length})</h2>
+      ${pending.length ? pending.map(renderEx).join('') : '<div class="text-center text-gray-400 py-4">No pending</div>'}
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">✅ History (${done.length})</h2>
+      ${done.length ? done.slice(0, 20).map(renderEx).join('') : '<div class="text-center text-gray-400 py-4">No history</div>'}
+    </div>`;
 }
-async function addExchange(){
-  const target_id = document.getElementById('xTarget').value;
-  const date = document.getElementById('xDate').value;
-  const orig = document.getElementById('xOrig').value.toUpperCase().trim();
-  const req = document.getElementById('xReq').value.toUpperCase().trim();
-  const reason = document.getElementById('xReason').value.trim();
-  if (!date || !orig || !req) return toast('All required','error');
-  const ex = Cache.get('exchanges',{}) || {};
+
+async function addExchange() {
+  const target_id = $('xTarget').value;
+  const date = $('xDate').value;
+  const orig = $('xOrig').value.toUpperCase().trim();
+  const req = $('xReq').value.toUpperCase().trim();
+  const reason = $('xReason').value.trim();
+  if (!date || !orig || !req) { toast('All required', 'error'); return; }
+  const ex = Cache.get('exchanges', {}) || {};
   const id = 'x_' + uid();
-  ex[id] = { id, requester_id:S.user.staff_id, target_id, date, orig, req, reason, staff_resp:'Pending', sup_resp:'Pending', status:'Pending', at:new Date().toISOString() };
+  ex[id] = {
+    id: id,
+    requester_id: S.user.staff_id,
+    target_id: target_id,
+    date: date,
+    orig: orig,
+    req: req,
+    reason: reason,
+    staff_resp: 'Pending',
+    sup_resp: 'Pending',
+    status: 'Pending',
+    at: new Date().toISOString()
+  };
   await Cache.set('exchanges', ex);
-  const staff = Cache.get('staff',{}) || {};
+  const staff = Cache.get('staff', {}) || {};
   const requester = staff[S.user.staff_id];
   const target = staff[target_id];
-  notifyAll('Exchange Request', `${requester?requester.name:'Staff'} → ${target?target.name:'Staff'} on ${fmtDate(date)}`, 'exchange');
+  notifyAll('Exchange Request', (requester ? requester.name : 'Staff') + ' → ' + (target ? target.name : 'Staff') + ' on ' + fmtDate(date), 'exchange');
   toast('Submitted ✅');
   render();
 }
-async function respondX(id, resp){
-  const ex = Cache.get('exchanges',{}) || {};
+
+async function respondX(id, resp) {
+  const ex = Cache.get('exchanges', {}) || {};
   const e = ex[id];
   if (!e) return;
   e.staff_resp = resp;
-  if (resp === 'Rejected') { e.status = 'Rejected'; e.sup_resp = 'Rejected'; }
+  if (resp === 'Rejected') {
+    e.status = 'Rejected';
+    e.sup_resp = 'Rejected';
+  }
   await Cache.set('exchanges', ex);
   toast(resp);
   render();
 }
-async function approveX(id, resp){
-  const ex = Cache.get('exchanges',{}) || {};
+
+async function approveX(id, resp) {
+  const ex = Cache.get('exchanges', {}) || {};
   const e = ex[id];
   if (!e) return;
   e.sup_resp = resp;
   e.status = resp;
+
   if (resp === 'Approved') {
-    const asg = Cache.get('assignments',{}) || {};
-    const periods = Cache.get('periods',{}) || {};
-    const p = Object.values(periods).find(pp => pp.start <= e.date && pp.end >= e.date);
+    const asg = Cache.get('assignments', {}) || {};
+    const periods = Cache.get('periods', {}) || {};
+    const p = Object.values(periods).find(function(pp) {
+      return pp.start <= e.date && pp.end >= e.date;
+    });
     if (p && asg[p.id]) {
       const rk = e.requester_id + '_' + e.date;
       const tk = e.target_id + '_' + e.date;
       const rd = asg[p.id][rk] || e.orig;
       const td = asg[p.id][tk] || e.req;
-      asg[p.id][rk] = td; asg[p.id][tk] = rd;
+      asg[p.id][rk] = td;
+      asg[p.id][tk] = rd;
       await Cache.set('assignments', asg);
     }
   }
   await Cache.set('exchanges', ex);
-  const staff = Cache.get('staff',{}) || {};
+  const staff = Cache.get('staff', {}) || {};
   const r = staff[e.requester_id];
   const t = staff[e.target_id];
-  notifyAll('Exchange ' + resp, `${r?r.name:'Staff'} ↔ ${t?t.name:'Staff'}`, 'exchange');
+  notifyAll('Exchange ' + resp, (r ? r.name : 'Staff') + ' ↔ ' + (t ? t.name : 'Staff'), 'exchange');
   toast(resp);
   render();
 }
 
 /* ============================================================
-   🔔 NOTIFICATIONS
+   CHAT
    ============================================================ */
-function viewNotifications(){
-  const notifs = Cache.get('notifications',{}) || {};
-  const arr = Object.values(notifs).sort((a,b)=>new Date(b.at)-new Date(a.at)).slice(0,100);
+function viewChat() {
+  const chat = Cache.get('chat', {}) || {};
+  const staff = Object.values(Cache.get('staff', {}) || {});
+  const isSup = S.user.role === 'supervisor';
+
+  if (S.chatType === 'group') {
+    const msgs = Object.values(chat.group || {}).sort(function(a, b) {
+      return new Date(a.at) - new Date(b.at);
+    });
+    return `
+      <div class="bg-white rounded-xl p-4 shadow-sm" style="margin-bottom:90px">
+        <h2 class="text-kihRed font-bold mb-3">💬 Group Chat</h2>
+        <div class="flex gap-2 mb-3">
+          <button class="pill on">👥 Group</button>
+          <button class="pill" onclick="S.chatType='individual';render()">👤 Individual</button>
+        </div>
+        <div style="max-height:50vh;overflow-y:auto" class="py-2">
+          ${msgs.length ? msgs.map(function(m) {
+            const mine = m.user_id === S.user.staff_id || m.user === S.user.username;
+            return '<div class="chat-msg ' + (mine ? 'me' : 'other') + '">' +
+              '<div class="text-[10px] opacity-70 mb-1">' + esc(m.user_name) + ' · ' + fmtTime(m.at) + '</div>' +
+              (m.text ? '<div>' + esc(m.text) + '</div>' : '') +
+              (m.image ? '<img src="' + m.image + '" class="max-w-full rounded-lg mt-1">' : '') +
+              '</div>';
+          }).join('') : '<div class="text-center text-gray-400 py-6">No messages</div>'}
+        </div>
+      </div>
+      <div class="fixed bottom-20 left-0 right-0 bg-white border-t p-2 flex gap-2 z-30">
+        <input id="chatInput" placeholder="Message..." onkeydown="if(event.key==='Enter')sendChatMsg('group',null)" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full">
+        <button onclick="sendChatMsg('group',null)" class="w-11 h-11 rounded-full bg-kihRed text-white font-bold">➤</button>
+      </div>`;
+  } else {
+    const myId = S.user.staff_id || 'admin';
+    const others = isSup ? staff : staff.filter(s => s.id !== S.user.staff_id);
+    const withId = S.chatWith || (others[0] ? others[0].id : null);
+    const roomKey = [myId, withId].sort().join('_');
+    const msgs = Object.values(chat[roomKey] || {}).sort(function(a, b) {
+      return new Date(a.at) - new Date(b.at);
+    });
+
+    return `
+      <div class="bg-white rounded-xl p-4 shadow-sm" style="margin-bottom:90px">
+        <h2 class="text-kihRed font-bold mb-3">💬 Individual</h2>
+        <div class="flex gap-2 mb-3">
+          <button class="pill" onclick="S.chatType='group';render()">👥 Group</button>
+          <button class="pill on">👤 Individual</button>
+        </div>
+        <select onchange="S.chatWith=this.value;render()" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+          ${others.map(s => '<option value="' + s.id + '" ' + (s.id === withId ? 'selected' : '') + '>' + esc(s.name) + '</option>').join('')}
+        </select>
+        <div style="max-height:45vh;overflow-y:auto" class="py-2">
+          ${msgs.length ? msgs.map(function(m) {
+            const mine = m.user_id === myId;
+            return '<div class="chat-msg ' + (mine ? 'me' : 'other') + '">' +
+              '<div class="text-[10px] opacity-70 mb-1">' + esc(m.user_name) + ' · ' + fmtTime(m.at) + '</div>' +
+              (m.text ? '<div>' + esc(m.text) + '</div>' : '') +
+              (m.image ? '<img src="' + m.image + '" class="max-w-full rounded-lg mt-1">' : '') +
+              '</div>';
+          }).join('') : '<div class="text-center text-gray-400 py-6">No messages</div>'}
+        </div>
+      </div>
+      ${withId ? '<div class="fixed bottom-20 left-0 right-0 bg-white border-t p-2 flex gap-2 z-30">' +
+        '<input id="chatInput2" placeholder="Message..." onkeydown="if(event.key===\'Enter\')sendChatMsg(\'individual\',\'' + roomKey + '\')" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full">' +
+        '<button onclick="sendChatMsg(\'individual\',\'' + roomKey + '\')" class="w-11 h-11 rounded-full bg-kihRed text-white font-bold">➤</button>' +
+        '</div>' : ''}`;
+  }
+}
+
+async function sendChatMsg(type, roomKey) {
+  const inputId = type === 'group' ? 'chatInput' : 'chatInput2';
+  const input = $(inputId);
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const chat = Cache.get('chat', {}) || {};
+  const key = type === 'group' ? 'group' : roomKey;
+  if (!chat[key]) chat[key] = {};
+  const msgId = 'm_' + uid();
+  chat[key][msgId] = {
+    id: msgId,
+    user: S.user.username,
+    user_id: S.user.staff_id || 'admin',
+    user_name: S.user.name || S.user.username,
+    text: text,
+    at: new Date().toISOString()
+  };
+  await Cache.set('chat', chat);
+  input.value = '';
+  render();
+}
+
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+function viewNotifications() {
+  const notifs = Cache.get('notifications', {}) || {};
+  const arr = Object.values(notifs).sort(function(a, b) {
+    return new Date(b.at) - new Date(a.at);
+  }).slice(0, 100);
+
   return `
-    <div class="card">
-      <h2>🔔 Notifications (${arr.length})</h2>
-      ${arr.length?arr.map(n=>`<div class="notif-item ${n.read?'':'unread'}" onclick="markRead('${n.id}')">
-        <div class="title">${esc(n.title)}</div>
-        <div class="desc">${esc(n.body)}</div>
-        <div class="time">${fmtTime(n.at)}</div>
-      </div>`).join(''):'<div class="empty"><div class="big">🔔</div>No notifications</div>'}
-      ${arr.length?'<button class="sec block" onclick="clearNotifs()">🗑 Clear All</button>':''}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">🔔 Notifications (${arr.length})</h2>
+      ${arr.length ? arr.map(function(n) {
+        return '<div class="py-3 border-b border-gray-100 cursor-pointer" onclick="markRead(\'' + n.id + '\')" style="' + (!n.read ? 'background:#FFF9FA;border-left:3px solid #C8102E;padding-left:12px' : '') + '">' +
+          '<div class="font-bold text-sm text-kihRed">' + esc(n.title) + '</div>' +
+          '<div class="text-xs text-gray-600 mt-1">' + esc(n.body) + '</div>' +
+          '<div class="text-[10px] text-gray-400 mt-1">' + fmtTime(n.at) + '</div>' +
+          '</div>';
+      }).join('') : '<div class="text-center text-gray-400 py-6">No notifications</div>'}
+      ${arr.length ? '<button onclick="clearNotifs()" class="w-full mt-3 py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">🗑 Clear All</button>' : ''}
     </div>`;
 }
-async function markRead(id){
-  const notifs = Cache.get('notifications',{}) || {};
-  if (notifs[id]) { notifs[id].read = true; await Cache.set('notifications', notifs); render(); }
+
+async function markRead(id) {
+  const notifs = Cache.get('notifications', {}) || {};
+  if (notifs[id]) {
+    notifs[id].read = true;
+    await Cache.set('notifications', notifs);
+    render();
+  }
 }
-async function clearNotifs(){
+
+async function clearNotifs() {
   if (!confirm('Clear all?')) return;
   await Cache.set('notifications', {});
   render();
 }
 
 /* ============================================================
-   💬 WHATSAPP (Manual Share)
+   WHATSAPP SHARE
    ============================================================ */
-function shareWhatsApp(scope){
-  const periods = Object.values(Cache.get('periods',{})||{});
+function shareWhatsApp(scope) {
+  const periods = Object.values(Cache.get('periods', {}) || {});
   const p = periods.find(x => x.id === S.periodId);
-  if (!p) return toast('No period','error');
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  if (!p) { toast('No period', 'error'); return; }
+  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
   const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments',{})[p.id]) || {};
-  const s = Cache.get('settings',{}) || {};
-  let text = `*${s.hospital_name}*\n*${s.department}*\n*Roster:* ${p.name}\n\n`;
+  const pd = (Cache.get('assignments', {})[p.id]) || {};
+  const s = Cache.get('settings', {}) || {};
+
+  let text = '*' + (s.hospital_name || 'Hospital') + '*\n' + '*' + (s.department || '') + '*\n*Roster:* ' + p.name + '\n\n';
+
   if (scope === 'staff') {
     const me = staff.find(x => x.id === S.user.staff_id);
-    if (!me) return toast('No profile','error');
-    text += `*${me.name}* — Your Schedule:\n`;
-    dates.forEach(d => { const c = pd[me.id+'_'+d]||'-'; text += `${fmtDate(d)} (${dayOfWeek(d)}): *${c}*\n`; });
+    if (!me) { toast('No profile', 'error'); return; }
+    text += '*' + me.name + '* — Your Schedule:\n';
+    dates.forEach(function(d) {
+      const c = pd[me.id + '_' + d] || '-';
+      text += fmtDate(d) + ' (' + dayName(d) + '): *' + c + '*\n';
+    });
   } else {
-    text += `*Full Roster:*\n\n`;
-    staff.forEach(x => {
-      text += `*${x.name}*:\n`;
+    text += '*Full Roster:*\n\n';
+    staff.forEach(function(x) {
+      text += '*' + x.name + '*:\n';
       const parts = [];
-      dates.forEach(d => { parts.push(`${d.slice(8)}:${pd[x.id+'_'+d]||'-'}`); });
+      dates.forEach(function(d) {
+        parts.push(d.slice(8) + ':' + (pd[x.id + '_' + d] || '-'));
+      });
       text += parts.join(' | ') + '\n\n';
     });
   }
-  text += `\n_Shared via ${s.whatsapp_bot||'FlipBotMe'}_`;
-  const url = 'https://wa.me/?text=' + encodeURIComponent(text);
-  window.open(url, '_blank');
+
+  text += '\n_Shared via ' + (s.whatsapp_bot || 'FlipBotMe') + '_';
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
   toast('WhatsApp opening...');
 }
 
 /* ============================================================
-   📊 EXCEL EXPORT (With Kulsum Header)
+   REPORTS
    ============================================================ */
-function exportExcel(){
-  const periods = Object.values(Cache.get('periods',{})||{});
+function viewReports() {
+  const periods = Object.values(Cache.get('periods', {}) || {});
+  const staff = Object.values(Cache.get('staff', {}) || {});
+  const asg = Cache.get('assignments', {}) || {};
+  const leave = Object.values(Cache.get('leave', {}) || {});
+  const ot = Object.values(Cache.get('overtime', {}) || {});
+  const ex = Object.values(Cache.get('exchanges', {}) || {});
+  const pid = S.periodId || (periods[0] ? periods[0].id : null);
+  const p = periods.find(x => x.id === pid);
+  const pd = asg[pid] || {};
+
+  let rows = [];
+  if (p) {
+    const dates = datesBetween(p.start, p.end);
+    staff.filter(s => s.status === 'Active').forEach(function(s) {
+      const c = { M: 0, E: 0, N: 0, D: 0, X: 0, OFF: 0, CPL: 0, EL: 0, total: 0 };
+      dates.forEach(function(d) {
+        const code = pd[s.id + '_' + d] || '';
+        if (code === 'M') c.M++;
+        else if (code === 'E') c.E++;
+        else if (code === 'N' || code === 'N12') c.N++;
+        else if (code === 'D') c.D++;
+        else if (code === 'X') c.X++;
+        else if (code === 'OFF') c.OFF++;
+        else if (code === 'CPL') c.CPL++;
+        else if (code === 'EL') c.EL++;
+        if (code) c.total++;
+      });
+      rows.push(Object.assign({ name: s.name, cplBalance: s.cplBalance || 0 }, c));
+    });
+  }
+
+  const totalOT = ot.reduce(function(sum, o) { return sum + (o.hours || 0); }, 0);
+  const totalOTcpl = ot.reduce(function(sum, o) { return sum + (o.cpl || 0); }, 0);
+
+  return `
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">📊 Monthly Summary</h2>
+      ${p ? '<div class="text-xs text-gray-500 mb-2">' + esc(p.name) + '</div>' : ''}
+      <div class="scroll-x">
+        <table class="w-full text-xs border-collapse">
+          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
+            <th class="px-2 py-2 text-left">Staff</th><th class="px-1 py-2">M</th><th class="px-1 py-2">E</th>
+            <th class="px-1 py-2">N</th><th class="px-1 py-2">D</th><th class="px-1 py-2">X</th>
+            <th class="px-1 py-2">OFF</th><th class="px-1 py-2">CPL</th><th class="px-1 py-2">Tot</th>
+            <th class="px-1 py-2">CPL Bal</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(function(r) {
+              return '<tr class="border-b border-gray-100">' +
+                '<td class="px-2 py-2 text-left font-semibold">' + esc(r.name) + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.M + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.E + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.N + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.D + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.X + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.OFF + '</td>' +
+                '<td class="px-1 py-2 text-center">' + r.CPL + '</td>' +
+                '<td class="px-1 py-2 text-center font-bold">' + r.total + '</td>' +
+                '<td class="px-1 py-2 text-center font-bold text-green-600">' + r.cplBalance.toFixed(2) + '</td>' +
+                '</tr>';
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">⏱ Overtime Summary</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-green-50 rounded-lg p-3 border-l-4 border-green-500">
+          <div class="text-2xl font-bold text-green-700">${totalOT.toFixed(1)}h</div>
+          <div class="text-xs text-gray-600 mt-1">Total OT Hours</div>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 border-l-4 border-orange-500">
+          <div class="text-2xl font-bold text-orange-700">${totalOTcpl.toFixed(2)}</div>
+          <div class="text-xs text-gray-600 mt-1">CPL Earned</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">🏖 Leave Report</h2>
+      <div class="scroll-x">
+        <table class="w-full text-xs border-collapse">
+          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
+            <th class="px-2 py-2 text-left">Staff</th><th class="px-2 py-2">Type</th>
+            <th class="px-2 py-2">Start</th><th class="px-2 py-2">End</th><th class="px-2 py-2">Days</th>
+          </tr></thead>
+          <tbody>
+            ${leave.slice(0, 30).map(function(l) {
+              const s = staff.find(x => x.id === l.staff_id);
+              const days = Math.ceil((new Date(l.end) - new Date(l.start)) / 86400000) + 1;
+              return '<tr class="border-b border-gray-100">' +
+                '<td class="px-2 py-2">' + esc(s ? s.name : '?') + '</td>' +
+                '<td class="px-2 py-2 text-center"><span class="text-xs bg-gray-100 px-2 py-0.5 rounded">' + l.type + '</span></td>' +
+                '<td class="px-2 py-2 text-center">' + fmtDate(l.start) + '</td>' +
+                '<td class="px-2 py-2 text-center">' + fmtDate(l.end) + '</td>' +
+                '<td class="px-2 py-2 text-center font-bold">' + days + '</td>' +
+                '</tr>';
+            }).join('') || '<tr><td colspan="5" class="text-center py-4 text-gray-400">No data</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">🔄 Exchange Report</h2>
+      <div class="scroll-x">
+        <table class="w-full text-xs border-collapse">
+          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
+            <th class="px-2 py-2 text-left">Requester</th><th class="px-2 py-2">Target</th>
+            <th class="px-2 py-2">Date</th><th class="px-2 py-2">Status</th>
+          </tr></thead>
+          <tbody>
+            ${ex.slice(0, 30).map(function(e) {
+              const r = staff.find(x => x.id === e.requester_id);
+              const t = staff.find(x => x.id === e.target_id);
+              return '<tr class="border-b border-gray-100">' +
+                '<td class="px-2 py-2">' + esc(r ? r.name : '?') + '</td>' +
+                '<td class="px-2 py-2">' + esc(t ? t.name : '?') + '</td>' +
+                '<td class="px-2 py-2 text-center">' + fmtDate(e.date) + '</td>' +
+                '<td class="px-2 py-2 text-center"><span class="text-xs font-bold px-2 py-0.5 rounded-full ' + (e.status === 'Approved' ? 'bg-green-100 text-green-700' : e.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + e.status + '</span></td>' +
+                '</tr>';
+            }).join('') || '<tr><td colspan="4" class="text-center py-4 text-gray-400">No data</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   EXCEL EXPORT
+   ============================================================ */
+function exportExcel() {
+  const periods = Object.values(Cache.get('periods', {}) || {});
   const p = periods.find(x => x.id === S.periodId);
-  if (!p) return toast('No period','error');
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  if (!p) { toast('No period', 'error'); return; }
+  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
   const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments',{})[p.id]) || {};
-  const settings = Cache.get('settings',{}) || {};
+  const pd = (Cache.get('assignments', {})[p.id]) || {};
+  const settings = Cache.get('settings', {}) || {};
 
   const aoa = [];
-  // Row 1: Hospital name
-  aoa.push([settings.hospital_name]);
-  // Row 2: Department
-  aoa.push([settings.department + ' — Phlebotomist Duty Roster']);
-  // Row 3: blank
+  aoa.push([settings.hospital_name || 'Hospital']);
+  aoa.push([(settings.department || '') + ' — Phlebotomist Duty Roster']);
   aoa.push([]);
-  // Row 4: Period info
   aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
-  // Row 5: blank
   aoa.push([]);
-  // Row 6: Header
-  const headerRow = ['Sr.', 'Name', 'Mobile'];
-  dates.forEach(d => headerRow.push(d.slice(8)));
-  headerRow.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
-  aoa.push(headerRow);
 
-  // Staff rows
-  staff.forEach((s, i) => {
+  const header = ['Sr.', 'Name', 'Mobile'];
+  dates.forEach(d => header.push(d.slice(8)));
+  header.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
+  aoa.push(header);
+
+  staff.forEach(function(s, i) {
     const row = [i + 1, s.name, s.mobile || ''];
-    const counts = { M:0, E:0, E4:0, N12:0, D:0, X:0, OFF:0, CPL:0 };
-    dates.forEach(d => {
+    const counts = { M: 0, E: 0, E4: 0, N12: 0, D: 0, X: 0, OFF: 0, CPL: 0 };
+    dates.forEach(function(d) {
       const c = pd[s.id + '_' + d] || '';
       row.push(c);
       if (counts[c] !== undefined) counts[c]++;
@@ -1307,410 +1622,264 @@ function exportExcel(){
     aoa.push(row);
   });
 
-  // Footer
   aoa.push([]);
   aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
   aoa.push(['Prepared by:', S.user.name || S.user.username]);
-  aoa.push(['Approved by:', '____________________']);
 
   const ws = XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols'] = [
-    { wch: 5 }, { wch: 22 }, { wch: 14 },
-    ...dates.map(() => ({ wch: 5 })),
-    { wch: 4 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 4 }, { wch: 4 }, { wch: 5 }, { wch: 5 }, { wch: 6 }
-  ];
-  ws['!merges'] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } }
-  ];
-
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Roster');
-  XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g,'_') + '.xlsx');
+  XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g, '_') + '.xlsx');
   audit('EXPORT_EXCEL', 'period', null, p.name);
   toast('Excel downloaded ✅');
 }
 
 /* ============================================================
-   📄 PDF EXPORT (With Kulsum Colors)
+   PRINT/PDF EXPORT
    ============================================================ */
-function exportPDF(){
-  const periods = Object.values(Cache.get('periods',{})||{});
+function exportPDF() {
+  const periods = Object.values(Cache.get('periods', {}) || {});
   const p = periods.find(x => x.id === S.periodId);
-  if (!p) return toast('No period','error');
-  const staff = Object.values(Cache.get('staff',{})||{}).filter(s => s.status === 'Active');
+  if (!p) { toast('No period', 'error'); return; }
+  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
   const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments',{})[p.id]) || {};
-  const settings = Cache.get('settings',{}) || {};
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+  const pd = (Cache.get('assignments', {})[p.id]) || {};
+  const settings = Cache.get('settings', {}) || {};
 
-  // Header
-  doc.setFontSize(18).setTextColor('#C8102E');
-  doc.text(settings.hospital_name || 'Hospital', 40, 40);
-  doc.setFontSize(11).setTextColor('#1E5BA8');
-  doc.text(settings.department || '', 40, 58);
-  doc.setFontSize(13).setTextColor('#222');
-  doc.text('Phlebotomist Duty Roster — ' + p.name, 40, 78);
-  doc.setFontSize(9).setTextColor('#666');
-  doc.text('Period: ' + fmtDate(p.start) + ' to ' + fmtDate(p.end) + '  |  Generated: ' + new Date().toLocaleString('en-GB'), 40, 92);
-
-  // Red line
-  doc.setDrawColor(200, 16, 46).setLineWidth(2);
-  doc.line(40, 100, doc.internal.pageSize.width - 40, 100);
-
-  // Table
-  const head = [['Name', ...dates.map(d => d.slice(8)), 'O', 'CPL', 'Tot']];
-  const body = staff.map(s => {
-    const row = [s.name];
-    let o = 0, cpl = 0, tot = 0;
-    dates.forEach(d => {
-      const c = pd[s.id+'_'+d] || '';
-      row.push(c);
-      if (c === 'O' || c === 'OFF') o++;
-      else if (c === 'CPL') cpl++;
+  let html = '<html><head><title>Roster</title><style>';
+  html += 'body{font-family:Arial,sans-serif;padding:20px}';
+  html += 'h1{color:#C8102E;margin:0;font-size:20px}';
+  html += 'h2{color:#1E5BA8;margin:5px 0;font-size:14px;font-weight:normal}';
+  html += 'h3{margin:10px 0;font-size:14px}';
+  html += 'table{border-collapse:collapse;width:100%;font-size:9px;margin-top:10px}';
+  html += 'th{background:#C8102E;color:white;padding:4px;border:1px solid #999}';
+  html += 'td{padding:3px;border:1px solid #ccc;text-align:center}';
+  html += '.name{text-align:left;font-weight:bold}';
+  html += '.footer{margin-top:30px;font-size:11px;display:flex;justify-content:space-between}';
+  html += '</style></head><body>';
+  html += '<h1>' + (settings.hospital_name || '') + '</h1>';
+  html += '<h2>' + (settings.department || '') + '</h2>';
+  html += '<h3>Phlebotomist Duty Roster — ' + p.name + '</h3>';
+  html += '<p style="font-size:11px;color:#666">Period: ' + fmtDate(p.start) + ' to ' + fmtDate(p.end) + ' | Generated: ' + new Date().toLocaleString('en-GB') + '</p>';
+  html += '<table><thead><tr><th>Name</th>';
+  dates.forEach(d => { html += '<th>' + d.slice(8) + '</th>'; });
+  html += '<th>O</th><th>Tot</th></tr></thead><tbody>';
+  staff.forEach(function(s) {
+    html += '<tr><td class="name">' + esc(s.name) + '</td>';
+    let off = 0, tot = 0;
+    dates.forEach(function(d) {
+      const c = pd[s.id + '_' + d] || '';
+      if (c === 'OFF' || c === 'EL' || c === 'CPL' || c === 'CL' || c === 'GH' || c === 'SL') off++;
       if (c) tot++;
+      html += '<td>' + (c || '·') + '</td>';
     });
-    row.push(o, cpl, tot);
-    return row;
+    html += '<td><b>' + off + '</b></td><td><b>' + tot + '</b></td></tr>';
   });
+  html += '</tbody></table>';
+  html += '<div class="footer"><div>Generated: ' + new Date().toLocaleDateString('en-GB') + '</div><div>Prepared by: ' + (S.user.name || S.user.username) + '</div><div>Approved by: ____________________</div></div>';
+  html += '</body></html>';
 
-  doc.autoTable({
-    head, body, startY: 115,
-    styles: { fontSize: 5.5, cellPadding: 1.8, halign: 'center', lineColor: [232, 235, 242], lineWidth: 0.2 },
-    headStyles: { fillColor: [200, 16, 46], textColor: 255, fontSize: 5.5, fontStyle: 'bold' },
-    alternateRowStyles: { fillColor: [250, 251, 253] },
-    columnStyles: { 0: { halign: 'left', cellWidth: 95, fontStyle: 'bold' } },
-    margin: { left: 20, right: 20 }
-  });
-
-  // Footer
-  const fy = doc.lastAutoTable.finalY + 25;
-  doc.setFontSize(9).setTextColor('#333');
-  doc.text('Generated: ' + new Date().toLocaleDateString('en-GB'), 40, fy);
-  doc.text('Prepared by: ' + S.user.name, 250, fy);
-  doc.text('Approved by: ____________________', 480, fy);
-  doc.setFontSize(7).setTextColor('#999');
-  doc.text(settings.hospital_name + ' | ' + (settings.address || ''), 40, fy + 20);
-
-  doc.save('roster-' + p.name.replace(/\s+/g,'_') + '.pdf');
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function() { w.print(); }, 500);
   audit('EXPORT_PDF', 'period', null, p.name);
-  toast('PDF downloaded ✅');
 }
 
 /* ============================================================
-   📊 REPORTS
+   TECHNOLOGIST (Separate Roster - Structure Only)
    ============================================================ */
-function viewReports(){
-  const periods = Object.values(Cache.get('periods',{})||{});
-  const staff = Object.values(Cache.get('staff',{})||{});
-  const asg = Cache.get('assignments',{})||{};
-  const leave = Object.values(Cache.get('leave',{})||{});
-  const ot = Object.values(Cache.get('overtime',{})||{});
-  const ex = Object.values(Cache.get('exchanges',{})||{});
-  const pid = S.periodId || (periods[0]?.id);
-  const p = periods.find(x => x.id === pid);
-  const pd = asg[pid] || {};
-
-  let rows = [];
-  if (p) {
-    const dates = datesBetween(p.start, p.end);
-    staff.filter(s => s.status === 'Active').forEach(s => {
-      const c = { M:0, E:0, N:0, D:0, X:0, OFF:0, CPL:0, EL:0, total:0 };
-      dates.forEach(d => {
-        const code = pd[s.id+'_'+d] || '';
-        if (code === 'M') c.M++;
-        else if (code === 'E') c.E++;
-        else if (['N','N12'].includes(code)) c.N++;
-        else if (code === 'D') c.D++;
-        else if (code === 'X') c.X++;
-        else if (code === 'O' || code === 'OFF') c.OFF++;
-        else if (code === 'CPL') c.CPL++;
-        else if (code === 'EL') c.EL++;
-        if (code) c.total++;
-      });
-      rows.push({ name: s.name, cplBalance: s.cplBalance || 0, ...c });
-    });
-  }
-
-  const totalOT = ot.reduce((sum, o) => sum + (o.hours || 0), 0);
-  const totalOTcpl = ot.reduce((sum, o) => sum + (o.cpl || 0), 0);
-
-  return `
-    <div class="card">
-      <h2>📊 Monthly Summary</h2>
-      ${p?`<div style="font-size:12px;color:#666;margin-bottom:8px">${esc(p.name)}</div>`:''}
-      <div class="scroll-x">
-        <table>
-          <thead><tr><th>Staff</th><th>M</th><th>E</th><th>N</th><th>D</th><th>X</th><th>OFF</th><th>CPL</th><th>EL</th><th>Tot</th><th>CPL Bal</th></tr></thead>
-          <tbody>${rows.map(r => `<tr>
-            <td style="text-align:left;max-width:120px;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}</td>
-            <td>${r.M}</td><td>${r.E}</td><td>${r.N}</td><td>${r.D}</td><td>${r.X}</td>
-            <td>${r.OFF}</td><td>${r.CPL}</td><td>${r.EL}</td><td><b>${r.total}</b></td>
-            <td><b style="color:${r.cplBalance>0?'#27AE60':'#666'}">${r.cplBalance.toFixed(2)}</b></td>
-          </tr>`).join('')}</tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <h2>⏱ Overtime Summary</h2>
-      <div class="stats" style="grid-template-columns:1fr 1fr">
-        <div class="stat green"><div class="num">${totalOT.toFixed(1)}h</div><div class="label">OT Hours</div></div>
-        <div class="stat orange"><div class="num">${totalOTcpl.toFixed(2)}</div><div class="label">CPL Earned</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <h2>🏖 Leave Report</h2>
-      <div class="scroll-x">
-        <table>
-          <thead><tr><th>Staff</th><th>Type</th><th>Start</th><th>End</th><th>Days</th></tr></thead>
-          <tbody>${leave.slice(0,30).map(l => {
-            const s = staff.find(x => x.id === l.staff_id);
-            const days = Math.ceil((new Date(l.end)-new Date(l.start))/86400000)+1;
-            return `<tr><td>${esc(s?s.name:'?')}</td><td><span class="chip">${l.type}</span></td><td>${fmtDate(l.start)}</td><td>${fmtDate(l.end)}</td><td><b>${days}</b></td></tr>`;
-          }).join('') || '<tr><td colspan="5">No data</td></tr>'}</tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <h2>🔄 Exchange Report</h2>
-      <div class="scroll-x">
-        <table>
-          <thead><tr><th>Requester</th><th>Target</th><th>Date</th><th>Status</th></tr></thead>
-          <tbody>${ex.slice(0,30).map(e => {
-            const r = staff.find(x => x.id === e.requester_id);
-            const t = staff.find(x => x.id === e.target_id);
-            return `<tr><td>${esc(r?r.name:'?')}</td><td>${esc(t?t.name:'?')}</td><td>${fmtDate(e.date)}</td><td><span class="badge b-${e.status.toLowerCase()}">${e.status}</span></td></tr>`;
-          }).join('') || '<tr><td colspan="4">No data</td></tr>'}</tbody>
-        </table>
-      </div>
-    </div>
-    ${S.user.role === 'supervisor'?`<div class="card">
-      <h2>📤 Export Reports</h2>
-      <div class="grid2">
-        <button onclick="exportExcel()">📊 Excel</button>
-        <button class="blue" onclick="exportPDF()">📄 PDF</button>
-      </div>
-    </div>`:''}`;
-}
-
-/* ============================================================
-   🔬 TECHNOLOGIST (الگ tab)
-   ============================================================ */
-function viewTechnologist(){
+function viewTechnologist() {
   const isSup = S.user.role === 'supervisor';
-  const techs = Object.values(Cache.get('technologists',{})||{});
+  const techs = Object.values(Cache.get('technologists', {}) || {});
+
   return `
-    <div class="card">
-      <h2>🔬 Technologist Roster</h2>
-      <div class="help">Separate roster for Lab Technologists</div>
-      ${isSup?`<button class="block success" onclick="showAddTechnologist()">➕ Add Technologist</button>`:''}
-      <div class="divider"></div>
-      ${techs.length?techs.map(t => `<div class="staff-card">
-        <div class="avatar">${initials(t.name)}</div>
-        <div class="info">
-          <div class="name">${esc(t.name)}</div>
-          <div class="detail">${esc(t.designation||'Technologist')} · 📱 ${esc(t.mobile||'')}</div>
-        </div>
-      </div>`).join(''):'<div class="empty"><div class="big">🔬</div>No technologists added yet</div>'}
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">🔬 Technologist Roster</h2>
+      <div class="text-xs text-gray-500 italic mb-3">Separate roster for Lab Technologists</div>
+      ${isSup ? '<button onclick="showAddTechnologist()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-3">➕ Add Technologist</button>' : ''}
+      <div class="border-t border-gray-100 pt-3">
+        ${techs.length ? techs.map(function(t) {
+          return '<div class="flex items-center gap-3 py-3 border-b border-gray-100">' +
+            '<div class="w-11 h-11 rounded-full kih-gradient text-white flex items-center justify-center font-bold">' + initials(t.name) + '</div>' +
+            '<div class="flex-1"><div class="font-bold text-sm">' + esc(t.name) + '</div>' +
+            '<div class="text-xs text-gray-500">' + esc(t.designation || 'Technologist') + ' · 📱 ' + esc(t.mobile || '') + '</div></div>' +
+            '</div>';
+        }).join('') : '<div class="text-center text-gray-400 py-6">No technologists added yet</div>'}
+      </div>
     </div>`;
 }
-function showAddTechnologist(){
+
+function showAddTechnologist() {
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>➕ Add Technologist</h2>
-    <input id="tName" placeholder="Name *">
-    <input id="tMobile" placeholder="Mobile *" inputmode="tel">
-    <input id="tDesig" placeholder="Designation" value="Lab Technologist">
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button class="success" onclick="saveTechnologist()">Save</button></div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add Technologist</h2>
+      <input id="tName" placeholder="Name *" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <input id="tMobile" placeholder="Mobile *" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <input id="tDesig" placeholder="Designation" value="Lab Technologist" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+        <button onclick="saveTechnologist()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Save</button>
+      </div>
+    </div>`;
   document.body.appendChild(m);
 }
-async function saveTechnologist(){
-  const name = document.getElementById('tName').value.trim();
-  const mobile = document.getElementById('tMobile').value.trim();
-  const desig = document.getElementById('tDesig').value.trim();
-  if (!name || !mobile) return toast('Name and mobile required','error');
-  const techs = Cache.get('technologists',{}) || {};
+
+async function saveTechnologist() {
+  const name = $('tName').value.trim();
+  const mobile = $('tMobile').value.trim();
+  const desig = $('tDesig').value.trim();
+  if (!name || !mobile) { toast('Name and mobile required', 'error'); return; }
+  const techs = Cache.get('technologists', {}) || {};
   const id = 't_' + uid();
-  techs[id] = { id, name, mobile, designation:desig, status:'Active' };
+  techs[id] = { id: id, name: name, mobile: mobile, designation: desig, status: 'Active' };
   await Cache.set('technologists', techs);
   toast('Technologist added ✅');
-  document.querySelector('.modal').remove();
+  document.querySelector('.modal-bg').remove();
   render();
 }
 
 /* ============================================================
-   📜 AUDIT LOG
+   AUDIT LOG
    ============================================================ */
-function viewAudit(){
-  if (S.user.role !== 'supervisor') return '<div class="card"><div class="empty">Access denied</div></div>';
-  const log = Object.values(Cache.get('audit',{})||{}).sort((a,b)=>new Date(b.at)-new Date(a.at));
+function viewAudit() {
+  if (S.user.role !== 'supervisor') return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">Access denied</div>';
+  const log = Object.values(Cache.get('audit', {}) || {}).sort(function(a, b) {
+    return new Date(b.at) - new Date(a.at);
+  });
+
   return `
-    <div class="card">
-      <h2>📜 Audit Log (${log.length})</h2>
-      <input id="auditSearch" placeholder="🔍 Search..." oninput="filterAudit()">
+    <div class="bg-white rounded-xl p-4 shadow-sm">
+      <h2 class="text-kihRed font-bold mb-3">📜 Audit Log (${log.length})</h2>
+      <input id="auditSearch" placeholder="🔍 Search..." oninput="filterAudit()" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
       <div style="max-height:70vh;overflow-y:auto" id="auditList">
-        ${log.slice(0,100).map(l => `<div class="notif-item" data-search="${esc((l.action+' '+l.user_name+(l.new||'')).toLowerCase())}">
-          <div class="title">${esc(l.action)}</div>
-          <div class="desc">👤 ${esc(l.user_name||l.user)}${l.old||l.new?` · <span style="color:#888">${esc(l.old||'—')} → ${esc(l.new||'—')}</span>`:''}</div>
-          <div class="time">${fmtTime(l.at)}</div>
-        </div>`).join('')}
+        ${log.slice(0, 100).map(function(l) {
+          const search = ((l.action || '') + ' ' + (l.user_name || '') + ' ' + (l.new || '')).toLowerCase();
+          return '<div class="py-2 border-b border-gray-100 text-xs audit-item" data-search="' + esc(search) + '">' +
+            '<div class="font-bold text-kihRed">' + esc(l.action) + '</div>' +
+            '<div class="text-gray-600">👤 ' + esc(l.user_name || l.user) + (l.old || l.new ? ' · ' + esc(l.old || '—') + ' → ' + esc(l.new || '—') : '') + '</div>' +
+            '<div class="text-gray-400 text-[10px]">' + fmtTime(l.at) + '</div>' +
+            '</div>';
+        }).join('')}
       </div>
-      <button class="sec block" style="margin-top:10px" onclick="clearAudit()">🗑 Clear Old Logs</button>
     </div>`;
 }
-function filterAudit(){
-  const q = document.getElementById('auditSearch').value.toLowerCase();
-  document.querySelectorAll('#auditList .notif-item').forEach(el => {
+
+function filterAudit() {
+  const q = $('auditSearch').value.toLowerCase();
+  document.querySelectorAll('.audit-item').forEach(function(el) {
     el.style.display = el.dataset.search.includes(q) ? 'block' : 'none';
   });
 }
-async function clearAudit(){
-  if (!confirm('Clear logs older than 30 days?')) return;
-  const log = Cache.get('audit',{}) || {};
-  const cutoff = Date.now() - 30*24*60*60*1000;
-  const filtered = {};
-  Object.values(log).forEach(l => { if (new Date(l.at).getTime() > cutoff) filtered[l.id] = l; });
-  await Cache.set('audit', filtered);
-  toast('Old logs cleared');
-  render();
-}
 
 /* ============================================================
-   ⚙ SETTINGS
+   SETTINGS
    ============================================================ */
-function viewSettings(){
-  if (S.user.role !== 'supervisor') return '<div class="card"><div class="empty">Access denied</div></div>';
-  const s = Cache.get('settings',{}) || {};
-  const holidays = Object.values(Cache.get('holidays',{})||{});
-  const shifts = Cache.get('shifts',{}) || DEFAULT_SHIFTS;
+function viewSettings() {
+  if (S.user.role !== 'supervisor') return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">Access denied</div>';
+  const s = Cache.get('settings', {}) || {};
+  const holidays = Object.values(Cache.get('holidays', {}) || {});
+
   return `
-    <div class="card">
-      <h2>🏥 Hospital Settings</h2>
-      <input id="stHosp" placeholder="Hospital Name" value="${esc(s.hospital_name||'')}">
-      <input id="stDept" placeholder="Department" value="${esc(s.department||'')}">
-      <input id="stAddr" placeholder="Address" value="${esc(s.address||'')}">
-      <input id="stWa" placeholder="WhatsApp Bot" value="${esc(s.whatsapp_bot||'')}">
-      <button class="block success" onclick="saveSettings()">💾 Save</button>
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">🏥 Hospital Settings</h2>
+      <input id="stHosp" placeholder="Hospital Name" value="${esc(s.hospital_name || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <input id="stDept" placeholder="Department" value="${esc(s.department || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <input id="stAddr" placeholder="Address" value="${esc(s.address || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
+      <input id="stWa" placeholder="WhatsApp Bot" value="${esc(s.whatsapp_bot || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <button onclick="saveSettings()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
     </div>
-    <div class="card">
-      <h2>🎉 Gazetted Holidays</h2>
-      <div class="help">Roster will apply Sunday rules on these dates</div>
-      ${holidays.length?holidays.map(h => `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #eee">
-        <div style="flex:1"><b>${esc(h.name)}</b><div style="font-size:11px;color:#888">${fmtDate(h.date)}</div></div>
-        <button class="danger sm" onclick="delHoliday('${h.id}')">🗑</button>
-      </div>`).join(''):'<div class="empty">No holidays added</div>'}
-      <button class="sec block" onclick="showAddHoliday()">➕ Add Holiday</button>
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">🎉 Gazetted Holidays</h2>
+      <div class="text-xs text-gray-500 italic mb-3">Roster will apply Sunday rules on these dates</div>
+      ${holidays.length ? holidays.map(function(h) {
+        return '<div class="py-2 border-b border-gray-100 flex items-center gap-2">' +
+          '<div class="flex-1"><b class="text-sm">' + esc(h.name) + '</b><div class="text-xs text-gray-500">' + fmtDate(h.date) + '</div></div>' +
+          '<button onclick="delHoliday(\'' + h.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">🗑</button>' +
+          '</div>';
+      }).join('') : '<div class="text-center text-gray-400 py-4">No holidays added</div>'}
+      <button onclick="showAddHoliday()" class="w-full mt-3 py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">➕ Add Holiday</button>
     </div>
-    <div class="card">
-      <h2>⏰ Shift Timings</h2>
-      ${Object.values(shifts).slice(0,9).map(sh => `<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px">
-        <b>${sh.code}</b> — ${sh.name} <span style="color:#888">${sh.start||''}${sh.end?' - '+sh.end:''}</span>
-      </div>`).join('')}
-    </div>
-    <div class="card">
-      <h2>💾 Data Backup</h2>
-      <button class="sec block" style="margin-bottom:8px" onclick="exportAllData()">📤 Export Backup (JSON)</button>
-      <button class="sec block" onclick="importAllData()">📥 Import Backup</button>
-      <div class="help" style="margin-top:8px">Firebase auto-backup is always active.</div>
-    </div>
-    <div class="card">
-      <h2>ℹ About</h2>
-      <div style="font-size:12px;color:#666;line-height:1.7">
-        <b>${esc(s.app_title||'Phlebotomist Roster')}</b><br>
-        Version 3.0<br>
-        ${esc(s.hospital_name||'')}<br>
-        Data synced via Firebase
+    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
+      <h2 class="text-kihRed font-bold mb-3">ℹ About</h2>
+      <div class="text-xs text-gray-600 space-y-1">
+        <div><b>${esc(s.app_title || 'Phlebotomist Roster')}</b></div>
+        <div>Version 4.0</div>
+        <div>${esc(s.hospital_name || '')}</div>
+        <div>Data synced via Firebase</div>
       </div>
     </div>`;
 }
-async function saveSettings(){
-  const s = Cache.get('settings',{}) || {};
-  s.hospital_name = document.getElementById('stHosp').value;
-  s.department = document.getElementById('stDept').value;
-  s.address = document.getElementById('stAddr').value;
-  s.whatsapp_bot = document.getElementById('stWa').value;
+
+async function saveSettings() {
+  const s = Cache.get('settings', {}) || {};
+  s.hospital_name = $('stHosp').value;
+  s.department = $('stDept').value;
+  s.address = $('stAddr').value;
+  s.whatsapp_bot = $('stWa').value;
   await Cache.set('settings', s);
   audit('EDIT_SETTINGS', 'settings', null, s.hospital_name);
   toast('Saved ✅');
   render();
 }
-function showAddHoliday(){
+
+function showAddHoliday() {
   const m = document.createElement('div');
-  m.className = 'modal';
-  m.innerHTML = `<div class="modal-c">
-    <h2>➕ Add Holiday</h2>
-    <input id="hName" placeholder="Holiday Name">
-    <input id="hDate" type="date">
-    <div class="row"><button class="sec" onclick="this.closest('.modal').remove()">Cancel</button><button class="success" onclick="saveHoliday()">Save</button></div>
-  </div>`;
+  m.className = 'modal-bg';
+  m.innerHTML = `
+    <div class="modal-c">
+      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add Holiday</h2>
+      <input id="hName" placeholder="Holiday Name" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
+      <input id="hDate" type="date" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
+      <div class="flex gap-2">
+        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
+        <button onclick="saveHoliday()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Save</button>
+      </div>
+    </div>`;
   document.body.appendChild(m);
 }
-async function saveHoliday(){
-  const name = document.getElementById('hName').value.trim();
-  const date = document.getElementById('hDate').value;
-  if (!name || !date) return toast('All required','error');
-  const holidays = Cache.get('holidays',{}) || {};
+
+async function saveHoliday() {
+  const name = $('hName').value.trim();
+  const date = $('hDate').value;
+  if (!name || !date) { toast('All required', 'error'); return; }
+  const holidays = Cache.get('holidays', {}) || {};
   const id = 'h_' + uid();
-  holidays[id] = { id, name, date, active: true };
+  holidays[id] = { id: id, name: name, date: date, active: true };
   await Cache.set('holidays', holidays);
-  audit('ADD_HOLIDAY', 'holiday', null, `${name} (${date})`);
-  document.querySelector('.modal').remove();
+  audit('ADD_HOLIDAY', 'holiday', null, name + ' (' + date + ')');
+  document.querySelector('.modal-bg').remove();
   toast('Holiday added ✅');
   render();
 }
-async function delHoliday(id){
+
+async function delHoliday(id) {
   if (!confirm('Delete?')) return;
-  const holidays = Cache.get('holidays',{}) || {};
+  const holidays = Cache.get('holidays', {}) || {};
   delete holidays[id];
   await Cache.set('holidays', holidays);
   render();
 }
-async function exportAllData(){
-  const data = {};
-  ['users','staff','technologists','periods','assignments','leave','overtime','exchanges','audit','settings','notifications','holidays','shifts','config'].forEach(k => data[k] = Cache.get(k));
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'phleb-backup-' + today() + '.json'; a.click();
-  toast('Downloaded ✅');
-}
-function importAllData(){
-  const inp = document.createElement('input');
-  inp.type = 'file'; inp.accept = '.json';
-  inp.onchange = e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    if (!confirm('Replace all current data?')) return;
-    const r = new FileReader();
-    r.onload = async (ev) => {
-      try {
-        const data = JSON.parse(ev.target.result);
-        for (const k of Object.keys(data)) { if (data[k]) await Cache.set(k, data[k]); }
-        toast('Restored ✅');
-        setTimeout(() => render(), 500);
-      } catch (err) { toast('Invalid file','error'); }
-    };
-    r.readAsText(f);
-  };
-  inp.click();
-}
 
 /* ============================================================
-   🚀 BOOT
+   BOOT
    ============================================================ */
 Cache.init();
 
 try {
   const saved = localStorage.getItem('phleb_user');
   if (saved) S.user = JSON.parse(saved);
-} catch {}
+} catch (e) {
+  console.error('Session restore error', e);
+}
 
-setTimeout(() => {
+setTimeout(function() {
   render();
-  setInterval(() => { if (S.user) render(); }, 15000);
+  setInterval(function() {
+    if (S.user) render();
+  }, 15000);
 }, 1200);
 
 </script>
