@@ -2,69 +2,72 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#C8102E">
-<title>Phlebotomist Roster - KIH</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>Phlebotomist Roster</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        kihRed: '#C8102E',
-        kihBlue: '#1E5BA8'
-      }
-    }
-  }
-}
-</script>
 <style>
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F5F7FA; }
-.kih-gradient { background: linear-gradient(135deg, #C8102E 0%, #1E5BA8 100%); }
-.cell { display: inline-block; padding: 4px 6px; border-radius: 4px; min-width: 26px; cursor: pointer; font-weight: 700; font-size: 11px; }
-.cell-M { background: #FFF3B0; color: #7D6608; }
-.cell-E { background: #FFD6A5; color: #7D4A00; }
-.cell-E4 { background: #FFC6FF; color: #8E2DE2; }
-.cell-N, .cell-N12 { background: #A0C4FF; color: #0B3D91; }
-.cell-OFF { background: #E5E5E5; color: #555; }
-.cell-D { background: #BDB2FF; color: #4A1D96; }
-.cell-X { background: #CAFFBF; color: #1E8449; }
-.cell-EL, .cell-CL, .cell-AL { background: #FDFFB6; color: #7D6608; }
-.cell-CPL { background: #FFD6A5; color: #7D4A00; }
-.cell-SL { background: #FFC9DE; color: #A61E4D; }
-.cell-ML { background: #D0BFFF; color: #5F3DC4; }
-.cell-GH { background: #FFADAD; color: #922B21; }
-.cell-empty { background: #FAFBFD; color: #CCC; }
-.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); padding: 12px 22px; border-radius: 25px; font-size: 13px; font-weight: 600; z-index: 9999; opacity: 0; transition: .3s; box-shadow: 0 6px 20px rgba(0,0,0,.25); max-width: 90%; text-align: center; }
-.toast.show { opacity: 1; }
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: flex; align-items: flex-end; justify-content: center; z-index: 1000; }
-.modal-c { background: #fff; border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; }
-@media (min-width: 768px) { .modal-bg { align-items: center; } .modal-c { border-radius: 16px; max-width: 700px; } }
-.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; }
-.scroll-x table { min-width: max-content; }
-input, select, textarea { font-size: 14px; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #C8102E; }
-.nav-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 12px; font-size: 10px; font-weight: 600; color: #888; background: none; border: none; cursor: pointer; border-radius: 0; min-width: 60px; white-space: nowrap; }
-.nav-btn.active { color: #C8102E; }
-.nav-btn .ico { font-size: 18px; }
-.pill { display: inline-block; padding: 6px 12px; border-radius: 14px; font-size: 12px; background: #E8EBF2; color: #1E5BA8; margin: 3px; cursor: pointer; font-weight: 600; border: 1.5px solid transparent; }
-.pill.on { background: #C8102E; color: #fff; border-color: #C8102E; }
-.chat-msg { padding: 10px 14px; border-radius: 16px; margin-bottom: 8px; max-width: 80%; word-wrap: break-word; font-size: 13px; }
-.chat-msg.me { background: #C8102E; color: #fff; margin-left: auto; border-bottom-right-radius: 4px; }
-.chat-msg.other { background: #F0F2F5; color: #222; border-bottom-left-radius: 4px; }
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background:#F5F7FA;color:#222;padding-bottom:70px}
+.header{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.15)}
+.header .logo{width:40px;height:40px;background:#fff;color:#C8102E;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
+.header h1{font-size:14px;font-weight:700;flex:1}
+.header button{background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
+.container{padding:12px;max-width:1000px;margin:0 auto}
+.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card h2{color:#C8102E;font-size:15px;margin-bottom:10px;font-weight:700}
+input,select,button{padding:10px 12px;border:1.5px solid #E0E4EB;border-radius:8px;font-size:14px;width:100%;margin-bottom:8px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:#C8102E}
+button{background:#C8102E;color:#fff;border:none;font-weight:600;cursor:pointer}
+button.green{background:#27AE60}
+button.blue{background:#1E5BA8}
+button.gray{background:#E8EBF2;color:#1E5BA8}
+button.red{background:#C0392B}
+button.small{padding:5px 10px;font-size:12px;width:auto;margin:0 2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.staff-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #eee}
+.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:11px;width:100%}
+th,td{border:1px solid #E8EBF2;padding:5px;text-align:center;white-space:nowrap}
+th{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;font-weight:600;position:sticky;top:0}
+td.name-cell{text-align:left;font-weight:600;background:#FAFBFD;position:sticky;left:0;z-index:2;min-width:120px}
+.cell{display:inline-block;padding:4px 6px;border-radius:4px;font-weight:700;font-size:11px;min-width:26px}
+.cM{background:#FFF3B0;color:#7D6608}
+.cE{background:#FFD6A5;color:#7D4A00}
+.cE4{background:#FFC6FF;color:#8E2DE2}
+.cN{background:#A0C4FF;color:#0B3D91}
+.cN12{background:#A0C4FF;color:#0B3D91}
+.cD{background:#BDB2FF;color:#4A1D96}
+.cX{background:#CAFFBF;color:#1E8449}
+.cOFF{background:#E5E5E5;color:#555}
+.cEL{background:#FDFFB6;color:#7D6608}
+.cCL{background:#FDFFB6;color:#7D6608}
+.cAL{background:#FDFFB6;color:#7D6608}
+.cCPL{background:#FFD6A5;color:#7D4A00}
+.cSL{background:#FFC9DE;color:#A61E4D}
+.cML{background:#D0BFFF;color:#5F3DC4}
+.cGH{background:#FFADAD;color:#922B21}
+.c-empty{background:#FAFBFD;color:#CCC}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid #F0F2F5;display:flex;overflow-x:auto;z-index:40;box-shadow:0 -3px 12px rgba(0,0,0,.08)}
+.nav button{flex:1;background:none;color:#888;border:none;padding:8px 6px;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:60px;border-radius:0;margin:0}
+.nav button.active{color:#C8102E}
+.nav button .ic{font-size:18px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:25px;color:#fff;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:.3s;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:90%;text-align:center;background:#27AE60}
+.toast.show{opacity:1}
+.login-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#C8102E,#1E5BA8)}
+.login-box{background:#fff;border-radius:20px;padding:30px 24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.login-box .logo-big{width:80px;height:80px;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px}
+.login-box h1{text-align:center;color:#C8102E;font-size:20px;font-weight:800;margin-bottom:4px}
+.login-box p{text-align:center;color:#666;font-size:11px;font-weight:600;margin-bottom:20px}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-/* ============================================================
-   FIREBASE INIT
-   ============================================================ */
-const firebaseConfig = {
+var firebaseConfig = {
   apiKey: "AIzaSyB4uyNiVe5CQ-vAZalcYpQxz2XCq4XY17o",
   authDomain: "phlebotomy-roster-f618f.firebaseapp.com",
   databaseURL: "https://phlebotomy-roster-f618f-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -74,1812 +77,850 @@ const firebaseConfig = {
   appId: "1:433203658029:web:bf2a31f75f4c3273df27a4"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+var db = firebase.database();
 
-/* ============================================================
-   GLOBAL STATE
-   ============================================================ */
-const S = {
-  user: null,
-  view: 'dashboard',
-  periodId: null,
-  techPeriodId: null,
-  chatWith: null,
-  chatType: 'group'
-};
+var App = { user: null, view: 'dashboard', periodId: null, cache: {} };
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
-function $(id) { return document.getElementById(id); }
-function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function uid() { return 'id_' + Date.now() + '_' + Math.floor(Math.random() * 1000); }
+function uid() { return 'x' + Date.now() + Math.floor(Math.random() * 1000); }
 function today() { return new Date().toISOString().slice(0, 10); }
-function fmtDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }); }
-function fmtTime(d) { return new Date(d).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }); }
-function dayName(d) { const dt = new Date(d + 'T00:00:00'); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()]; }
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, function(c) {
+    if (c === '&') return '&amp;';
+    if (c === '<') return '&lt;';
+    if (c === '>') return '&gt;';
+    if (c === '"') return '&quot;';
+    return '&#39;';
+  });
+}
+function toast(msg, type) {
+  var t = document.createElement('div');
+  t.className = 'toast';
+  if (type === 'error') t.style.background = '#C0392B';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.classList.add('show'); }, 20);
+  setTimeout(function() {
+    t.classList.remove('show');
+    setTimeout(function() { t.remove(); }, 300);
+  }, 2500);
+}
 function isSunday(d) { return new Date(d + 'T00:00:00').getDay() === 0; }
 function isSaturday(d) { return new Date(d + 'T00:00:00').getDay() === 6; }
+function dayName(d) {
+  var dt = new Date(d + 'T00:00:00');
+  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+}
+function fmtDate(d) {
+  var dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+}
+function initials(n) {
+  if (!n) return '?';
+  var parts = n.split(' ');
+  var result = '';
+  for (var i = 0; i < Math.min(2, parts.length); i++) {
+    if (parts[i]) result += parts[i][0];
+  }
+  return result.toUpperCase();
+}
 function datesBetween(s, e) {
-  const out = [];
-  const d = new Date(s + 'T00:00:00');
-  const end = new Date(e + 'T00:00:00');
+  var out = [];
+  var d = new Date(s + 'T00:00:00');
+  var end = new Date(e + 'T00:00:00');
   while (d <= end) {
     out.push(d.toISOString().slice(0, 10));
     d.setDate(d.getDate() + 1);
   }
   return out;
 }
-function initials(name) {
-  return (name || '?').split(' ').map(x => x[0]).slice(0, 2).join('').toUpperCase();
-}
 
-function toast(msg, type) {
-  type = type || 'success';
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.style.background = type === 'error' ? '#C0392B' : type === 'info' ? '#1E5BA8' : '#27AE60';
-  t.style.color = '#fff';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.classList.add('show'), 20);
-  setTimeout(() => {
-    t.classList.remove('show');
-    setTimeout(() => t.remove(), 300);
-  }, 2800);
-}
-
-/* ============================================================
-   FIREBASE CACHE
-   ============================================================ */
-const Cache = {
-  data: {},
-  listeners: [],
-  init() {
-    const keys = ['users', 'staff', 'technologists', 'periods', 'assignments',
-                  'techPeriods', 'techAssignments', 'leave', 'overtime', 'exchanges',
-                  'audit', 'settings', 'notifications', 'chat', 'holidays'];
-    keys.forEach(k => {
-      db.ref(k).on('value', snap => {
-        this.data[k] = snap.val();
-        if (k === 'settings' && !this.data[k]) {
-          db.ref('settings').set({
-            hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
-            department: 'Laboratory and Blood Bank',
-            app_title: 'Phlebotomist Roster',
-            whatsapp_bot: 'FlipBotMe',
-            address: 'Islamabad, Pakistan'
-          });
-        }
-        if (k === 'users' && !this.data[k]) {
-          db.ref('users').set({
-            admin: {
-              username: 'admin',
-              password: 'admin123',
-              role: 'supervisor',
-              active: true,
-              mobile: '03001234567',
-              name: 'Admin'
-            }
-          });
-        }
-        if (S.user) render();
-      });
+function initCache() {
+  var keys = ['users', 'staff', 'periods', 'assignments', 'leave', 'holidays', 'settings', 'audit'];
+  keys.forEach(function(k) {
+    db.ref(k).on('value', function(snap) {
+      App.cache[k] = snap.val();
+      if (k === 'users' && !App.cache[k]) {
+        db.ref('users').set({
+          admin: {
+            username: 'admin',
+            password: 'admin123',
+            role: 'supervisor',
+            active: true,
+            mobile: '03001234567',
+            name: 'Admin'
+          }
+        });
+      }
+      if (k === 'settings' && !App.cache[k]) {
+        db.ref('settings').set({
+          hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
+          department: 'Laboratory and Blood Bank',
+          app_title: 'Phlebotomist Roster'
+        });
+      }
+      if (App.user) render();
     });
-  },
-  get(k, def) { return this.data[k] ?? def; },
-  set(k, v) {
-    this.data[k] = v;
-    return db.ref(k).set(v);
-  },
-  push(k, v) {
-    const ref = db.ref(k).push();
-    return ref.set(v).then(() => ref.key);
-  }
-};
-
-/* ============================================================
-   AUDIT + NOTIFICATIONS
-   ============================================================ */
-function audit(action, entity, oldv, newv, reason) {
-  const log = Cache.get('audit', {}) || {};
-  const arr = Object.values(log);
-  const entry = {
+  });
+}
+function save(k, v) {
+  App.cache[k] = v;
+  return db.ref(k).set(v);
+}
+function get(k, def) {
+  if (App.cache[k] !== undefined && App.cache[k] !== null) return App.cache[k];
+  return def || {};
+}
+function logAudit(action, oldv, newv) {
+  var log = get('audit', {});
+  var arr = Object.values(log);
+  arr.unshift({
     id: uid(),
-    user: S.user ? S.user.username : 'system',
-    user_name: S.user ? (S.user.name || S.user.username) : 'system',
+    user: App.user ? App.user.username : 'system',
     action: action,
-    entity: entity,
-    old: oldv ?? null,
-    new: newv ?? null,
-    reason: reason || null,
+    old: oldv,
+    new: newv,
     at: new Date().toISOString()
-  };
-  arr.unshift(entry);
-  const obj = {};
-  arr.slice(0, 1000).forEach(x => { obj[x.id] = x; });
-  Cache.set('audit', obj);
+  });
+  var obj = {};
+  arr.slice(0, 500).forEach(function(x) { obj[x.id] = x; });
+  save('audit', obj);
 }
 
-function notifyAll(title, body, type) {
-  const notifs = Cache.get('notifications', {}) || {};
-  const id = 'n_' + uid();
-  notifs[id] = {
-    id: id,
-    title: title,
-    body: body,
-    type: type || 'info',
-    at: new Date().toISOString(),
-    read: false
-  };
-  Cache.set('notifications', notifs);
-}
-
-/* ============================================================
-   LOGIN
-   ============================================================ */
 function renderLogin() {
-  const app = $('app');
-  app.innerHTML = `
-    <div class="min-h-screen flex items-center justify-center p-4 kih-gradient">
-      <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-6">
-          <div class="w-20 h-20 mx-auto rounded-2xl kih-gradient flex items-center justify-center text-white font-extrabold text-2xl shadow-lg mb-4">KIH</div>
-          <h1 class="text-2xl font-extrabold text-kihRed">Phlebotomist Roster</h1>
-          <p class="text-xs font-semibold text-gray-500 tracking-wide mt-1">KULSUM INTERNATIONAL HOSPITAL</p>
-        </div>
-        <input id="loginUser" type="text" placeholder="Mobile Number / Username" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3 text-base focus:border-kihRed" autocomplete="username">
-        <input id="loginPass" type="password" placeholder="Password" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3 text-base focus:border-kihRed" autocomplete="current-password">
-        <button onclick="doLogin()" class="w-full py-3 bg-kihRed text-white rounded-lg font-bold text-base hover:opacity-90">🔐 Login</button>
-        <div class="text-center mt-4">
-          <button onclick="showForgot()" class="text-kihBlue text-sm font-semibold hover:underline">Forgot Password?</button>
-        </div>
-        <div class="text-center text-xs text-gray-400 mt-4">Admin: admin / admin123</div>
-      </div>
-    </div>`;
-  $('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('app').innerHTML =
+    '<div class="login-bg"><div class="login-box">' +
+    '<div class="logo-big">KIH</div>' +
+    '<h1>Phlebotomist Roster</h1>' +
+    '<p>KULSUM INTERNATIONAL HOSPITAL</p>' +
+    '<input id="lu" placeholder="Mobile / Username" autocomplete="username">' +
+    '<input id="lp" type="password" placeholder="Password" autocomplete="current-password">' +
+    '<button onclick="doLogin()">🔐 Login</button>' +
+    '<div style="text-align:center;margin-top:14px;font-size:11px;color:#999">Admin: admin / admin123</div>' +
+    '</div></div>';
+  document.getElementById('lp').onkeydown = function(e) {
+    if (e.key === 'Enter') doLogin();
+  };
 }
 
 function doLogin() {
-  const u = $('loginUser').value.trim();
-  const p = $('loginPass').value;
-  if (!u || !p) { toast('Enter mobile and password', 'error'); return; }
-  const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(function(x) {
+  var u = document.getElementById('lu').value.trim();
+  var p = document.getElementById('lp').value;
+  if (!u || !p) { toast('Enter credentials', 'error'); return; }
+  var users = get('users', {});
+  var user = Object.values(users).find(function(x) {
     return (x.username === u || x.mobile === u) && x.password === p;
   });
   if (!user) { toast('Invalid credentials', 'error'); return; }
-  if (user.active === false) { toast('Account disabled', 'error'); return; }
-  S.user = {
+  App.user = {
     username: user.username,
     name: user.name || user.username,
     role: user.role,
-    staff_id: user.staff_id || null,
-    mobile: user.mobile || user.username
+    staff_id: user.staff_id || null
   };
-  localStorage.setItem('phleb_user', JSON.stringify(S.user));
-  S.view = 'dashboard';
-  toast('Welcome ' + (user.name || user.username));
+  localStorage.setItem('phleb_user', JSON.stringify(App.user));
+  App.view = 'dashboard';
   render();
 }
 
 function doLogout() {
   if (!confirm('Logout?')) return;
-  S.user = null;
+  App.user = null;
   localStorage.removeItem('phleb_user');
   render();
 }
 
-function showForgot() {
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">🔑 Forgot Password</h2>
-      <p class="text-sm text-gray-600 mb-3">Enter your registered mobile number</p>
-      <input id="fgMobile" placeholder="Mobile Number" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3" inputmode="tel">
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold">Cancel</button>
-        <button onclick="sendOTP()" class="flex-1 py-3 bg-kihRed text-white rounded-lg font-semibold">Send OTP</button>
-      </div>
-      <div id="fgStatus" class="mt-3 text-sm"></div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-function sendOTP() {
-  const mobile = $('fgMobile').value.trim();
-  if (!mobile) { toast('Enter mobile', 'error'); return; }
-  const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(function(x) {
-    return x.username === mobile || x.mobile === mobile;
-  });
-  if (!user) {
-    $('fgStatus').innerHTML = '<span class="text-red-600">Mobile not registered</span>';
-    return;
-  }
-  const otp = String(Math.floor(100000 + Math.random() * 900000));
-  sessionStorage.setItem('otp_' + mobile, otp);
-  $('fgStatus').innerHTML = `
-    <div class="bg-orange-100 p-3 rounded-lg text-orange-700 font-semibold mb-3">
-      Demo OTP: <span class="text-xl tracking-widest">${otp}</span>
-    </div>
-    <input id="fgOTP" placeholder="Enter OTP" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3" inputmode="numeric" maxlength="6">
-    <input id="fgNewPass" type="password" placeholder="New Password (min 6 chars)" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg mb-3">
-    <button onclick="verifyOTP('${mobile}')" class="w-full py-3 bg-green-600 text-white rounded-lg font-semibold">Reset Password</button>`;
-}
-
-function verifyOTP(mobile) {
-  const entered = $('fgOTP').value.trim();
-  const newPass = $('fgNewPass').value;
-  const savedOTP = sessionStorage.getItem('otp_' + mobile);
-  if (entered !== savedOTP) { toast('Invalid OTP', 'error'); return; }
-  if (!newPass || newPass.length < 6) { toast('Password must be 6+ chars', 'error'); return; }
-  const users = Cache.get('users', {}) || {};
-  const user = Object.values(users).find(function(x) {
-    return x.username === mobile || x.mobile === mobile;
-  });
-  user.password = newPass;
-  Cache.set('users', users);
-  audit('PASSWORD_RESET', 'user', null, mobile);
-  sessionStorage.removeItem('otp_' + mobile);
-  document.querySelector('.modal-bg').remove();
-  toast('Password reset! Login now.');
-}
-
-/* ============================================================
-   MAIN RENDER
-   ============================================================ */
 function render() {
-  if (!S.user) { renderLogin(); return; }
-  const v = S.view;
-  let body = '';
-  if (v === 'dashboard') body = viewDashboard();
+  if (!App.user) { renderLogin(); return; }
+  var v = App.view;
+  var body = '';
+  if (v === 'dashboard') body = viewDash();
   else if (v === 'roster') body = viewRoster();
   else if (v === 'staff') body = viewStaff();
   else if (v === 'leave') body = viewLeave();
-  else if (v === 'overtime') body = viewOvertime();
-  else if (v === 'exchange') body = viewExchange();
-  else if (v === 'chat') body = viewChat();
-  else if (v === 'notifications') body = viewNotifications();
-  else if (v === 'reports') body = viewReports();
-  else if (v === 'technologist') body = viewTechnologist();
   else if (v === 'audit') body = viewAudit();
   else if (v === 'settings') body = viewSettings();
-  else body = '<div class="text-center text-gray-400 p-10">Unknown view</div>';
+  else body = '<div class="card">Unknown view</div>';
 
-  const isSup = S.user.role === 'supervisor';
-  const navItems = isSup
-    ? [['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['technologist','🔬','Techno'],['leave','🏖','Leave'],['exchange','🔄','Exchange'],['overtime','⏱','OT'],['chat','💬','Chat'],['notifications','🔔','Bell'],['reports','📊','Reports'],['audit','📜','Audit'],['settings','⚙','Set']]
-    : [['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave'],['exchange','🔄','Exchange'],['chat','💬','Chat'],['notifications','🔔','Bell']];
+  var isSup = App.user.role === 'supervisor';
+  var nav = isSup
+    ? [['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['leave','🏖','Leave'],['audit','📜','Audit'],['settings','⚙','Set']]
+    : [['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave']];
 
-  const unreadNum = Object.values(Cache.get('notifications', {}) || {}).filter(n => !n.read).length;
+  var navHtml = nav.map(function(item) {
+    var cls = App.view === item[0] ? 'active' : '';
+    return '<button class="' + cls + '" onclick="App.view=\'' + item[0] + '\';render()"><span class="ic">' + item[1] + '</span>' + item[2] + '</button>';
+  }).join('');
 
-  $('app').innerHTML = `
-    <div class="kih-gradient text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-40 shadow-lg">
-      <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-kihRed font-extrabold text-sm shrink-0">KIH</div>
-      <div class="flex-1 min-w-0">
-        <h1 class="text-sm font-bold truncate">${esc((Cache.get('settings', {}) || {}).app_title || 'Phlebotomist Roster')}</h1>
-        <div class="text-xs opacity-85">${esc(S.user.name)} · ${isSup ? 'Supervisor' : 'Staff'}</div>
-      </div>
-      <button onclick="doLogout()" class="bg-white/20 px-3 py-1.5 rounded-lg text-xs font-semibold">Logout</button>
-    </div>
-    <div class="p-3 max-w-5xl mx-auto" style="padding-bottom: 84px;">${body}</div>
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-100 flex overflow-x-auto z-40 shadow-2xl" style="scrollbar-width:none;">
-      ${navItems.map(function(item) {
-        const k = item[0], i = item[1], l = item[2];
-        const badge = (k === 'notifications' && unreadNum) ? '<span class="bg-kihRed text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 font-bold">' + unreadNum + '</span>' : '';
-        return '<button class="nav-btn ' + (S.view === k ? 'active' : '') + '" onclick="go(\'' + k + '\')"><span class="ico">' + i + '</span>' + l + badge + '</button>';
-      }).join('')}
-    </nav>`;
+  var title = 'Phlebotomist Roster';
+  var st = get('settings', {});
+  if (st.app_title) title = st.app_title;
+
+  document.getElementById('app').innerHTML =
+    '<div class="header">' +
+    '<div class="logo">KIH</div>' +
+    '<h1>' + esc(title) + '</h1>' +
+    '<button onclick="doLogout()">Logout</button>' +
+    '</div>' +
+    '<div class="container">' + body + '</div>' +
+    '<div class="nav">' + navHtml + '</div>';
 }
 
-function go(v) {
-  S.view = v;
-  render();
-  window.scrollTo(0, 0);
-}
-
-/* ============================================================
-   DASHBOARD
-   ============================================================ */
-function viewDashboard() {
-  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
-  const periods = Object.values(Cache.get('periods', {}) || {});
-  const t = today();
-  const cp = periods.find(p => p.start <= t && p.end >= t);
-  const asg = Cache.get('assignments', {}) || {};
-  const lv = Object.values(Cache.get('leave', {}) || {}).filter(l => l.start <= t && l.end >= t && l.status === 'Approved');
-  const ex = Object.values(Cache.get('exchanges', {}) || {}).filter(e => e.status === 'Pending');
-
-  let td = {};
-  if (cp) {
-    const pd = asg[cp.id] || {};
-    staff.forEach(s => {
-      const c = pd[s.id + '_' + t];
+function viewDash() {
+  var staff = Object.values(get('staff', {})).filter(function(s) { return s.status === 'Active'; });
+  var periods = Object.values(get('periods', {}));
+  var t = today();
+  var cp = periods.find(function(p) { return p.start <= t && p.end >= t; });
+  var asg = get('assignments', {});
+  var td = {};
+  if (cp && asg[cp.id]) {
+    staff.forEach(function(s) {
+      var c = asg[cp.id][s.id + '_' + t];
       if (c) td[c] = (td[c] || 0) + 1;
     });
   }
 
-  const sundayHoliday = isSunday(t) || (Object.values(Cache.get('holidays', {}) || {}).some(h => h.date === t && h.active));
+  var periodHtml = '<div style="text-align:center;color:#999;padding:20px">No active period</div>';
+  if (cp) {
+    var badgeColor = cp.status === 'Published' ? 'background:#CAFFBF;color:#1E8449' : 'background:#FFF3B0;color:#7D6608';
+    periodHtml = '<div style="font-weight:700">' + esc(cp.name) + '</div>' +
+      '<div style="color:#666;font-size:12px;margin-top:4px">' + fmtDate(cp.start) + ' → ' + fmtDate(cp.end) + '</div>' +
+      '<div style="margin-top:6px"><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;' + badgeColor + '">' + cp.status + '</span></div>';
+  }
 
-  return `
-    <div class="grid grid-cols-2 gap-3 mb-3">
-      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-kihRed">
-        <div class="text-2xl font-extrabold text-kihBlue">${staff.length}</div>
-        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Active Staff</div>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-green-500">
-        <div class="text-2xl font-extrabold text-kihBlue">${lv.length}</div>
-        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">On Leave</div>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-orange-500">
-        <div class="text-2xl font-extrabold text-kihBlue">${ex.length}</div>
-        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Pending Exchange</div>
-      </div>
-      <div class="bg-white rounded-xl p-4 shadow-sm border-l-4 border-kihBlue">
-        <div class="text-2xl font-extrabold text-kihBlue">${Object.values(Cache.get('overtime', {}) || {}).length}</div>
-        <div class="text-xs text-gray-500 font-semibold uppercase mt-1">Overtime</div>
-      </div>
-    </div>
-    ${sundayHoliday ? '<div class="bg-orange-50 rounded-xl p-4 mb-3 border border-orange-200"><div class="font-bold text-orange-700 mb-1">🎉 ' + (isSunday(t) ? 'Sunday' : 'Gazetted Holiday') + '</div><div class="text-sm text-orange-600">Today: 5 ON Duty, باقی OFF</div></div>' : ''}
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-2">📅 Current Period</h2>
-      ${cp ? '<div class="font-bold text-base">' + esc(cp.name) + '</div><div class="text-xs text-gray-500 mt-1">' + fmtDate(cp.start) + ' → ' + fmtDate(cp.end) + '</div><div class="mt-2"><span class="text-xs font-bold uppercase px-2 py-1 rounded-full ' + (cp.status === 'Published' ? 'bg-green-100 text-green-700' : cp.status === 'Locked' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + cp.status + '</span></div>' : '<div class="text-center text-gray-400 py-6">No active period</div>'}
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-2">📊 Today's Duties</h2>
-      ${Object.keys(td).length ? '<div class="flex flex-wrap gap-2">' + Object.entries(td).map(e => '<span class="cell cell-' + e[0] + '">' + e[0] + ': ' + e[1] + '</span>').join('') + '</div>' : '<div class="text-center text-gray-400 py-6">No duties today</div>'}
-    </div>`;
+  var dutyHtml = '<div style="text-align:center;color:#999;padding:20px">No duties today</div>';
+  var tdKeys = Object.keys(td);
+  if (tdKeys.length) {
+    dutyHtml = tdKeys.map(function(c) {
+      return '<span class="cell c' + c + '">' + c + ': ' + td[c] + '</span> ';
+    }).join('');
+  }
+
+  return '<div class="card"><h2>📅 Current Period</h2>' + periodHtml + '</div>' +
+    '<div class="card"><h2>👥 Staff: ' + staff.length + ' Active</h2></div>' +
+    '<div class="card"><h2>📊 Today\'s Duties (' + fmtDate(t) + ')</h2>' + dutyHtml + '</div>';
 }
 
-/* ============================================================
-   STAFF MANAGEMENT
-   ============================================================ */
 function viewStaff() {
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const isSup = S.user.role === 'supervisor';
-
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">👥 Staff (${staff.length})</h2>
-      ${isSup ? '<button onclick="showAddStaff()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-3">➕ Add New Staff</button>' : ''}
-      <div class="border-t border-gray-100 pt-3">
-        ${staff.length ? staff.map(s => `
-          <div class="flex items-center gap-3 py-3 border-b border-gray-100">
-            <div class="w-11 h-11 rounded-full kih-gradient text-white flex items-center justify-center font-bold shrink-0">${initials(s.name)}</div>
-            <div class="flex-1 min-w-0">
-              <div class="font-bold text-sm truncate">${esc(s.name)}</div>
-              <div class="text-xs text-gray-500">${esc(s.designation || 'Phlebotomist')} · 📱 ${esc(s.mobile || '')}</div>
-              <div class="mt-1 flex flex-wrap gap-1">
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${s.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${s.status}</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">${esc(s.gender || 'Male')}</span>
-              </div>
-            </div>
-            ${isSup ? '<div class="flex gap-1"><button onclick="editStaff(\'' + s.id + '\')" class="text-xs bg-gray-200 text-kihBlue px-2 py-1 rounded">✏️</button><button onclick="toggleStaff(\'' + s.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">${s.status === 'Active' ? '⏸' : '▶'}</button></div>' : ''}
-          </div>`).join('') : '<div class="text-center text-gray-400 py-6">No staff added yet</div>'}
-      </div>
-    </div>`;
+  var staff = Object.values(get('staff', {}));
+  var isSup = App.user.role === 'supervisor';
+  var html = '<div class="card"><h2>👥 Staff (' + staff.length + ')</h2>';
+  if (isSup) html += '<button class="green" onclick="addStaff()">➕ Add New Staff</button>';
+  if (!staff.length) {
+    html += '<div style="text-align:center;color:#999;padding:20px">No staff</div>';
+  } else {
+    staff.forEach(function(s) {
+      var statusStyle = s.status === 'Active' ? 'background:#E8F5E9;color:#27AE60' : 'background:#FFEBEE;color:#C8102E';
+      html += '<div class="staff-row">' +
+        '<div class="avatar">' + initials(s.name) + '</div>' +
+        '<div style="flex:1">' +
+        '<div style="font-weight:700;font-size:14px">' + esc(s.name) + '</div>' +
+        '<div style="font-size:11px;color:#888">' + esc(s.designation || 'Phlebotomist') + ' · 📱 ' + esc(s.mobile || '') + '</div>' +
+        '<div style="margin-top:3px">' +
+        '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;' + statusStyle + '">' + s.status + '</span> ' +
+        '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#F0F2F5;color:#555">' + esc(s.gender || 'Male') + '</span>' +
+        '</div></div>';
+      if (isSup) {
+        html += '<button class="small gray" onclick="editStaff(\'' + s.id + '\')">✏️</button>';
+        var toggleCls = s.status === 'Active' ? 'red' : 'green';
+        var toggleLabel = s.status === 'Active' ? '⏸' : '▶';
+        html += '<button class="small ' + toggleCls + '" onclick="toggleStaff(\'' + s.id + '\')">' + toggleLabel + '</button>';
+      }
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  return html;
 }
 
-function showAddStaff() {
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add New Staff</h2>
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <input id="nsName" placeholder="Full Name *" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <select id="nsGender" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-          <option value="">Gender *</option>
-          <option>Male</option>
-          <option>Female</option>
-        </select>
-      </div>
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <input id="nsMobile" placeholder="Mobile *" class="px-3 py-2 border-2 border-gray-200 rounded-lg" inputmode="tel">
-        <input id="nsEmpId" placeholder="Employee ID *" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <input id="nsDesig" placeholder="Designation *" value="Phlebotomist" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <input id="nsPassword" placeholder="Password (default: 123456)" value="123456" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-        <button onclick="saveNewStaff()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function saveNewStaff() {
-  const name = $('nsName').value.trim();
-  const gender = $('nsGender').value;
-  const mobile = $('nsMobile').value.trim();
-  const empId = $('nsEmpId').value.trim();
-  const desig = $('nsDesig').value.trim();
-  const password = $('nsPassword').value || '123456';
-
-  if (!name || !gender || !mobile || !empId || !desig) {
-    toast('All mandatory fields required', 'error');
-    return;
-  }
-
-  const staff = Cache.get('staff', {}) || {};
-  if (Object.values(staff).find(s => s.mobile === mobile)) {
-    toast('Mobile already registered', 'error');
-    return;
-  }
-
-  const newId = 's_' + uid();
-  staff[newId] = {
-    id: newId,
+function addStaff() {
+  var name = prompt('Staff Name:');
+  if (!name) return;
+  var gender = prompt('Gender (Male/Female):', 'Male');
+  if (!gender) return;
+  var mobile = prompt('Mobile Number:');
+  if (!mobile) return;
+  var empId = prompt('Employee ID:');
+  if (!empId) return;
+  var designation = prompt('Designation:', 'Phlebotomist') || 'Phlebotomist';
+  var staff = get('staff', {});
+  var exists = Object.values(staff).find(function(s) { return s.mobile === mobile; });
+  if (exists) { toast('Mobile already registered', 'error'); return; }
+  var id = 's_' + uid();
+  staff[id] = {
+    id: id,
     name: name,
     gender: gender,
     mobile: mobile,
     empId: empId,
-    designation: desig,
+    designation: designation,
     status: 'Active',
     createdAt: new Date().toISOString()
   };
-  await Cache.set('staff', staff);
-
-  const users = Cache.get('users', {}) || {};
+  save('staff', staff);
+  var users = get('users', {});
   users[mobile] = {
     username: mobile,
-    password: password,
+    password: '123456',
     role: 'staff',
-    staff_id: newId,
+    staff_id: id,
     name: name,
     mobile: mobile,
     active: true
   };
-  await Cache.set('users', users);
-
-  audit('CREATE_STAFF', 'staff', null, name);
-  document.querySelector('.modal-bg').remove();
+  save('users', users);
+  logAudit('CREATE_STAFF', null, name);
   toast('Staff added ✅');
   render();
 }
 
 function editStaff(id) {
-  const staff = Cache.get('staff', {}) || {};
-  const s = staff[id];
+  var staff = get('staff', {});
+  var s = staff[id];
   if (!s) return;
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">✏️ Edit Staff</h2>
-      <input id="esName" value="${esc(s.name)}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <select id="esGender" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-          <option ${s.gender === 'Male' ? 'selected' : ''}>Male</option>
-          <option ${s.gender === 'Female' ? 'selected' : ''}>Female</option>
-        </select>
-        <input id="esMobile" value="${esc(s.mobile || '')}" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <div class="grid grid-cols-2 gap-2 mb-3">
-        <input id="esEmpId" value="${esc(s.empId || '')}" placeholder="Employee ID" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <input id="esDesig" value="${esc(s.designation || '')}" placeholder="Designation" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <select id="esStatus" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
-        <option ${s.status === 'Active' ? 'selected' : ''}>Active</option>
-        <option ${s.status === 'Inactive' ? 'selected' : ''}>Inactive</option>
-      </select>
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-        <button onclick="saveEditStaff('${id}')" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function saveEditStaff(id) {
-  const staff = Cache.get('staff', {}) || {};
-  const s = staff[id];
-  if (!s) return;
-  s.name = $('esName').value.trim();
-  s.gender = $('esGender').value;
-  s.mobile = $('esMobile').value.trim();
-  s.empId = $('esEmpId').value.trim();
-  s.designation = $('esDesig').value.trim();
-  s.status = $('esStatus').value;
-  await Cache.set('staff', staff);
-  audit('EDIT_STAFF', 'staff', null, s.name);
-  document.querySelector('.modal-bg').remove();
+  var name = prompt('Name:', s.name);
+  if (name === null) return;
+  var gender = prompt('Gender:', s.gender);
+  if (gender === null) return;
+  var mobile = prompt('Mobile:', s.mobile);
+  if (mobile === null) return;
+  var empId = prompt('Employee ID:', s.empId);
+  if (empId === null) return;
+  var designation = prompt('Designation:', s.designation);
+  if (designation === null) return;
+  s.name = name;
+  s.gender = gender;
+  s.mobile = mobile;
+  s.empId = empId;
+  s.designation = designation;
+  save('staff', staff);
+  logAudit('EDIT_STAFF', null, name);
   toast('Updated ✅');
   render();
 }
 
-async function toggleStaff(id) {
-  const staff = Cache.get('staff', {}) || {};
-  const s = staff[id];
+function toggleStaff(id) {
+  var staff = get('staff', {});
+  var s = staff[id];
   if (!s) return;
   s.status = s.status === 'Active' ? 'Inactive' : 'Active';
-  await Cache.set('staff', staff);
+  save('staff', staff);
   toast(s.status);
   render();
 }
 
-/* ============================================================
-   ROSTER
-   ============================================================ */
 function viewRoster() {
-  const periods = Object.values(Cache.get('periods', {}) || {}).sort((a, b) => b.start.localeCompare(a.start));
-  const isSup = S.user.role === 'supervisor';
+  var periods = Object.values(get('periods', {})).sort(function(a, b) {
+    return b.start.localeCompare(a.start);
+  });
+  var isSup = App.user.role === 'supervisor';
 
   if (!periods.length) {
-    if (!isSup) return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">No roster yet</div>';
-    return `
-      <div class="bg-white rounded-xl p-4 shadow-sm">
-        <h2 class="text-kihRed font-bold mb-3">📅 Create First Period</h2>
-        <input id="pName" placeholder="Name" value="Sep 2026" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-        <div class="grid grid-cols-2 gap-2 mb-3">
-          <input id="pStart" type="date" value="2026-09-01" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-          <input id="pEnd" type="date" value="2026-09-30" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        </div>
-        <button onclick="createPeriod()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">Create</button>
-      </div>`;
+    if (!isSup) return '<div class="card"><div style="text-align:center;color:#999;padding:20px">No roster</div></div>';
+    return '<div class="card"><h2>📅 Create First Period</h2>' +
+      '<input id="pName" placeholder="Name" value="Sep 2026">' +
+      '<div class="grid2">' +
+      '<input id="pStart" type="date" value="2026-09-01">' +
+      '<input id="pEnd" type="date" value="2026-09-30">' +
+      '</div>' +
+      '<button class="green" onclick="createPeriod()">Create</button>' +
+      '</div>';
   }
 
-  if (!S.periodId) S.periodId = periods[0].id;
-  const period = periods.find(p => p.id === S.periodId) || periods[0];
-  S.periodId = period.id;
+  if (!App.periodId) App.periodId = periods[0].id;
+  var period = periods.find(function(p) { return p.id === App.periodId; }) || periods[0];
+  App.periodId = period.id;
 
-  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
-  const dates = datesBetween(period.start, period.end);
-  const asg = Cache.get('assignments', {}) || {};
-  const pd = asg[period.id] || {};
-  const locked = period.status === 'Locked';
+  var staff = Object.values(get('staff', {})).filter(function(s) { return s.status === 'Active'; });
+  var dates = datesBetween(period.start, period.end);
+  var asg = get('assignments', {});
+  var pd = asg[period.id] || {};
 
-  let gridHtml = '<div class="scroll-x"><table class="w-full text-xs border-collapse"><thead><tr>';
-  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10 text-left">Name</th>';
+  var gridHtml = '<div class="card"><h2>📋 Roster Grid</h2><div class="scroll-x"><table><thead><tr>';
+  gridHtml += '<th>Name</th>';
   dates.forEach(function(d) {
-    const sh = isSunday(d) || (Object.values(Cache.get('holidays', {}) || {}).some(h => h.date === d && h.active));
-    gridHtml += '<th class="' + (sh ? 'bg-orange-500' : 'bg-gradient-to-r from-kihRed to-kihBlue') + ' text-white px-1 py-2 text-center text-[10px] sticky top-0 z-10">' + d.slice(8) + '<br><span class="font-normal opacity-80">' + dayName(d) + '</span></th>';
+    var sun = isSunday(d);
+    var style = sun ? ' style="background:#E67E22"' : '';
+    gridHtml += '<th' + style + '>' + d.slice(8) + '<br><span style="font-size:9px">' + dayName(d) + '</span></th>';
   });
-  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10">O</th>';
-  gridHtml += '<th class="bg-gradient-to-r from-kihRed to-kihBlue text-white px-1 py-2 sticky top-0 z-10">Tot</th>';
-  gridHtml += '</tr></thead><tbody>';
+  gridHtml += '<th>OFF</th><th>Tot</th></tr></thead><tbody>';
 
   staff.forEach(function(s) {
-    let offCount = 0;
-    let totalCount = 0;
-    gridHtml += '<tr>';
-    const isMe = S.user.staff_id === s.id;
-    gridHtml += '<td class="px-1 py-1 text-left font-bold ' + (isMe ? 'bg-orange-50' : '') + '" style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(s.name) + '</td>';
+    var off = 0;
+    var total = 0;
+    gridHtml += '<tr><td class="name-cell">' + esc(s.name) + '</td>';
     dates.forEach(function(d) {
-      const code = pd[s.id + '_' + d] || '';
-      if (code === 'OFF' || code === 'EL' || code === 'CPL' || code === 'CL' || code === 'GH' || code === 'SL' || code === 'AL' || code === 'ML') offCount++;
-      if (code) totalCount++;
-      const cls = code ? 'cell cell-' + code : 'cell cell-empty';
-      gridHtml += '<td class="px-0.5 py-1 text-center border border-gray-100"><span class="' + cls + '" onclick="editCell(\'' + s.id + '\',\'' + d + '\')">' + (code || '·') + '</span></td>';
+      var c = pd[s.id + '_' + d] || '';
+      if (c === 'OFF' || c === 'EL' || c === 'CPL' || c === 'CL' || c === 'GH' || c === 'SL' || c === 'AL' || c === 'ML') off++;
+      if (c) total++;
+      var cls = c ? 'c' + c : 'c-empty';
+      gridHtml += '<td onclick="editCell(\'' + s.id + '\',\'' + d + '\')"><span class="cell ' + cls + '">' + (c || '·') + '</span></td>';
     });
-    gridHtml += '<td class="px-1 py-1 text-center font-bold">' + offCount + '</td>';
-    gridHtml += '<td class="px-1 py-1 text-center font-bold">' + totalCount + '</td>';
-    gridHtml += '</tr>';
+    gridHtml += '<td><b>' + off + '</b></td><td><b>' + total + '</b></td></tr>';
   });
-  gridHtml += '</tbody></table></div>';
+  gridHtml += '</tbody></table></div></div>';
 
-  const opts = periods.map(p => '<option value="' + p.id + '" ' + (p.id === period.id ? 'selected' : '') + '>' + esc(p.name) + '</option>').join('');
+  var opts = periods.map(function(p) {
+    var sel = p.id === period.id ? ' selected' : '';
+    return '<option value="' + p.id + '"' + sel + '>' + esc(p.name) + '</option>';
+  }).join('');
 
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <div class="flex flex-wrap gap-2 items-center mb-3">
-        <select onchange="S.periodId=this.value;render()" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-lg">${opts}</select>
-        <span class="text-xs font-bold uppercase px-2 py-1 rounded-full ${period.status === 'Published' ? 'bg-green-100 text-green-700' : period.status === 'Locked' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">${period.status}</span>
-      </div>
-      <div class="text-xs text-gray-500 mb-3">${fmtDate(period.start)} → ${fmtDate(period.end)}</div>
-      ${isSup ? `
-        <div class="grid grid-cols-2 gap-2">
-          <button onclick="autoGenerate()" class="py-3 bg-green-600 text-white rounded-lg font-bold">⚡ Auto Generate</button>
-          <button onclick="publishRoster()" class="py-3 bg-blue-600 text-white rounded-lg font-bold">📢 Publish</button>
-          ${locked ? '<button onclick="unlockRoster()" class="py-3 bg-orange-500 text-white rounded-lg font-bold">🔓 Unlock</button>' : '<button onclick="lockRoster()" class="py-3 bg-red-600 text-white rounded-lg font-bold">🔒 Lock</button>'}
-          <button onclick="exportExcel()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">📊 Excel</button>
-          <button onclick="exportPDF()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">📄 PDF</button>
-          <button onclick="newPeriodModal()" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">➕ New Period</button>
-          <button onclick="shareWhatsApp('full')" class="py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">💬 WhatsApp</button>
-        </div>
-      ` : '<button onclick="shareWhatsApp(\'staff\')" class="w-full py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">💬 Share My Duties</button>'}
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-2">📋 Roster Grid</h2>
-      <div class="flex flex-wrap gap-1 mb-3 text-[10px]">
-        <span class="cell cell-M">M</span><span class="cell cell-E">E</span>
-        <span class="cell cell-E4">E4</span><span class="cell cell-N12">N12</span>
-        <span class="cell cell-D">D</span><span class="cell cell-X">X</span>
-        <span class="cell cell-OFF">OFF</span><span class="cell cell-CPL">CPL</span>
-      </div>
-      ${isSup ? '<div class="text-xs text-gray-500 italic mb-2">Tap cell to change duty</div>' : ''}
-      ${gridHtml}
-    </div>`;
+  var actions = '';
+  if (isSup) {
+    actions = '<div class="grid2">' +
+      '<button class="green" onclick="autoGenerate()">⚡ Auto Generate</button>' +
+      '<button class="blue" onclick="exportExcel()">📊 Excel</button>' +
+      '<button class="gray" onclick="newPeriod()">➕ New Period</button>' +
+      '<button class="gray" onclick="shareWhatsApp()">💬 WhatsApp</button>' +
+      '</div>';
+  }
+
+  return '<div class="card">' +
+    '<select onchange="App.periodId=this.value;render()">' + opts + '</select>' +
+    '<div style="font-size:12px;color:#666;margin:8px 0">' + fmtDate(period.start) + ' → ' + fmtDate(period.end) + ' | Status: <b>' + period.status + '</b></div>' +
+    actions +
+    '</div>' + gridHtml;
 }
 
-async function createPeriod() {
-  const name = $('pName').value.trim();
-  const start = $('pStart').value;
-  const end = $('pEnd').value;
+function createPeriod() {
+  var name = document.getElementById('pName').value.trim();
+  var start = document.getElementById('pStart').value;
+  var end = document.getElementById('pEnd').value;
   if (!name || !start || !end) { toast('All fields required', 'error'); return; }
-  if (start > end) { toast('Start before end', 'error'); return; }
-  const id = 'p_' + uid();
-  const periods = Cache.get('periods', {}) || {};
-  periods[id] = { id: id, name: name, start: start, end: end, status: 'Draft', created: new Date().toISOString() };
-  await Cache.set('periods', periods);
-  S.periodId = id;
-  audit('CREATE_PERIOD', 'period', null, name);
+  var id = 'p_' + uid();
+  var periods = get('periods', {});
+  periods[id] = {
+    id: id,
+    name: name,
+    start: start,
+    end: end,
+    status: 'Draft',
+    created: new Date().toISOString()
+  };
+  save('periods', periods);
+  App.periodId = id;
   toast('Period created');
   render();
 }
 
-function newPeriodModal() {
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">➕ New Period</h2>
-      <input id="npName" placeholder="Name" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <div class="grid grid-cols-2 gap-2 mb-4">
-        <input id="npStart" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <input id="npEnd" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-        <button onclick="createPeriod2()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Create</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function createPeriod2() {
-  const name = $('npName').value.trim();
-  const start = $('npStart').value;
-  const end = $('npEnd').value;
-  if (!name || !start || !end) { toast('All required', 'error'); return; }
-  const id = 'p_' + uid();
-  const periods = Cache.get('periods', {}) || {};
-  periods[id] = { id: id, name: name, start: start, end: end, status: 'Draft', created: new Date().toISOString() };
-  await Cache.set('periods', periods);
-  S.periodId = id;
-  document.querySelector('.modal-bg').remove();
+function newPeriod() {
+  var name = prompt('Period Name:');
+  if (!name) return;
+  var start = prompt('Start Date (YYYY-MM-DD):');
+  if (!start) return;
+  var end = prompt('End Date (YYYY-MM-DD):');
+  if (!end) return;
+  var id = 'p_' + uid();
+  var periods = get('periods', {});
+  periods[id] = {
+    id: id,
+    name: name,
+    start: start,
+    end: end,
+    status: 'Draft',
+    created: new Date().toISOString()
+  };
+  save('periods', periods);
+  App.periodId = id;
   toast('Created');
   render();
 }
 
 function editCell(staffId, date) {
-  if (S.user.role !== 'supervisor') { toast('Only supervisor', 'error'); return; }
-  const periods = Cache.get('periods', {}) || {};
-  const period = periods[S.periodId];
-  if (!period || period.status === 'Locked') { toast('Locked', 'error'); return; }
-
-  const allCodes = ['M', 'E', 'E4', 'N12', 'N', 'D', 'X', 'OFF', 'EL', 'CPL', 'CL', 'GH', 'SL', 'AL', 'ML'];
-  const asg = Cache.get('assignments', {}) || {};
-  const pd = asg[period.id] || {};
-  const cur = pd[staffId + '_' + date] || '';
-
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-3">Change Duty</h2>
-      <div class="text-xs text-gray-500 mb-3">${fmtDate(date)} — Current: <b>${cur || 'none'}</b></div>
-      <div class="flex flex-wrap gap-2 mb-4">
-        ${allCodes.map(c => '<button class="pill ' + (c === cur ? 'on' : '') + '" onclick="setDuty(\'' + staffId + '\',\'' + date + '\',\'' + c + '\')">' + c + '</button>').join('')}
-      </div>
-      <button onclick="this.closest('.modal-bg').remove()" class="w-full py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function setDuty(staffId, date, code) {
-  const asg = Cache.get('assignments', {}) || {};
-  const pd = asg[S.periodId] || {};
-  const old = pd[staffId + '_' + date] || null;
-  if (old === code) { document.querySelector('.modal-bg').remove(); return; }
+  if (App.user.role !== 'supervisor') { toast('Only supervisor', 'error'); return; }
+  var periods = get('periods', {});
+  var period = periods[App.periodId];
+  if (!period) return;
+  var options = ['M', 'E', 'E4', 'N12', 'N', 'D', 'X', 'OFF', 'EL', 'CPL', 'CL', 'GH', 'SL', 'AL', 'ML'];
+  var asg = get('assignments', {});
+  var pd = asg[period.id] || {};
+  var cur = pd[staffId + '_' + date] || '';
+  var choice = prompt('Choose duty:\n' + options.join(', ') + '\n\nCurrent: ' + (cur || 'none'), cur);
+  if (!choice) return;
+  var code = choice.toUpperCase().trim();
+  if (options.indexOf(code) === -1) { toast('Invalid code', 'error'); return; }
   pd[staffId + '_' + date] = code;
-  asg[S.periodId] = pd;
-  await Cache.set('assignments', asg);
-  audit('EDIT_DUTY', 'assignment', old, code);
-  const staff = Cache.get('staff', {})[staffId];
-  if (staff) notifyAll('Duty Changed', staff.name + "'s " + fmtDate(date) + " from " + (old || '—') + " to " + code, 'duty');
-  document.querySelector('.modal-bg').remove();
+  asg[period.id] = pd;
+  save('assignments', asg);
+  logAudit('EDIT_DUTY', cur, code);
   toast('Updated');
   render();
 }
 
-async function publishRoster() {
-  const periods = Cache.get('periods', {}) || {};
-  const p = periods[S.periodId];
-  if (!p) return;
-  p.status = 'Published';
-  p.published = new Date().toISOString();
-  await Cache.set('periods', periods);
-  audit('PUBLISH', 'period', 'Draft', 'Published');
-  notifyAll('Roster Published', p.name + ' is live', 'roster');
-  toast('Published');
-  render();
-}
-
-async function lockRoster() {
-  if (!confirm('Lock roster?')) return;
-  const periods = Cache.get('periods', {}) || {};
-  const p = periods[S.periodId];
-  if (!p) return;
-  p.status = 'Locked';
-  p.locked = new Date().toISOString();
-  await Cache.set('periods', periods);
-  toast('Locked');
-  render();
-}
-
-async function unlockRoster() {
-  const reason = prompt('Reason:');
-  if (!reason) return;
-  const periods = Cache.get('periods', {}) || {};
-  const p = periods[S.periodId];
-  if (!p) return;
-  p.status = 'Published';
-  p.locked = null;
-  await Cache.set('periods', periods);
-  audit('UNLOCK', 'period', 'Locked', 'Published', reason);
-  toast('Unlocked');
-  render();
-}
-
-/* ============================================================
-   AUTO GENERATE (FIXED - NO SYNTAX ERRORS)
-   ============================================================ */
-async function autoGenerate() {
+function autoGenerate() {
   if (!confirm('Auto Generate roster? Existing assignments will be replaced.')) return;
 
-  const periods = Cache.get('periods', {}) || {};
-  const p = periods[S.periodId];
-  if (!p) return;
+  var periods = get('periods', {});
+  var p = periods[App.periodId];
+  if (!p) { toast('No period', 'error'); return; }
 
-  let staff = Object.values(Cache.get('staff', {}) || {}).filter(function(s) {
+  var staff = Object.values(get('staff', {})).filter(function(s) {
     return s.status === 'Active';
   });
   if (!staff.length) { toast('No active staff', 'error'); return; }
 
-  const leaves = Object.values(Cache.get('leave', {}) || {}).filter(function(l) {
+  var leaves = Object.values(get('leave', {})).filter(function(l) {
     return l.status === 'Approved';
   });
-  const dates = datesBetween(p.start, p.end);
-  const sundaysCount = dates.filter(function(d) { return isSunday(d); }).length;
-  const targetOff = sundaysCount;
+  var dates = datesBetween(p.start, p.end);
+  var sundaysCount = dates.filter(function(d) { return isSunday(d); }).length;
+  var targetOff = sundaysCount;
 
-  const result = {};
-  const stats = {};
+  var result = {};
+  var stats = {};
   staff.forEach(function(s) {
     stats[s.id] = {
-      total: 0,
       offCount: 0,
       counts: {},
-      lastDate: null
+      total: 0
     };
   });
 
-  function onLeave(sid, d) {
-    return leaves.find(function(l) {
-      return l.staff_id === sid && d >= l.start && d <= l.end;
-    });
-  }
+  for (var i = 0; i < dates.length; i++) {
+    var date = dates[i];
+    var sun = isSunday(date);
+    var sat = isSaturday(date) && !sun;
 
-  function isHol(d) {
-    const h = Cache.get('holidays', {}) || {};
-    return Object.values(h).some(function(x) { return x.date === d && x.active; });
-  }
-
-  function isSunHol(d) {
-    return isSunday(d) || isHol(d);
-  }
-
-  let lastRotationIdx = 0;
-
-  for (let di = 0; di < dates.length; di++) {
-    const date = dates[di];
-    const sunHol = isSunHol(date);
-    const sat = isSaturday(date) && !sunHol;
-
-    const availStaff = staff.filter(function(s) {
-      return !onLeave(s.id, date);
+    var availStaff = staff.filter(function(s) {
+      var onLv = leaves.find(function(l) {
+        return l.staff_id === s.id && date >= l.start && date <= l.end;
+      });
+      return !onLv;
     });
 
-    let offToday = 0;
-    if (sunHol) {
+    var offToday = 0;
+    if (sun) {
       offToday = Math.max(0, availStaff.length - 5);
     } else if (sat) {
       offToday = 2;
     } else {
-      const needOff = availStaff.filter(function(s) {
+      var needOff = availStaff.filter(function(s) {
         return stats[s.id].offCount < targetOff;
       });
       if (needOff.length > 0) offToday = 1;
     }
 
-    const offStaffToday = [];
+    var offStaffIds = [];
     if (offToday > 0) {
-      const candidates = availStaff
+      var candidates = availStaff
         .filter(function(s) { return stats[s.id].offCount < targetOff; })
         .sort(function(a, b) {
-          if (stats[a.id].offCount !== stats[b.id].offCount) {
-            return stats[a.id].offCount - stats[b.id].offCount;
-          }
-          return stats[a.id].total - stats[b.id].total;
+          return stats[a.id].offCount - stats[b.id].offCount;
         });
-      for (let i = 0; i < Math.min(offToday, candidates.length); i++) {
-        offStaffToday.push(candidates[i].id);
+      for (var j = 0; j < Math.min(offToday, candidates.length); j++) {
+        offStaffIds.push(candidates[j].id);
       }
     }
 
-    const assignedToday = {};
-    let rule;
-    if (sunHol) {
+    var assigned = {};
+    var rule;
+    if (sun) {
       rule = { M: 2, E: 2, N: 1 };
     } else {
       rule = { M: 3, E: 3, D: 1, N12: 1, E4: 1, X: 1 };
     }
 
-    const queue = [];
-    if (sunHol) {
-      for (let i = 0; i < rule.N; i++) queue.push('N');
-      for (let i = 0; i < rule.M; i++) queue.push('M');
-      for (let i = 0; i < rule.E; i++) queue.push('E');
+    var queue = [];
+    if (sun) {
+      for (var n1 = 0; n1 < rule.N; n1++) queue.push('N');
+      for (var n2 = 0; n2 < rule.M; n2++) queue.push('M');
+      for (var n3 = 0; n3 < rule.E; n3++) queue.push('E');
     } else {
-      for (let i = 0; i < rule.N12; i++) queue.push('N12');
-      for (let i = 0; i < rule.D; i++) queue.push('D');
-      for (let i = 0; i < rule.E4; i++) queue.push('E4');
-      for (let i = 0; i < rule.X; i++) queue.push('X');
-      for (let i = 0; i < rule.M; i++) queue.push('M');
-      for (let i = 0; i < rule.E; i++) queue.push('E');
+      for (var n4 = 0; n4 < rule.N12; n4++) queue.push('N12');
+      for (var n5 = 0; n5 < rule.D; n5++) queue.push('D');
+      for (var n6 = 0; n6 < rule.E4; n6++) queue.push('E4');
+      for (var n7 = 0; n7 < rule.X; n7++) queue.push('X');
+      for (var n8 = 0; n8 < rule.M; n8++) queue.push('M');
+      for (var n9 = 0; n9 < rule.E; n9++) queue.push('E');
     }
 
-    let gyneeM = false;
-    let gyneeE = false;
-    const gyneeMNeeded = !sunHol && rule.M > 0;
-    const gyneeENeeded = !sunHol && rule.E > 0;
+    var gyneeM = false;
+    var gyneeE = false;
 
-    for (let qi = 0; qi < queue.length; qi++) {
-      const code = queue[qi];
-
-      const eligible = availStaff.filter(function(s) {
-        if (assignedToday[s.id]) return false;
-        if (offStaffToday.indexOf(s.id) !== -1) return false;
-
+    for (var q = 0; q < queue.length; q++) {
+      var code = queue[q];
+      var eligible = availStaff.filter(function(s) {
+        if (assigned[s.id]) return false;
+        if (offStaffIds.indexOf(s.id) !== -1) return false;
         if (code === 'D' && s.gender !== 'Female') return false;
         if ((code === 'N12' || code === 'N') && s.gender !== 'Male') return false;
-
-        if (code === 'M' && gyneeMNeeded && !gyneeM) {
-          if (s.gender !== 'Female') return false;
-        }
-        if (code === 'E' && gyneeENeeded && !gyneeE) {
-          if (s.gender !== 'Female') return false;
-        }
-
-        if (code === 'E4' && s.gender !== 'Male') {
-          const maleAvail = availStaff.some(function(x) {
-            return !assignedToday[x.id] &&
-                   offStaffToday.indexOf(x.id) === -1 &&
-                   x.gender === 'Male';
+        if (code === 'M' && !sun && rule.M > 0 && !gyneeM && s.gender !== 'Female') {
+          var femAvailM = availStaff.some(function(x) {
+            return !assigned[x.id] && offStaffIds.indexOf(x.id) === -1 && x.gender === 'Female';
           });
-          if (maleAvail) return false;
+          if (femAvailM) return false;
         }
-
+        if (code === 'E' && !sun && rule.E > 0 && !gyneeE && s.gender !== 'Female') {
+          var femAvailE = availStaff.some(function(x) {
+            return !assigned[x.id] && offStaffIds.indexOf(x.id) === -1 && x.gender === 'Female';
+          });
+          if (femAvailE) return false;
+        }
         return true;
       });
 
       eligible.sort(function(a, b) {
-        const aC = stats[a.id].counts[code] || 0;
-        const bC = stats[b.id].counts[code] || 0;
+        var aC = stats[a.id].counts[code] || 0;
+        var bC = stats[b.id].counts[code] || 0;
         if (aC !== bC) return aC - bC;
         return stats[a.id].total - stats[b.id].total;
       });
 
       if (eligible[0]) {
-        const chosen = eligible[0];
-        result[chosen.id + '_' + date] = code;
-        assignedToday[chosen.id] = true;
-        stats[chosen.id].counts[code] = (stats[chosen.id].counts[code] || 0) + 1;
-        stats[chosen.id].total++;
-
-        if (code === 'M' && gyneeMNeeded && !gyneeM) gyneeM = true;
-        if (code === 'E' && gyneeENeeded && !gyneeE) gyneeE = true;
+        var ch = eligible[0];
+        result[ch.id + '_' + date] = code;
+        assigned[ch.id] = true;
+        stats[ch.id].counts[code] = (stats[ch.id].counts[code] || 0) + 1;
+        stats[ch.id].total++;
+        if (code === 'M' && !sun && !gyneeM) gyneeM = true;
+        if (code === 'E' && !sun && !gyneeE) gyneeE = true;
       }
     }
 
     staff.forEach(function(s) {
       if (result[s.id + '_' + date]) return;
-      const lv = onLeave(s.id, date);
+      var lv = leaves.find(function(l) {
+        return l.staff_id === s.id && date >= l.start && date <= l.end;
+      });
       if (lv) {
         result[s.id + '_' + date] = lv.type || 'EL';
         stats[s.id].offCount++;
-      } else if (offStaffToday.indexOf(s.id) !== -1) {
+      } else if (offStaffIds.indexOf(s.id) !== -1) {
         result[s.id + '_' + date] = 'OFF';
         stats[s.id].offCount++;
       } else {
         result[s.id + '_' + date] = 'OFF';
       }
     });
-
-    if (!sunHol && gyneeMNeeded && !gyneeM) {
-      notifyAll('Gynee Alert', fmtDate(date) + ': Gynee M needs Female', 'alert');
-    }
-    if (!sunHol && gyneeENeeded && !gyneeE) {
-      notifyAll('Gynee Alert', fmtDate(date) + ': Gynee E needs Female', 'alert');
-    }
   }
 
-  const asg = Cache.get('assignments', {}) || {};
+  var asg = get('assignments', {});
   asg[p.id] = result;
-  await Cache.set('assignments', asg);
-  audit('GENERATE_ROSTER', 'period', null, Object.keys(result).length + ' assignments');
-  notifyAll('Roster Generated', Object.keys(result).length + ' assignments for ' + p.name, 'roster');
+  save('assignments', asg);
+  logAudit('GENERATE_ROSTER', null, Object.keys(result).length + ' assignments');
   toast('✅ Generated ' + Object.keys(result).length + ' assignments');
   render();
 }
 
-/* ============================================================
-   LEAVE
-   ============================================================ */
 function viewLeave() {
-  const leave = Object.values(Cache.get('leave', {}) || {});
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const isSup = S.user.role === 'supervisor';
+  var leave = Object.values(get('leave', {}));
+  var staff = Object.values(get('staff', {}));
+  var isSup = App.user.role === 'supervisor';
 
-  return `
-    ${isSup ? `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">🏖 Add Leave</h2>
-      <select id="lStaff" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
-      <select id="lType" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-        <option>EL</option><option>CPL</option><option>CL</option><option>GH</option><option>SL</option><option>AL</option><option>ML</option><option>OFF</option>
-      </select>
-      <div class="grid grid-cols-2 gap-2 mb-2">
-        <input id="lStart" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <input id="lEnd" type="date" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <input id="lRem" placeholder="Remarks" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <button onclick="addLeave()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">➕ Add Leave</button>
-    </div>` : ''}
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">📋 Leave Records (${leave.length})</h2>
-      ${leave.length ? leave.map(function(l) {
-        const s = staff.find(x => x.id === l.staff_id);
-        return '<div class="py-3 border-b border-gray-100 flex items-center gap-3">' +
-          '<div class="flex-1"><div class="font-bold text-sm">' + esc(s ? s.name : '?') + '</div>' +
-          '<div class="text-xs text-gray-500">' + l.type + ' · ' + fmtDate(l.start) + ' → ' + fmtDate(l.end) + '</div></div>' +
-          '<span class="text-xs font-bold px-2 py-1 rounded-full bg-green-100 text-green-700">' + l.status + '</span>' +
-          (isSup ? '<button onclick="delLeave(\'' + l.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">🗑</button>' : '') +
-          '</div>';
-      }).join('') : '<div class="text-center text-gray-400 py-6">No leave records</div>'}
-    </div>`;
+  var html = '';
+  if (isSup) {
+    var staffOpts = staff.map(function(s) {
+      return '<option value="' + s.id + '">' + esc(s.name) + '</option>';
+    }).join('');
+    html += '<div class="card"><h2>🏖 Add Leave</h2>' +
+      '<select id="lStaff">' + staffOpts + '</select>' +
+      '<select id="lType">' +
+      '<option>EL</option><option>CPL</option><option>CL</option><option>GH</option>' +
+      '<option>SL</option><option>AL</option><option>ML</option><option>OFF</option>' +
+      '</select>' +
+      '<div class="grid2">' +
+      '<input id="lStart" type="date">' +
+      '<input id="lEnd" type="date">' +
+      '</div>' +
+      '<input id="lRem" placeholder="Remarks">' +
+      '<button class="green" onclick="addLeave()">➕ Add Leave</button>' +
+      '</div>';
+  }
+
+  html += '<div class="card"><h2>📋 Leave Records (' + leave.length + ')</h2>';
+  if (!leave.length) {
+    html += '<div style="text-align:center;color:#999;padding:20px">No records</div>';
+  } else {
+    leave.forEach(function(l) {
+      var s = staff.find(function(x) { return x.id === l.staff_id; });
+      html += '<div class="staff-row">' +
+        '<div style="flex:1"><div style="font-weight:700">' + esc(s ? s.name : '?') + '</div>' +
+        '<div style="font-size:11px;color:#888">' + l.type + ' · ' + fmtDate(l.start) + ' → ' + fmtDate(l.end) + '</div></div>' +
+        '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:#CAFFBF;color:#1E8449">' + l.status + '</span>';
+      if (isSup) {
+        html += '<button class="small red" onclick="delLeave(\'' + l.id + '\')">🗑</button>';
+      }
+      html += '</div>';
+    });
+  }
+  html += '</div>';
+  return html;
 }
 
-async function addLeave() {
-  const staff_id = $('lStaff').value;
-  const type = $('lType').value;
-  const start = $('lStart').value;
-  const end = $('lEnd').value;
-  const remarks = $('lRem').value;
+function addLeave() {
+  var staff_id = document.getElementById('lStaff').value;
+  var type = document.getElementById('lType').value;
+  var start = document.getElementById('lStart').value;
+  var end = document.getElementById('lEnd').value;
+  var remarks = document.getElementById('lRem').value;
   if (!start || !end) { toast('Dates required', 'error'); return; }
   if (start > end) { toast('Start before end', 'error'); return; }
-  const leave = Cache.get('leave', {}) || {};
-  const id = 'l_' + uid();
-  leave[id] = { id: id, staff_id: staff_id, type: type, start: start, end: end, status: 'Approved', remarks: remarks, at: new Date().toISOString() };
-  await Cache.set('leave', leave);
-  audit('ADD_LEAVE', 'leave', null, type);
-  const staff = Cache.get('staff', {})[staff_id];
-  if (staff) notifyAll('Leave Approved', staff.name + ': ' + type + ' ' + fmtDate(start) + ' - ' + fmtDate(end), 'leave');
-  toast('Added ✅');
+  var leave = get('leave', {});
+  var id = 'l_' + uid();
+  leave[id] = {
+    id: id,
+    staff_id: staff_id,
+    type: type,
+    start: start,
+    end: end,
+    status: 'Approved',
+    remarks: remarks,
+    at: new Date().toISOString()
+  };
+  save('leave', leave);
+  logAudit('ADD_LEAVE', null, type);
+  toast('Leave added ✅');
   render();
 }
 
-async function delLeave(id) {
+function delLeave(id) {
   if (!confirm('Delete?')) return;
-  const leave = Cache.get('leave', {}) || {};
+  var leave = get('leave', {});
   delete leave[id];
-  await Cache.set('leave', leave);
+  save('leave', leave);
   toast('Deleted');
   render();
 }
 
-/* ============================================================
-   OVERTIME
-   ============================================================ */
-function viewOvertime() {
-  const ot = Object.values(Cache.get('overtime', {}) || {});
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const isSup = S.user.role === 'supervisor';
-
-  return `
-    ${isSup ? `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">⏱ Add Overtime</h2>
-      <select id="oStaff" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
-      <input id="oDate" type="date" value="${today()}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <div class="grid grid-cols-2 gap-2 mb-2">
-        <input id="oStart" type="time" value="18:00" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <input id="oEnd" type="time" value="22:00" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <input id="oReason" placeholder="Reason" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <div class="text-xs text-gray-500 italic mb-3">CPL = hours × 0.125</div>
-      <button onclick="addOt()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">➕ Add Overtime</button>
-    </div>` : ''}
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">📋 Overtime (${ot.length})</h2>
-      ${ot.length ? ot.map(function(o) {
-        const s = staff.find(x => x.id === o.staff_id);
-        return '<div class="py-3 border-b border-gray-100">' +
-          '<div class="font-bold text-sm">' + esc(s ? s.name : '?') + '</div>' +
-          '<div class="text-xs text-gray-500">' + fmtDate(o.date) + ' · ' + o.start + ' → ' + o.end + '</div>' +
-          '<div class="mt-1 flex gap-2"><span class="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">' + o.hours + 'h</span>' +
-          '<span class="text-xs font-bold px-2 py-0.5 rounded bg-orange-100 text-orange-700">+' + o.cpl + ' CPL</span></div>' +
-          '</div>';
-      }).join('') : '<div class="text-center text-gray-400 py-6">No overtime records</div>'}
-    </div>`;
-}
-
-async function addOt() {
-  const staff_id = $('oStaff').value;
-  const date = $('oDate').value;
-  const start = $('oStart').value;
-  const end = $('oEnd').value;
-  const reason = $('oReason').value;
-  if (!date || !start || !end) { toast('All required', 'error'); return; }
-  const sm = start.split(':').map(Number);
-  const em = end.split(':').map(Number);
-  let mins = (em[0] * 60 + em[1]) - (sm[0] * 60 + sm[1]);
-  if (mins < 0) mins += 24 * 60;
-  const hours = +(mins / 60).toFixed(2);
-  const cpl = +(hours * 0.125).toFixed(3);
-  const ot = Cache.get('overtime', {}) || {};
-  const id = 'o_' + uid();
-  ot[id] = { id: id, staff_id: staff_id, date: date, start: start, end: end, hours: hours, cpl: cpl, reason: reason, by: S.user.name, at: new Date().toISOString() };
-  await Cache.set('overtime', ot);
-  const staff = Cache.get('staff', {}) || {};
-  const s = staff[staff_id];
-  if (s) {
-    s.cplBalance = +((s.cplBalance || 0) + cpl).toFixed(3);
-    await Cache.set('staff', staff);
+function viewAudit() {
+  if (App.user.role !== 'supervisor') {
+    return '<div class="card" style="text-align:center;color:#999">Access denied</div>';
   }
-  audit('ADD_OT', 'overtime', null, hours + 'h');
-  toast('Added ' + hours + 'h (+' + cpl + ' CPL) ✅');
-  render();
-}
-
-/* ============================================================
-   EXCHANGE
-   ============================================================ */
-function viewExchange() {
-  const ex = Object.values(Cache.get('exchanges', {}) || {});
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const isSup = S.user.role === 'supervisor';
-  const isStaff = S.user.role === 'staff';
-
-  const mine = isStaff
-    ? ex.filter(function(e) { return e.requester_id === S.user.staff_id || e.target_id === S.user.staff_id; })
-    : ex;
-  const pending = mine.filter(function(e) { return e.status === 'Pending'; });
-  const done = mine.filter(function(e) { return e.status !== 'Pending'; });
-
-  function renderEx(e) {
-    const req = staff.find(x => x.id === e.requester_id);
-    const tgt = staff.find(x => x.id === e.target_id);
-    let actions = '';
-    if (isStaff && e.target_id === S.user.staff_id && e.staff_resp === 'Pending') {
-      actions = '<button onclick="respondX(\'' + e.id + '\',\'Accepted\')" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-bold">✅ Accept</button>' +
-                '<button onclick="respondX(\'' + e.id + '\',\'Rejected\')" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-bold ml-2">❌ Reject</button>';
-    } else if (isSup && e.staff_resp === 'Accepted' && e.sup_resp === 'Pending') {
-      actions = '<button onclick="approveX(\'' + e.id + '\',\'Approved\')" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded font-bold">✅ Approve</button>' +
-                '<button onclick="approveX(\'' + e.id + '\',\'Rejected\')" class="text-xs bg-red-600 text-white px-3 py-1.5 rounded font-bold ml-2">❌ Reject</button>';
-    }
-    return '<div class="py-3 border-b border-gray-100">' +
-      '<div class="font-bold text-sm">' + esc(req ? req.name : '?') + ' ↔ ' + esc(tgt ? tgt.name : '?') + '</div>' +
-      '<div class="text-xs text-gray-500">' + fmtDate(e.date) + ' · ' + e.orig + ' ↔ ' + e.req + '</div>' +
-      '<div class="mt-1 flex flex-wrap gap-1">' +
-      '<span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-100">Staff: ' + e.staff_resp + '</span>' +
-      '<span class="text-xs font-bold px-2 py-0.5 rounded bg-gray-100">Sup: ' + e.sup_resp + '</span>' +
-      '<span class="text-xs font-bold px-2 py-0.5 rounded-full ' + (e.status === 'Approved' ? 'bg-green-100 text-green-700' : e.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + e.status + '</span>' +
-      '</div>' +
-      (actions ? '<div class="mt-2">' + actions + '</div>' : '') +
-      '</div>';
-  }
-
-  return `
-    ${isStaff ? `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">🔄 Request Exchange</h2>
-      <select id="xTarget" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">${staff.filter(s => s.id !== S.user.staff_id).map(s => '<option value="' + s.id + '">' + esc(s.name) + '</option>').join('')}</select>
-      <input id="xDate" type="date" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <div class="grid grid-cols-2 gap-2 mb-2">
-        <input id="xOrig" placeholder="My duty" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-        <input id="xReq" placeholder="Their duty" class="px-3 py-2 border-2 border-gray-200 rounded-lg">
-      </div>
-      <input id="xReason" placeholder="Reason" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <button onclick="addExchange()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">📤 Submit</button>
-    </div>` : ''}
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">⏳ Pending (${pending.length})</h2>
-      ${pending.length ? pending.map(renderEx).join('') : '<div class="text-center text-gray-400 py-4">No pending</div>'}
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">✅ History (${done.length})</h2>
-      ${done.length ? done.slice(0, 20).map(renderEx).join('') : '<div class="text-center text-gray-400 py-4">No history</div>'}
-    </div>`;
-}
-
-async function addExchange() {
-  const target_id = $('xTarget').value;
-  const date = $('xDate').value;
-  const orig = $('xOrig').value.toUpperCase().trim();
-  const req = $('xReq').value.toUpperCase().trim();
-  const reason = $('xReason').value.trim();
-  if (!date || !orig || !req) { toast('All required', 'error'); return; }
-  const ex = Cache.get('exchanges', {}) || {};
-  const id = 'x_' + uid();
-  ex[id] = {
-    id: id,
-    requester_id: S.user.staff_id,
-    target_id: target_id,
-    date: date,
-    orig: orig,
-    req: req,
-    reason: reason,
-    staff_resp: 'Pending',
-    sup_resp: 'Pending',
-    status: 'Pending',
-    at: new Date().toISOString()
-  };
-  await Cache.set('exchanges', ex);
-  const staff = Cache.get('staff', {}) || {};
-  const requester = staff[S.user.staff_id];
-  const target = staff[target_id];
-  notifyAll('Exchange Request', (requester ? requester.name : 'Staff') + ' → ' + (target ? target.name : 'Staff') + ' on ' + fmtDate(date), 'exchange');
-  toast('Submitted ✅');
-  render();
-}
-
-async function respondX(id, resp) {
-  const ex = Cache.get('exchanges', {}) || {};
-  const e = ex[id];
-  if (!e) return;
-  e.staff_resp = resp;
-  if (resp === 'Rejected') {
-    e.status = 'Rejected';
-    e.sup_resp = 'Rejected';
-  }
-  await Cache.set('exchanges', ex);
-  toast(resp);
-  render();
-}
-
-async function approveX(id, resp) {
-  const ex = Cache.get('exchanges', {}) || {};
-  const e = ex[id];
-  if (!e) return;
-  e.sup_resp = resp;
-  e.status = resp;
-
-  if (resp === 'Approved') {
-    const asg = Cache.get('assignments', {}) || {};
-    const periods = Cache.get('periods', {}) || {};
-    const p = Object.values(periods).find(function(pp) {
-      return pp.start <= e.date && pp.end >= e.date;
-    });
-    if (p && asg[p.id]) {
-      const rk = e.requester_id + '_' + e.date;
-      const tk = e.target_id + '_' + e.date;
-      const rd = asg[p.id][rk] || e.orig;
-      const td = asg[p.id][tk] || e.req;
-      asg[p.id][rk] = td;
-      asg[p.id][tk] = rd;
-      await Cache.set('assignments', asg);
-    }
-  }
-  await Cache.set('exchanges', ex);
-  const staff = Cache.get('staff', {}) || {};
-  const r = staff[e.requester_id];
-  const t = staff[e.target_id];
-  notifyAll('Exchange ' + resp, (r ? r.name : 'Staff') + ' ↔ ' + (t ? t.name : 'Staff'), 'exchange');
-  toast(resp);
-  render();
-}
-
-/* ============================================================
-   CHAT
-   ============================================================ */
-function viewChat() {
-  const chat = Cache.get('chat', {}) || {};
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const isSup = S.user.role === 'supervisor';
-
-  if (S.chatType === 'group') {
-    const msgs = Object.values(chat.group || {}).sort(function(a, b) {
-      return new Date(a.at) - new Date(b.at);
-    });
-    return `
-      <div class="bg-white rounded-xl p-4 shadow-sm" style="margin-bottom:90px">
-        <h2 class="text-kihRed font-bold mb-3">💬 Group Chat</h2>
-        <div class="flex gap-2 mb-3">
-          <button class="pill on">👥 Group</button>
-          <button class="pill" onclick="S.chatType='individual';render()">👤 Individual</button>
-        </div>
-        <div style="max-height:50vh;overflow-y:auto" class="py-2">
-          ${msgs.length ? msgs.map(function(m) {
-            const mine = m.user_id === S.user.staff_id || m.user === S.user.username;
-            return '<div class="chat-msg ' + (mine ? 'me' : 'other') + '">' +
-              '<div class="text-[10px] opacity-70 mb-1">' + esc(m.user_name) + ' · ' + fmtTime(m.at) + '</div>' +
-              (m.text ? '<div>' + esc(m.text) + '</div>' : '') +
-              (m.image ? '<img src="' + m.image + '" class="max-w-full rounded-lg mt-1">' : '') +
-              '</div>';
-          }).join('') : '<div class="text-center text-gray-400 py-6">No messages</div>'}
-        </div>
-      </div>
-      <div class="fixed bottom-20 left-0 right-0 bg-white border-t p-2 flex gap-2 z-30">
-        <input id="chatInput" placeholder="Message..." onkeydown="if(event.key==='Enter')sendChatMsg('group',null)" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full">
-        <button onclick="sendChatMsg('group',null)" class="w-11 h-11 rounded-full bg-kihRed text-white font-bold">➤</button>
-      </div>`;
-  } else {
-    const myId = S.user.staff_id || 'admin';
-    const others = isSup ? staff : staff.filter(s => s.id !== S.user.staff_id);
-    const withId = S.chatWith || (others[0] ? others[0].id : null);
-    const roomKey = [myId, withId].sort().join('_');
-    const msgs = Object.values(chat[roomKey] || {}).sort(function(a, b) {
-      return new Date(a.at) - new Date(b.at);
-    });
-
-    return `
-      <div class="bg-white rounded-xl p-4 shadow-sm" style="margin-bottom:90px">
-        <h2 class="text-kihRed font-bold mb-3">💬 Individual</h2>
-        <div class="flex gap-2 mb-3">
-          <button class="pill" onclick="S.chatType='group';render()">👥 Group</button>
-          <button class="pill on">👤 Individual</button>
-        </div>
-        <select onchange="S.chatWith=this.value;render()" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-          ${others.map(s => '<option value="' + s.id + '" ' + (s.id === withId ? 'selected' : '') + '>' + esc(s.name) + '</option>').join('')}
-        </select>
-        <div style="max-height:45vh;overflow-y:auto" class="py-2">
-          ${msgs.length ? msgs.map(function(m) {
-            const mine = m.user_id === myId;
-            return '<div class="chat-msg ' + (mine ? 'me' : 'other') + '">' +
-              '<div class="text-[10px] opacity-70 mb-1">' + esc(m.user_name) + ' · ' + fmtTime(m.at) + '</div>' +
-              (m.text ? '<div>' + esc(m.text) + '</div>' : '') +
-              (m.image ? '<img src="' + m.image + '" class="max-w-full rounded-lg mt-1">' : '') +
-              '</div>';
-          }).join('') : '<div class="text-center text-gray-400 py-6">No messages</div>'}
-        </div>
-      </div>
-      ${withId ? '<div class="fixed bottom-20 left-0 right-0 bg-white border-t p-2 flex gap-2 z-30">' +
-        '<input id="chatInput2" placeholder="Message..." onkeydown="if(event.key===\'Enter\')sendChatMsg(\'individual\',\'' + roomKey + '\')" class="flex-1 px-3 py-2 border-2 border-gray-200 rounded-full">' +
-        '<button onclick="sendChatMsg(\'individual\',\'' + roomKey + '\')" class="w-11 h-11 rounded-full bg-kihRed text-white font-bold">➤</button>' +
-        '</div>' : ''}`;
-  }
-}
-
-async function sendChatMsg(type, roomKey) {
-  const inputId = type === 'group' ? 'chatInput' : 'chatInput2';
-  const input = $(inputId);
-  if (!input) return;
-  const text = input.value.trim();
-  if (!text) return;
-  const chat = Cache.get('chat', {}) || {};
-  const key = type === 'group' ? 'group' : roomKey;
-  if (!chat[key]) chat[key] = {};
-  const msgId = 'm_' + uid();
-  chat[key][msgId] = {
-    id: msgId,
-    user: S.user.username,
-    user_id: S.user.staff_id || 'admin',
-    user_name: S.user.name || S.user.username,
-    text: text,
-    at: new Date().toISOString()
-  };
-  await Cache.set('chat', chat);
-  input.value = '';
-  render();
-}
-
-/* ============================================================
-   NOTIFICATIONS
-   ============================================================ */
-function viewNotifications() {
-  const notifs = Cache.get('notifications', {}) || {};
-  const arr = Object.values(notifs).sort(function(a, b) {
+  var log = Object.values(get('audit', {})).sort(function(a, b) {
     return new Date(b.at) - new Date(a.at);
-  }).slice(0, 100);
+  });
 
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">🔔 Notifications (${arr.length})</h2>
-      ${arr.length ? arr.map(function(n) {
-        return '<div class="py-3 border-b border-gray-100 cursor-pointer" onclick="markRead(\'' + n.id + '\')" style="' + (!n.read ? 'background:#FFF9FA;border-left:3px solid #C8102E;padding-left:12px' : '') + '">' +
-          '<div class="font-bold text-sm text-kihRed">' + esc(n.title) + '</div>' +
-          '<div class="text-xs text-gray-600 mt-1">' + esc(n.body) + '</div>' +
-          '<div class="text-[10px] text-gray-400 mt-1">' + fmtTime(n.at) + '</div>' +
-          '</div>';
-      }).join('') : '<div class="text-center text-gray-400 py-6">No notifications</div>'}
-      ${arr.length ? '<button onclick="clearNotifs()" class="w-full mt-3 py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">🗑 Clear All</button>' : ''}
-    </div>`;
-}
-
-async function markRead(id) {
-  const notifs = Cache.get('notifications', {}) || {};
-  if (notifs[id]) {
-    notifs[id].read = true;
-    await Cache.set('notifications', notifs);
-    render();
+  var html = '<div class="card"><h2>📜 Audit Log (' + log.length + ')</h2>';
+  if (!log.length) {
+    html += '<div style="text-align:center;color:#999;padding:20px">No logs</div>';
+  } else {
+    log.slice(0, 100).forEach(function(l) {
+      html += '<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px">' +
+        '<div style="font-weight:700;color:#C8102E">' + esc(l.action) + '</div>' +
+        '<div style="color:#666">👤 ' + esc(l.user) + '</div>' +
+        '<div style="color:#999;font-size:10px">' + new Date(l.at).toLocaleString() + '</div>' +
+        '</div>';
+    });
   }
+  html += '</div>';
+  return html;
 }
 
-async function clearNotifs() {
-  if (!confirm('Clear all?')) return;
-  await Cache.set('notifications', {});
+function viewSettings() {
+  if (App.user.role !== 'supervisor') {
+    return '<div class="card" style="text-align:center;color:#999">Access denied</div>';
+  }
+  var s = get('settings', {});
+  return '<div class="card">' +
+    '<h2>🏥 Hospital Settings</h2>' +
+    '<input id="stHosp" placeholder="Hospital Name" value="' + esc(s.hospital_name || '') + '">' +
+    '<input id="stDept" placeholder="Department" value="' + esc(s.department || '') + '">' +
+    '<button class="green" onclick="saveSettings()">💾 Save</button>' +
+    '</div>' +
+    '<div class="card">' +
+    '<h2>ℹ About</h2>' +
+    '<div style="font-size:12px;color:#666">' +
+    '<div><b>Phlebotomist Roster</b></div>' +
+    '<div>Version 4.0</div>' +
+    '<div>' + esc(s.hospital_name || '') + '</div>' +
+    '</div></div>';
+}
+
+function saveSettings() {
+  var s = get('settings', {});
+  s.hospital_name = document.getElementById('stHosp').value;
+  s.department = document.getElementById('stDept').value;
+  save('settings', s);
+  toast('Saved ✅');
   render();
 }
 
-/* ============================================================
-   WHATSAPP SHARE
-   ============================================================ */
-function shareWhatsApp(scope) {
-  const periods = Object.values(Cache.get('periods', {}) || {});
-  const p = periods.find(x => x.id === S.periodId);
-  if (!p) { toast('No period', 'error'); return; }
-  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
-  const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments', {})[p.id]) || {};
-  const s = Cache.get('settings', {}) || {};
-
-  let text = '*' + (s.hospital_name || 'Hospital') + '*\n' + '*' + (s.department || '') + '*\n*Roster:* ' + p.name + '\n\n';
-
-  if (scope === 'staff') {
-    const me = staff.find(x => x.id === S.user.staff_id);
-    if (!me) { toast('No profile', 'error'); return; }
-    text += '*' + me.name + '* — Your Schedule:\n';
-    dates.forEach(function(d) {
-      const c = pd[me.id + '_' + d] || '-';
-      text += fmtDate(d) + ' (' + dayName(d) + '): *' + c + '*\n';
-    });
-  } else {
-    text += '*Full Roster:*\n\n';
-    staff.forEach(function(x) {
-      text += '*' + x.name + '*:\n';
-      const parts = [];
-      dates.forEach(function(d) {
-        parts.push(d.slice(8) + ':' + (pd[x.id + '_' + d] || '-'));
-      });
-      text += parts.join(' | ') + '\n\n';
-    });
-  }
-
-  text += '\n_Shared via ' + (s.whatsapp_bot || 'FlipBotMe') + '_';
-  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
-  toast('WhatsApp opening...');
-}
-
-/* ============================================================
-   REPORTS
-   ============================================================ */
-function viewReports() {
-  const periods = Object.values(Cache.get('periods', {}) || {});
-  const staff = Object.values(Cache.get('staff', {}) || {});
-  const asg = Cache.get('assignments', {}) || {};
-  const leave = Object.values(Cache.get('leave', {}) || {});
-  const ot = Object.values(Cache.get('overtime', {}) || {});
-  const ex = Object.values(Cache.get('exchanges', {}) || {});
-  const pid = S.periodId || (periods[0] ? periods[0].id : null);
-  const p = periods.find(x => x.id === pid);
-  const pd = asg[pid] || {};
-
-  let rows = [];
-  if (p) {
-    const dates = datesBetween(p.start, p.end);
-    staff.filter(s => s.status === 'Active').forEach(function(s) {
-      const c = { M: 0, E: 0, N: 0, D: 0, X: 0, OFF: 0, CPL: 0, EL: 0, total: 0 };
-      dates.forEach(function(d) {
-        const code = pd[s.id + '_' + d] || '';
-        if (code === 'M') c.M++;
-        else if (code === 'E') c.E++;
-        else if (code === 'N' || code === 'N12') c.N++;
-        else if (code === 'D') c.D++;
-        else if (code === 'X') c.X++;
-        else if (code === 'OFF') c.OFF++;
-        else if (code === 'CPL') c.CPL++;
-        else if (code === 'EL') c.EL++;
-        if (code) c.total++;
-      });
-      rows.push(Object.assign({ name: s.name, cplBalance: s.cplBalance || 0 }, c));
-    });
-  }
-
-  const totalOT = ot.reduce(function(sum, o) { return sum + (o.hours || 0); }, 0);
-  const totalOTcpl = ot.reduce(function(sum, o) { return sum + (o.cpl || 0); }, 0);
-
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">📊 Monthly Summary</h2>
-      ${p ? '<div class="text-xs text-gray-500 mb-2">' + esc(p.name) + '</div>' : ''}
-      <div class="scroll-x">
-        <table class="w-full text-xs border-collapse">
-          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
-            <th class="px-2 py-2 text-left">Staff</th><th class="px-1 py-2">M</th><th class="px-1 py-2">E</th>
-            <th class="px-1 py-2">N</th><th class="px-1 py-2">D</th><th class="px-1 py-2">X</th>
-            <th class="px-1 py-2">OFF</th><th class="px-1 py-2">CPL</th><th class="px-1 py-2">Tot</th>
-            <th class="px-1 py-2">CPL Bal</th>
-          </tr></thead>
-          <tbody>
-            ${rows.map(function(r) {
-              return '<tr class="border-b border-gray-100">' +
-                '<td class="px-2 py-2 text-left font-semibold">' + esc(r.name) + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.M + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.E + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.N + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.D + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.X + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.OFF + '</td>' +
-                '<td class="px-1 py-2 text-center">' + r.CPL + '</td>' +
-                '<td class="px-1 py-2 text-center font-bold">' + r.total + '</td>' +
-                '<td class="px-1 py-2 text-center font-bold text-green-600">' + r.cplBalance.toFixed(2) + '</td>' +
-                '</tr>';
-            }).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">⏱ Overtime Summary</h2>
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-green-50 rounded-lg p-3 border-l-4 border-green-500">
-          <div class="text-2xl font-bold text-green-700">${totalOT.toFixed(1)}h</div>
-          <div class="text-xs text-gray-600 mt-1">Total OT Hours</div>
-        </div>
-        <div class="bg-orange-50 rounded-lg p-3 border-l-4 border-orange-500">
-          <div class="text-2xl font-bold text-orange-700">${totalOTcpl.toFixed(2)}</div>
-          <div class="text-xs text-gray-600 mt-1">CPL Earned</div>
-        </div>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">🏖 Leave Report</h2>
-      <div class="scroll-x">
-        <table class="w-full text-xs border-collapse">
-          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
-            <th class="px-2 py-2 text-left">Staff</th><th class="px-2 py-2">Type</th>
-            <th class="px-2 py-2">Start</th><th class="px-2 py-2">End</th><th class="px-2 py-2">Days</th>
-          </tr></thead>
-          <tbody>
-            ${leave.slice(0, 30).map(function(l) {
-              const s = staff.find(x => x.id === l.staff_id);
-              const days = Math.ceil((new Date(l.end) - new Date(l.start)) / 86400000) + 1;
-              return '<tr class="border-b border-gray-100">' +
-                '<td class="px-2 py-2">' + esc(s ? s.name : '?') + '</td>' +
-                '<td class="px-2 py-2 text-center"><span class="text-xs bg-gray-100 px-2 py-0.5 rounded">' + l.type + '</span></td>' +
-                '<td class="px-2 py-2 text-center">' + fmtDate(l.start) + '</td>' +
-                '<td class="px-2 py-2 text-center">' + fmtDate(l.end) + '</td>' +
-                '<td class="px-2 py-2 text-center font-bold">' + days + '</td>' +
-                '</tr>';
-            }).join('') || '<tr><td colspan="5" class="text-center py-4 text-gray-400">No data</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">🔄 Exchange Report</h2>
-      <div class="scroll-x">
-        <table class="w-full text-xs border-collapse">
-          <thead><tr class="bg-gradient-to-r from-kihRed to-kihBlue text-white">
-            <th class="px-2 py-2 text-left">Requester</th><th class="px-2 py-2">Target</th>
-            <th class="px-2 py-2">Date</th><th class="px-2 py-2">Status</th>
-          </tr></thead>
-          <tbody>
-            ${ex.slice(0, 30).map(function(e) {
-              const r = staff.find(x => x.id === e.requester_id);
-              const t = staff.find(x => x.id === e.target_id);
-              return '<tr class="border-b border-gray-100">' +
-                '<td class="px-2 py-2">' + esc(r ? r.name : '?') + '</td>' +
-                '<td class="px-2 py-2">' + esc(t ? t.name : '?') + '</td>' +
-                '<td class="px-2 py-2 text-center">' + fmtDate(e.date) + '</td>' +
-                '<td class="px-2 py-2 text-center"><span class="text-xs font-bold px-2 py-0.5 rounded-full ' + (e.status === 'Approved' ? 'bg-green-100 text-green-700' : e.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') + '">' + e.status + '</span></td>' +
-                '</tr>';
-            }).join('') || '<tr><td colspan="4" class="text-center py-4 text-gray-400">No data</td></tr>'}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-}
-
-/* ============================================================
-   EXCEL EXPORT
-   ============================================================ */
 function exportExcel() {
-  const periods = Object.values(Cache.get('periods', {}) || {});
-  const p = periods.find(x => x.id === S.periodId);
+  var periods = get('periods', {});
+  var p = periods[App.periodId];
   if (!p) { toast('No period', 'error'); return; }
-  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
-  const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments', {})[p.id]) || {};
-  const settings = Cache.get('settings', {}) || {};
+  var staff = Object.values(get('staff', {})).filter(function(s) {
+    return s.status === 'Active';
+  });
+  var dates = datesBetween(p.start, p.end);
+  var asg = get('assignments', {});
+  var pd = asg[p.id] || {};
+  var settings = get('settings', {});
 
-  const aoa = [];
+  var aoa = [];
   aoa.push([settings.hospital_name || 'Hospital']);
   aoa.push([(settings.department || '') + ' — Phlebotomist Duty Roster']);
   aoa.push([]);
   aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
   aoa.push([]);
 
-  const header = ['Sr.', 'Name', 'Mobile'];
-  dates.forEach(d => header.push(d.slice(8)));
+  var header = ['Sr.', 'Name', 'Mobile'];
+  dates.forEach(function(d) { header.push(d.slice(8)); });
   header.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
   aoa.push(header);
 
   staff.forEach(function(s, i) {
-    const row = [i + 1, s.name, s.mobile || ''];
-    const counts = { M: 0, E: 0, E4: 0, N12: 0, D: 0, X: 0, OFF: 0, CPL: 0 };
+    var row = [i + 1, s.name, s.mobile || ''];
+    var counts = { M: 0, E: 0, E4: 0, N12: 0, D: 0, X: 0, OFF: 0, CPL: 0 };
     dates.forEach(function(d) {
-      const c = pd[s.id + '_' + d] || '';
+      var c = pd[s.id + '_' + d] || '';
       row.push(c);
       if (counts[c] !== undefined) counts[c]++;
     });
-    const total = dates.filter(d => pd[s.id + '_' + d]).length;
+    var total = dates.filter(function(d) { return pd[s.id + '_' + d]; }).length;
     row.push(counts.M, counts.E, counts.E4, counts.N12, counts.D, counts.X, counts.OFF, counts.CPL, total);
     aoa.push(row);
   });
 
   aoa.push([]);
   aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
-  aoa.push(['Prepared by:', S.user.name || S.user.username]);
+  aoa.push(['Prepared by:', App.user.name || App.user.username]);
 
-  const ws = XLSX.utils.aoa_to_sheet(aoa);
-  const wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(aoa);
+  var wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Roster');
   XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g, '_') + '.xlsx');
-  audit('EXPORT_EXCEL', 'period', null, p.name);
   toast('Excel downloaded ✅');
 }
 
-/* ============================================================
-   PRINT/PDF EXPORT
-   ============================================================ */
-function exportPDF() {
-  const periods = Object.values(Cache.get('periods', {}) || {});
-  const p = periods.find(x => x.id === S.periodId);
+function shareWhatsApp() {
+  var periods = get('periods', {});
+  var p = periods[App.periodId];
   if (!p) { toast('No period', 'error'); return; }
-  const staff = Object.values(Cache.get('staff', {}) || {}).filter(s => s.status === 'Active');
-  const dates = datesBetween(p.start, p.end);
-  const pd = (Cache.get('assignments', {})[p.id]) || {};
-  const settings = Cache.get('settings', {}) || {};
+  var staff = Object.values(get('staff', {})).filter(function(s) {
+    return s.status === 'Active';
+  });
+  var dates = datesBetween(p.start, p.end);
+  var asg = get('assignments', {});
+  var pd = asg[p.id] || {};
+  var settings = get('settings', {});
 
-  let html = '<html><head><title>Roster</title><style>';
-  html += 'body{font-family:Arial,sans-serif;padding:20px}';
-  html += 'h1{color:#C8102E;margin:0;font-size:20px}';
-  html += 'h2{color:#1E5BA8;margin:5px 0;font-size:14px;font-weight:normal}';
-  html += 'h3{margin:10px 0;font-size:14px}';
-  html += 'table{border-collapse:collapse;width:100%;font-size:9px;margin-top:10px}';
-  html += 'th{background:#C8102E;color:white;padding:4px;border:1px solid #999}';
-  html += 'td{padding:3px;border:1px solid #ccc;text-align:center}';
-  html += '.name{text-align:left;font-weight:bold}';
-  html += '.footer{margin-top:30px;font-size:11px;display:flex;justify-content:space-between}';
-  html += '</style></head><body>';
-  html += '<h1>' + (settings.hospital_name || '') + '</h1>';
-  html += '<h2>' + (settings.department || '') + '</h2>';
-  html += '<h3>Phlebotomist Duty Roster — ' + p.name + '</h3>';
-  html += '<p style="font-size:11px;color:#666">Period: ' + fmtDate(p.start) + ' to ' + fmtDate(p.end) + ' | Generated: ' + new Date().toLocaleString('en-GB') + '</p>';
-  html += '<table><thead><tr><th>Name</th>';
-  dates.forEach(d => { html += '<th>' + d.slice(8) + '</th>'; });
-  html += '<th>O</th><th>Tot</th></tr></thead><tbody>';
+  var text = '*' + (settings.hospital_name || 'Hospital') + '*\n';
+  text += '*' + (settings.department || '') + '*\n';
+  text += '*Roster:* ' + p.name + '\n\n';
   staff.forEach(function(s) {
-    html += '<tr><td class="name">' + esc(s.name) + '</td>';
-    let off = 0, tot = 0;
+    text += '*' + s.name + '*: ';
+    var parts = [];
     dates.forEach(function(d) {
-      const c = pd[s.id + '_' + d] || '';
-      if (c === 'OFF' || c === 'EL' || c === 'CPL' || c === 'CL' || c === 'GH' || c === 'SL') off++;
-      if (c) tot++;
-      html += '<td>' + (c || '·') + '</td>';
+      parts.push(d.slice(8) + ':' + (pd[s.id + '_' + d] || '-'));
     });
-    html += '<td><b>' + off + '</b></td><td><b>' + tot + '</b></td></tr>';
-  });
-  html += '</tbody></table>';
-  html += '<div class="footer"><div>Generated: ' + new Date().toLocaleDateString('en-GB') + '</div><div>Prepared by: ' + (S.user.name || S.user.username) + '</div><div>Approved by: ____________________</div></div>';
-  html += '</body></html>';
-
-  const w = window.open('', '_blank');
-  w.document.write(html);
-  w.document.close();
-  setTimeout(function() { w.print(); }, 500);
-  audit('EXPORT_PDF', 'period', null, p.name);
-}
-
-/* ============================================================
-   TECHNOLOGIST (Separate Roster - Structure Only)
-   ============================================================ */
-function viewTechnologist() {
-  const isSup = S.user.role === 'supervisor';
-  const techs = Object.values(Cache.get('technologists', {}) || {});
-
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">🔬 Technologist Roster</h2>
-      <div class="text-xs text-gray-500 italic mb-3">Separate roster for Lab Technologists</div>
-      ${isSup ? '<button onclick="showAddTechnologist()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold mb-3">➕ Add Technologist</button>' : ''}
-      <div class="border-t border-gray-100 pt-3">
-        ${techs.length ? techs.map(function(t) {
-          return '<div class="flex items-center gap-3 py-3 border-b border-gray-100">' +
-            '<div class="w-11 h-11 rounded-full kih-gradient text-white flex items-center justify-center font-bold">' + initials(t.name) + '</div>' +
-            '<div class="flex-1"><div class="font-bold text-sm">' + esc(t.name) + '</div>' +
-            '<div class="text-xs text-gray-500">' + esc(t.designation || 'Technologist') + ' · 📱 ' + esc(t.mobile || '') + '</div></div>' +
-            '</div>';
-        }).join('') : '<div class="text-center text-gray-400 py-6">No technologists added yet</div>'}
-      </div>
-    </div>`;
-}
-
-function showAddTechnologist() {
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add Technologist</h2>
-      <input id="tName" placeholder="Name *" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <input id="tMobile" placeholder="Mobile *" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <input id="tDesig" placeholder="Designation" value="Lab Technologist" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-        <button onclick="saveTechnologist()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Save</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function saveTechnologist() {
-  const name = $('tName').value.trim();
-  const mobile = $('tMobile').value.trim();
-  const desig = $('tDesig').value.trim();
-  if (!name || !mobile) { toast('Name and mobile required', 'error'); return; }
-  const techs = Cache.get('technologists', {}) || {};
-  const id = 't_' + uid();
-  techs[id] = { id: id, name: name, mobile: mobile, designation: desig, status: 'Active' };
-  await Cache.set('technologists', techs);
-  toast('Technologist added ✅');
-  document.querySelector('.modal-bg').remove();
-  render();
-}
-
-/* ============================================================
-   AUDIT LOG
-   ============================================================ */
-function viewAudit() {
-  if (S.user.role !== 'supervisor') return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">Access denied</div>';
-  const log = Object.values(Cache.get('audit', {}) || {}).sort(function(a, b) {
-    return new Date(b.at) - new Date(a.at);
+    text += parts.join(' | ') + '\n\n';
   });
 
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm">
-      <h2 class="text-kihRed font-bold mb-3">📜 Audit Log (${log.length})</h2>
-      <input id="auditSearch" placeholder="🔍 Search..." oninput="filterAudit()" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <div style="max-height:70vh;overflow-y:auto" id="auditList">
-        ${log.slice(0, 100).map(function(l) {
-          const search = ((l.action || '') + ' ' + (l.user_name || '') + ' ' + (l.new || '')).toLowerCase();
-          return '<div class="py-2 border-b border-gray-100 text-xs audit-item" data-search="' + esc(search) + '">' +
-            '<div class="font-bold text-kihRed">' + esc(l.action) + '</div>' +
-            '<div class="text-gray-600">👤 ' + esc(l.user_name || l.user) + (l.old || l.new ? ' · ' + esc(l.old || '—') + ' → ' + esc(l.new || '—') : '') + '</div>' +
-            '<div class="text-gray-400 text-[10px]">' + fmtTime(l.at) + '</div>' +
-            '</div>';
-        }).join('')}
-      </div>
-    </div>`;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  toast('WhatsApp opening...');
 }
 
-function filterAudit() {
-  const q = $('auditSearch').value.toLowerCase();
-  document.querySelectorAll('.audit-item').forEach(function(el) {
-    el.style.display = el.dataset.search.includes(q) ? 'block' : 'none';
-  });
-}
-
-/* ============================================================
-   SETTINGS
-   ============================================================ */
-function viewSettings() {
-  if (S.user.role !== 'supervisor') return '<div class="bg-white rounded-xl p-4 shadow-sm text-center text-gray-400">Access denied</div>';
-  const s = Cache.get('settings', {}) || {};
-  const holidays = Object.values(Cache.get('holidays', {}) || {});
-
-  return `
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">🏥 Hospital Settings</h2>
-      <input id="stHosp" placeholder="Hospital Name" value="${esc(s.hospital_name || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <input id="stDept" placeholder="Department" value="${esc(s.department || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <input id="stAddr" placeholder="Address" value="${esc(s.address || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-2">
-      <input id="stWa" placeholder="WhatsApp Bot" value="${esc(s.whatsapp_bot || '')}" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <button onclick="saveSettings()" class="w-full py-3 bg-green-600 text-white rounded-lg font-bold">💾 Save</button>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">🎉 Gazetted Holidays</h2>
-      <div class="text-xs text-gray-500 italic mb-3">Roster will apply Sunday rules on these dates</div>
-      ${holidays.length ? holidays.map(function(h) {
-        return '<div class="py-2 border-b border-gray-100 flex items-center gap-2">' +
-          '<div class="flex-1"><b class="text-sm">' + esc(h.name) + '</b><div class="text-xs text-gray-500">' + fmtDate(h.date) + '</div></div>' +
-          '<button onclick="delHoliday(\'' + h.id + '\')" class="text-xs bg-red-600 text-white px-2 py-1 rounded">🗑</button>' +
-          '</div>';
-      }).join('') : '<div class="text-center text-gray-400 py-4">No holidays added</div>'}
-      <button onclick="showAddHoliday()" class="w-full mt-3 py-3 bg-gray-200 text-kihBlue rounded-lg font-bold">➕ Add Holiday</button>
-    </div>
-    <div class="bg-white rounded-xl p-4 shadow-sm mb-3">
-      <h2 class="text-kihRed font-bold mb-3">ℹ About</h2>
-      <div class="text-xs text-gray-600 space-y-1">
-        <div><b>${esc(s.app_title || 'Phlebotomist Roster')}</b></div>
-        <div>Version 4.0</div>
-        <div>${esc(s.hospital_name || '')}</div>
-        <div>Data synced via Firebase</div>
-      </div>
-    </div>`;
-}
-
-async function saveSettings() {
-  const s = Cache.get('settings', {}) || {};
-  s.hospital_name = $('stHosp').value;
-  s.department = $('stDept').value;
-  s.address = $('stAddr').value;
-  s.whatsapp_bot = $('stWa').value;
-  await Cache.set('settings', s);
-  audit('EDIT_SETTINGS', 'settings', null, s.hospital_name);
-  toast('Saved ✅');
-  render();
-}
-
-function showAddHoliday() {
-  const m = document.createElement('div');
-  m.className = 'modal-bg';
-  m.innerHTML = `
-    <div class="modal-c">
-      <h2 class="text-xl font-bold text-kihRed mb-4">➕ Add Holiday</h2>
-      <input id="hName" placeholder="Holiday Name" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-3">
-      <input id="hDate" type="date" class="w-full px-3 py-2 border-2 border-gray-200 rounded-lg mb-4">
-      <div class="flex gap-2">
-        <button onclick="this.closest('.modal-bg').remove()" class="flex-1 py-3 bg-gray-200 rounded-lg font-semibold">Cancel</button>
-        <button onclick="saveHoliday()" class="flex-1 py-3 bg-green-600 text-white rounded-lg font-bold">Save</button>
-      </div>
-    </div>`;
-  document.body.appendChild(m);
-}
-
-async function saveHoliday() {
-  const name = $('hName').value.trim();
-  const date = $('hDate').value;
-  if (!name || !date) { toast('All required', 'error'); return; }
-  const holidays = Cache.get('holidays', {}) || {};
-  const id = 'h_' + uid();
-  holidays[id] = { id: id, name: name, date: date, active: true };
-  await Cache.set('holidays', holidays);
-  audit('ADD_HOLIDAY', 'holiday', null, name + ' (' + date + ')');
-  document.querySelector('.modal-bg').remove();
-  toast('Holiday added ✅');
-  render();
-}
-
-async function delHoliday(id) {
-  if (!confirm('Delete?')) return;
-  const holidays = Cache.get('holidays', {}) || {};
-  delete holidays[id];
-  await Cache.set('holidays', holidays);
-  render();
-}
-
-/* ============================================================
-   BOOT
-   ============================================================ */
-Cache.init();
+initCache();
 
 try {
-  const saved = localStorage.getItem('phleb_user');
-  if (saved) S.user = JSON.parse(saved);
+  var saved = localStorage.getItem('phleb_user');
+  if (saved) App.user = JSON.parse(saved);
 } catch (e) {
-  console.error('Session restore error', e);
+  console.error('Session error', e);
 }
 
 setTimeout(function() {
   render();
-  setInterval(function() {
-    if (S.user) render();
-  }, 15000);
 }, 1200);
 
 </script>
