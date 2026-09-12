@@ -4,925 +4,2504 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#C8102E">
-<title>Phlebotomist Roster</title>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<title>Phlebotomist Roster — Kulsum International Hospital</title>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<!-- SheetJS (Excel Export) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
-body{background:#F5F7FA;color:#222;padding-bottom:70px}
-.header{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 3px 10px rgba(0,0,0,.15)}
-.header .logo{width:40px;height:40px;background:#fff;color:#C8102E;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px}
-.header h1{font-size:14px;font-weight:700;flex:1}
-.header button{background:rgba(255,255,255,.2);color:#fff;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer}
-.container{padding:12px;max-width:1000px;margin:0 auto}
-.card{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.card h2{color:#C8102E;font-size:15px;margin-bottom:10px;font-weight:700}
-input,select,button{padding:10px 12px;border:1.5px solid #E0E4EB;border-radius:8px;font-size:14px;width:100%;margin-bottom:8px;font-family:inherit}
-input:focus,select:focus{outline:none;border-color:#C8102E}
-button{background:#C8102E;color:#fff;border:none;font-weight:600;cursor:pointer}
-button.green{background:#27AE60}
-button.blue{background:#1E5BA8}
-button.gray{background:#E8EBF2;color:#1E5BA8}
-button.red{background:#C0392B}
-button.small{padding:5px 10px;font-size:12px;width:auto;margin:0 2px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.staff-row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #eee}
-.avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
-.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{border-collapse:collapse;font-size:11px;width:100%}
-th,td{border:1px solid #E8EBF2;padding:5px;text-align:center;white-space:nowrap}
-th{background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;font-weight:600;position:sticky;top:0}
-td.name-cell{text-align:left;font-weight:600;background:#FAFBFD;position:sticky;left:0;z-index:2;min-width:120px}
-.cell{display:inline-block;padding:4px 6px;border-radius:4px;font-weight:700;font-size:11px;min-width:26px}
-.cM{background:#FFF3B0;color:#7D6608}
-.cE{background:#FFD6A5;color:#7D4A00}
-.cE4{background:#FFC6FF;color:#8E2DE2}
-.cN{background:#A0C4FF;color:#0B3D91}
-.cN12{background:#A0C4FF;color:#0B3D91}
-.cD{background:#BDB2FF;color:#4A1D96}
-.cX{background:#CAFFBF;color:#1E8449}
-.cOFF{background:#E5E5E5;color:#555}
-.cEL{background:#FDFFB6;color:#7D6608}
-.cCL{background:#FDFFB6;color:#7D6608}
-.cAL{background:#FDFFB6;color:#7D6608}
-.cCPL{background:#FFD6A5;color:#7D4A00}
-.cSL{background:#FFC9DE;color:#A61E4D}
-.cML{background:#D0BFFF;color:#5F3DC4}
-.cGH{background:#FFADAD;color:#922B21}
-.c-empty{background:#FAFBFD;color:#CCC}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid #F0F2F5;display:flex;overflow-x:auto;z-index:40;box-shadow:0 -3px 12px rgba(0,0,0,.08)}
-.nav button{flex:1;background:none;color:#888;border:none;padding:8px 6px;font-size:10px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:60px;border-radius:0;margin:0}
-.nav button.active{color:#C8102E}
-.nav button .ic{font-size:18px}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:25px;color:#fff;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:.3s;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:90%;text-align:center;background:#27AE60}
-.toast.show{opacity:1}
-.login-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#C8102E,#1E5BA8)}
-.login-box{background:#fff;border-radius:20px;padding:30px 24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.login-box .logo-big{width:80px;height:80px;background:linear-gradient(135deg,#C8102E,#1E5BA8);color:#fff;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 16px}
-.login-box h1{text-align:center;color:#C8102E;font-size:20px;font-weight:800;margin-bottom:4px}
-.login-box p{text-align:center;color:#666;font-size:11px;font-weight:600;margin-bottom:20px}
+/* ============ RESET & BASE ============ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --red:#C8102E;
+  --blue:#1E5BA8;
+  --red-light:#fde8eb;
+  --blue-light:#e8f0fa;
+  --grey:#6b7280;
+  --grey-light:#f3f4f6;
+  --border:#e5e7eb;
+  --text:#111827;
+  --text-light:#6b7280;
+  --white:#ffffff;
+  --green:#059669;
+  --amber:#d97706;
+  --radius:10px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+}
+html,body{height:100%}
+body{
+  font-family:'Segoe UI',Roboto,-apple-system,'Helvetica Neue',sans-serif;
+  background:#f5f7fa;
+  color:var(--text);
+  font-size:14px;
+  line-height:1.5;
+  padding-bottom:70px;
+}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:inherit;font-size:14px;outline:none}
+a{color:var(--blue);text-decoration:none}
+
+/* ============ LOGIN PAGE ============ */
+#loginPage{
+  position:fixed;inset:0;z-index:1000;
+  background:linear-gradient(135deg,#C8102E 0%,#8a0a1f 40%,#1E5BA8 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;overflow-y:auto;
+}
+#loginPage::before{
+  content:'';position:absolute;inset:0;
+  background:url('https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=1600&q=80') center/cover;
+  opacity:.15;pointer-events:none;
+}
+.login-box{
+  position:relative;z-index:2;
+  background:#fff;border-radius:16px;
+  width:100%;max-width:420px;
+  padding:28px 24px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.login-logo{
+  width:70px;height:70px;border-radius:50%;
+  background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;letter-spacing:1px;
+  margin:0 auto 12px;
+  box-shadow:0 6px 20px rgba(200,16,46,.4);
+}
+.login-title{text-align:center;font-size:20px;font-weight:700;color:var(--red);margin-bottom:4px}
+.login-sub{text-align:center;font-size:12px;color:var(--text-light);margin-bottom:20px}
+.login-tabs{display:flex;gap:8px;margin-bottom:18px;background:var(--grey-light);padding:4px;border-radius:var(--radius)}
+.login-tab{
+  flex:1;padding:10px;border-radius:8px;background:transparent;
+  font-weight:600;font-size:13px;color:var(--text-light);transition:.2s;
+}
+.login-tab.active{background:#fff;color:var(--red);box-shadow:var(--shadow)}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;font-weight:600;color:var(--text-light);margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{
+  width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;background:#fff;transition:.2s;
+}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{
+  border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,91,168,.1);
+}
+.btn{
+  padding:11px 16px;border-radius:8px;font-size:14px;font-weight:600;
+  transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-primary{background:var(--red);color:#fff;width:100%}
+.btn-primary:hover{background:#a60d25}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{background:#174a8a}
+.btn-outline{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-outline:hover{background:var(--blue-light)}
+.btn-grey{background:var(--grey-light);color:var(--text)}
+.btn-grey:hover{background:#e5e7eb}
+.btn-sm{padding:7px 12px;font-size:12px}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-danger:hover{background:#b91c1c}
+.btn-green{background:var(--green);color:#fff}
+.btn-block{width:100%}
+.login-error{
+  background:var(--red-light);color:var(--red);padding:10px;border-radius:8px;
+  font-size:12px;margin-bottom:12px;display:none;
+}
+.login-error.show{display:block}
+.login-footer{text-align:center;font-size:11px;color:var(--text-light);margin-top:16px}
+
+/* ============ APP LAYOUT ============ */
+#app{display:none}
+#app.show{display:block}
+.app-header{
+  background:linear-gradient(135deg,var(--red),#a60d25);
+  color:#fff;padding:12px 16px;
+  display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.app-header .logo{
+  width:38px;height:38px;border-radius:50%;background:#fff;color:var(--red);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;
+}
+.app-header h1{font-size:15px;font-weight:700;flex:1;line-height:1.2}
+.app-header h1 small{display:block;font-size:10px;font-weight:400;opacity:.85}
+.app-header .header-actions{display:flex;gap:6px}
+.icon-btn{
+  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:16px;position:relative;transition:.2s;
+}
+.icon-btn:hover{background:rgba(255,255,255,.28)}
+.icon-btn .badge{
+  position:absolute;top:-2px;right:-2px;background:#fbbf24;color:#000;
+  font-size:9px;font-weight:700;padding:2px 5px;border-radius:10px;min-width:16px;text-align:center;
+}
+
+/* ============ BOTTOM NAV (MOBILE) ============ */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:99;
+  background:#fff;border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;
+  padding:6px 0 max(6px,env(safe-area-inset-bottom));
+  box-shadow:0 -2px 10px rgba(0,0,0,.05);
+}
+.bottom-nav button{
+  flex:1;background:transparent;display:flex;flex-direction:column;
+  align-items:center;gap:2px;padding:6px 2px;color:var(--text-light);
+  font-size:10px;font-weight:600;transition:.2s;
+}
+.bottom-nav button.active{color:var(--red)}
+.bottom-nav button .ico{font-size:18px}
+
+/* ============ MAIN CONTENT ============ */
+.container{max-width:1200px;margin:0 auto;padding:14px}
+.section{display:none}
+.section.active{display:block}
+.card{
+  background:#fff;border-radius:var(--radius);padding:14px;
+  box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--border);
+}
+.card h2{
+  font-size:15px;font-weight:700;color:var(--red);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.card h2 .sub{font-size:11px;font-weight:400;color:var(--text-light);margin-left:auto}
+.card h3{font-size:13px;font-weight:700;color:var(--blue);margin:12px 0 8px}
+
+/* ============ STATS GRID ============ */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat{
+  background:#fff;border-radius:var(--radius);padding:12px;
+  border-left:4px solid var(--red);box-shadow:var(--shadow);
+}
+.stat.blue{border-left-color:var(--blue)}
+.stat.green{border-left-color:var(--green)}
+.stat.amber{border-left-color:var(--amber)}
+.stat .num{font-size:22px;font-weight:800;color:var(--text);line-height:1}
+.stat .lbl{font-size:11px;color:var(--text-light);margin-top:4px;font-weight:600}
+
+/* ============ TABLES ============ */
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px;background:#fff}
+th,td{padding:8px 6px;text-align:center;border:1px solid var(--border);white-space:nowrap}
+th{background:var(--blue);color:#fff;font-weight:600;font-size:11px;position:sticky;top:0}
+th.staff-col,td.staff-col{
+  text-align:left;background:#f9fafb;font-weight:600;
+  position:sticky;left:0;z-index:2;min-width:130px;max-width:160px;
+  white-space:normal;
+}
+th.staff-col{z-index:3;background:var(--blue)}
+tr:nth-child(even) td{background:#fafbfc}
+tr:nth-child(even) td.staff-col{background:#f3f4f6}
+
+/* Roster cell colors (screen) */
+td.cell-M{background:#fef3c7}
+td.cell-E{background:#dbeafe}
+td.cell-E4{background:#e0e7ff}
+td.cell-N12{background:#c7d2fe}
+td.cell-N{background:#a5b4fc}
+td.cell-D{background:#fce7f3}
+td.cell-X{background:#d1fae5}
+td.cell-OFF{background:#e5e7eb;color:#374151;font-weight:700}
+td.cell-EL,td.cell-CPL,td.cell-CL,td.cell-GH,td.cell-SL,td.cell-AL,td.cell-ML{
+  background:#fee2e2;color:#991b1b;font-weight:700;
+}
+td.cell-holiday{background:#fecaca;color:#7f1d1d;font-weight:700}
+
+/* ============ FORMS ============ */
+.form-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.form-grid.two{grid-template-columns:1fr 1fr}
+@media(min-width:640px){.form-grid.two{grid-template-columns:1fr 1fr}}
+.form-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:5px 10px;border-radius:20px;background:var(--grey-light);
+  font-size:11px;font-weight:600;color:var(--text);
+}
+.chip.red{background:var(--red-light);color:var(--red)}
+.chip.blue{background:var(--blue-light);color:var(--blue)}
+.chip.green{background:#d1fae5;color:#065f46}
+
+/* ============ MODAL ============ */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;
+  display:none;align-items:flex-end;justify-content:center;padding:0;
+}
+.modal-bg.show{display:flex}
+@media(min-width:640px){.modal-bg{align-items:center;padding:20px}}
+.modal{
+  background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:600px;
+  max-height:90vh;overflow-y:auto;padding:18px;
+  animation:slideUp .25s ease;
+}
+@media(min-width:640px){.modal{border-radius:16px}}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.modal-head h3{font-size:16px;font-weight:700;color:var(--red)}
+.modal-head .close{
+  width:32px;height:32px;border-radius:50%;background:var(--grey-light);
+  font-size:18px;color:var(--text);
+}
+
+/* ============ TOAST NOTIFICATION ============ */
+#toastContainer{
+  position:fixed;top:70px;right:12px;z-index:2000;
+  display:flex;flex-direction:column;gap:8px;max-width:340px;
+  pointer-events:none;
+}
+.toast{
+  background:#fff;border-radius:10px;padding:12px 14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18);
+  border-left:4px solid var(--blue);
+  animation:toastIn .3s ease;
+  pointer-events:auto;font-size:13px;
+}
+.toast.red{border-left-color:var(--red)}
+.toast.green{border-left-color:var(--green)}
+.toast.amber{border-left-color:var(--amber)}
+.toast .t-title{font-weight:700;font-size:13px;margin-bottom:2px}
+.toast .t-body{font-size:12px;color:var(--text-light)}
+@keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ============ NOTIFICATION PANEL ============ */
+.notif-item{
+  padding:10px;border-radius:8px;background:var(--grey-light);
+  margin-bottom:8px;border-left:3px solid var(--blue);font-size:12px;
+}
+.notif-item.unread{background:var(--blue-light);border-left-color:var(--red)}
+.notif-item .n-title{font-weight:700;margin-bottom:2px}
+.notif-item .n-time{font-size:10px;color:var(--text-light)}
+
+/* ============ CHAT ============ */
+.chat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.chat-item{
+  display:flex;align-items:center;gap:10px;padding:10px;
+  background:#fff;border-radius:8px;border:1px solid var(--border);
+  cursor:pointer;transition:.2s;
+}
+.chat-item:hover{background:var(--blue-light)}
+.chat-avatar{
+  width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+  flex-shrink:0;
+}
+.chat-avatar.group{background:var(--red)}
+.chat-item .ci-name{font-weight:600;font-size:13px}
+.chat-item .ci-last{font-size:11px;color:var(--text-light)}
+
+#chatWindow{
+  position:fixed;inset:0;background:#fff;z-index:600;
+  display:none;flex-direction:column;
+}
+#chatWindow.show{display:flex}
+.chat-window-head{
+  background:var(--blue);color:#fff;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.chat-window-head .back{
+  width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);
+  color:#fff;font-size:18px;
+}
+.chat-window-head .cw-name{font-weight:700;font-size:14px;flex:1}
+.chat-messages{
+  flex:1;overflow-y:auto;padding:14px;background:#f0f4f8;
+  display:flex;flex-direction:column;gap:8px;
+}
+.msg{
+  max-width:78%;padding:8px 12px;border-radius:14px;font-size:13px;
+  word-wrap:break-word;position:relative;
+}
+.msg.me{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg.other{align-self:flex-start;background:#fff;color:var(--text);border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.msg .m-sender{font-size:10px;font-weight:700;opacity:.8;margin-bottom:2px}
+.msg .m-time{font-size:9px;opacity:.7;margin-top:3px;text-align:right}
+.msg img{max-width:200px;border-radius:8px;display:block;margin-top:4px}
+.chat-input-bar{
+  display:flex;gap:8px;padding:10px;background:#fff;
+  border-top:1px solid var(--border);align-items:center;
+}
+.chat-input-bar input[type=text]{
+  flex:1;padding:10px 14px;border:1.5px solid var(--border);
+  border-radius:22px;font-size:14px;
+}
+.chat-input-bar .attach{
+  width:38px;height:38px;border-radius:50%;background:var(--grey-light);
+  font-size:18px;color:var(--text-light);flex-shrink:0;
+}
+.chat-input-bar .send{
+  width:38px;height:38px;border-radius:50%;background:var(--red);
+  color:#fff;font-size:16px;flex-shrink:0;
+}
+
+/* ============ WIZARD (Auto Generate Form) ============ */
+.wizard-steps{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.wizard-step{
+  flex:1;padding:8px;border-radius:8px;background:var(--grey-light);
+  text-align:center;font-size:11px;font-weight:600;color:var(--text-light);
+  min-width:80px;
+}
+.wizard-step.active{background:var(--red);color:#fff}
+.wizard-step.done{background:#d1fae5;color:#065f46}
+.wizard-page{display:none}
+.wizard-page.active{display:block}
+.staff-row{
+  display:grid;grid-template-columns:1fr;gap:8px;
+  padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;
+  background:#fafbfc;
+}
+@media(min-width:640px){.staff-row{grid-template-columns:1.2fr 1fr 1fr 1fr}}
+.staff-row .sr-name{font-weight:700;font-size:13px;color:var(--red)}
+.staff-row .sr-meta{font-size:11px;color:var(--text-light)}
+.staff-row select,.staff-row input{
+  padding:8px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:100%;
+}
+
+/* ============ ALERTS / WARNINGS ============ */
+.alert{
+  padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:8px;
+  border-left:4px solid var(--amber);background:#fffbeb;color:#92400e;
+}
+.alert.red{border-left-color:var(--red);background:var(--red-light);color:#991b1b}
+.alert.green{border-left-color:var(--green);background:#ecfdf5;color:#065f46}
+.alert.blue{border-left-color:var(--blue);background:var(--blue-light);color:#1e40af}
+
+/* ============ MISC ============ */
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
+.tabs button{
+  padding:8px 14px;border-radius:20px;background:var(--grey-light);
+  font-size:12px;font-weight:600;color:var(--text-light);white-space:nowrap;
+}
+.tabs button.active{background:var(--red);color:#fff}
+.empty{text-align:center;padding:30px 10px;color:var(--text-light);font-size:13px}
+.empty .ico{font-size:36px;display:block;margin-bottom:8px;opacity:.4}
+.loading{text-align:center;padding:20px;color:var(--text-light);font-size:13px}
+.spinner{
+  width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--red);
+  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 8px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.text-muted{color:var(--text-light);font-size:11px}
+.mt-2{margin-top:8px}
+.mb-2{margin-bottom:8px}
+.hidden{display:none!important}
+
+/* ============ PRINT STYLES ============ */
+@media print{
+  body{background:#fff;padding:0}
+  .app-header,.bottom-nav,.tabs,.btn,.icon-btn,#toastContainer,.no-print{display:none!important}
+  .container{max-width:100%;padding:0}
+  .card{box-shadow:none;border:none;padding:0;margin:0}
+  table{font-size:10px;min-width:0;page-break-inside:auto}
+  th,td{border:1px solid #000!important;padding:3px!important;color:#000!important}
+  th{background:#fff!important;color:#000!important;font-weight:700}
+  /* Print: only OFF/Leave/Holiday cells black, others white */
+  td.cell-OFF,td.cell-EL,td.cell-CPL,td.cell-CL,td.cell-GH,td.cell-SL,td.cell-AL,td.cell-ML,td.cell-holiday{
+    background:#000!important;color:#fff!important;
+  }
+  td.cell-M,td.cell-E,td.cell-E4,td.cell-N12,td.cell-N,td.cell-D,td.cell-X{
+    background:#fff!important;color:#000!important;
+  }
+  .print-header{display:block!important;text-align:center;margin-bottom:10px}
+  .print-header .ph-logo{
+    display:inline-flex;width:50px;height:50px;border-radius:50%;
+    background:#C8102E;color:#fff;align-items:center;justify-content:center;
+    font-weight:800;font-size:16px;margin-bottom:6px;
+  }
+  .print-header h1{font-size:16px;color:#C8102E;margin:0}
+  .print-header p{font-size:11px;margin:2px 0;color:#333}
+  .print-signatures{display:flex!important;justify-content:space-between;margin-top:30px;padding-top:10px}
+  .print-signatures div{text-align:center;font-size:10px;width:30%}
+  .print-signatures .line{border-top:1px solid #000;margin-top:30px;padding-top:4px}
+}
+.print-header{display:none}
+.print-signatures{display:none}
+
+/* Desktop: show more columns */
+@media(min-width:900px){
+  .container{padding:20px}
+  .card{padding:20px}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .bottom-nav{display:none}
+  body{padding-bottom:20px}
+  .app-header h1{font-size:17px}
+  .desktop-nav{
+    display:flex!important;gap:4px;background:var(--blue);padding:8px 16px;
+    overflow-x:auto;position:sticky;top:62px;z-index:98;
+  }
+  .desktop-nav button{
+    padding:8px 14px;border-radius:8px;background:rgba(255,255,255,.12);
+    color:#fff;font-size:12px;font-weight:600;white-space:nowrap;
+  }
+  .desktop-nav button.active{background:#fff;color:var(--blue)}
+}
+.desktop-nav{display:none}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<script>
-var firebaseConfig = {
-  apiKey: "AIzaSyB4uyNiVe5CQ-vAZalcYpQxz2XCq4XY17o",
-  authDomain: "phlebotomy-roster-f618f.firebaseapp.com",
-  databaseURL: "https://phlebotomy-roster-f618f-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "phlebotomy-roster-f618f",
-  storageBucket: "phlebotomy-roster-f618f.firebasestorage.app",
-  messagingSenderId: "433203658029",
-  appId: "1:433203658029:web:bf2a31f75f4c3273df27a4"
-};
-firebase.initializeApp(firebaseConfig);
-var db = firebase.database();
 
-var App = { user: null, view: 'dashboard', periodId: null, cache: {} };
+<!-- ============ TOAST CONTAINER ============ -->
+<div id="toastContainer"></div>
 
-function uid() { return 'x' + Date.now() + Math.floor(Math.random() * 1000); }
-function today() { return new Date().toISOString().slice(0, 10); }
-function esc(s) {
-  return String(s || '').replace(/[&<>"']/g, function(c) {
-    if (c === '&') return '&amp;';
-    if (c === '<') return '&lt;';
-    if (c === '>') return '&gt;';
-    if (c === '"') return '&quot;';
-    return '&#39;';
-  });
-}
-function toast(msg, type) {
-  var t = document.createElement('div');
-  t.className = 'toast';
-  if (type === 'error') t.style.background = '#C0392B';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function() { t.classList.add('show'); }, 20);
-  setTimeout(function() {
-    t.classList.remove('show');
-    setTimeout(function() { t.remove(); }, 300);
-  }, 2500);
-}
-function isSunday(d) { return new Date(d + 'T00:00:00').getDay() === 0; }
-function isSaturday(d) { return new Date(d + 'T00:00:00').getDay() === 6; }
-function dayName(d) {
-  var dt = new Date(d + 'T00:00:00');
-  return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
-}
-function fmtDate(d) {
-  var dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
-}
-function initials(n) {
-  if (!n) return '?';
-  var parts = n.split(' ');
-  var result = '';
-  for (var i = 0; i < Math.min(2, parts.length); i++) {
-    if (parts[i]) result += parts[i][0];
-  }
-  return result.toUpperCase();
-}
-function datesBetween(s, e) {
-  var out = [];
-  var d = new Date(s + 'T00:00:00');
-  var end = new Date(e + 'T00:00:00');
-  while (d <= end) {
-    out.push(d.toISOString().slice(0, 10));
-    d.setDate(d.getDate() + 1);
-  }
-  return out;
-}
+<!-- ============ LOGIN PAGE ============ -->
+<div id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">KIH</div>
+    <div class="login-title">Phlebotomist Roster</div>
+    <div class="login-sub">Kulsum International Hospital, Islamabad<br>Department: Phlebotomy</div>
 
-function initCache() {
-  var keys = ['users', 'staff', 'periods', 'assignments', 'leave', 'holidays', 'settings', 'audit'];
-  keys.forEach(function(k) {
-    db.ref(k).on('value', function(snap) {
-      App.cache[k] = snap.val();
-      if (k === 'users' && !App.cache[k]) {
-        db.ref('users').set({
-          admin: {
-            username: 'admin',
-            password: 'admin123',
-            role: 'supervisor',
-            active: true,
-            mobile: '03001234567',
-            name: 'Admin'
-          }
-        });
-      }
-      if (k === 'settings' && !App.cache[k]) {
-        db.ref('settings').set({
-          hospital_name: 'KULSUM INTERNATIONAL HOSPITAL',
-          department: 'Laboratory and Blood Bank',
-          app_title: 'Phlebotomist Roster'
-        });
-      }
-      if (App.user) render();
-    });
-  });
-}
-function save(k, v) {
-  App.cache[k] = v;
-  return db.ref(k).set(v);
-}
-function get(k, def) {
-  if (App.cache[k] !== undefined && App.cache[k] !== null) return App.cache[k];
-  return def || {};
-}
-function logAudit(action, oldv, newv) {
-  var log = get('audit', {});
-  var arr = Object.values(log);
-  arr.unshift({
-    id: uid(),
-    user: App.user ? App.user.username : 'system',
-    action: action,
-    old: oldv,
-    new: newv,
-    at: new Date().toISOString()
-  });
-  var obj = {};
-  arr.slice(0, 500).forEach(function(x) { obj[x.id] = x; });
-  save('audit', obj);
-}
+    <div class="login-tabs">
+      <button class="login-tab active" id="tabStaff" onclick="switchLoginTab('staff')">Staff</button>
+      <button class="login-tab" id="tabAdmin" onclick="switchLoginTab('admin')">Admin</button>
+    </div>
 
-function renderLogin() {
-  document.getElementById('app').innerHTML =
-    '<div class="login-bg"><div class="login-box">' +
-    '<div class="logo-big">KIH</div>' +
-    '<h1>Phlebotomist Roster</h1>' +
-    '<p>KULSUM INTERNATIONAL HOSPITAL</p>' +
-    '<input id="lu" placeholder="Mobile / Username" autocomplete="username">' +
-    '<input id="lp" type="password" placeholder="Password" autocomplete="current-password">' +
-    '<button onclick="doLogin()">🔐 Login</button>' +
-    '<div style="text-align:center;margin-top:14px;font-size:11px;color:#999">Admin: admin / admin123</div>' +
-    '</div></div>';
-  document.getElementById('lp').onkeydown = function(e) {
-    if (e.key === 'Enter') doLogin();
-  };
-}
+    <div class="login-error" id="loginError"></div>
 
-function doLogin() {
-  var u = document.getElementById('lu').value.trim();
-  var p = document.getElementById('lp').value;
-  if (!u || !p) { toast('Enter credentials', 'error'); return; }
-  var users = get('users', {});
-  var user = Object.values(users).find(function(x) {
-    return (x.username === u || x.mobile === u) && x.password === p;
-  });
-  if (!user) { toast('Invalid credentials', 'error'); return; }
-  App.user = {
-    username: user.username,
-    name: user.name || user.username,
-    role: user.role,
-    staff_id: user.staff_id || null
-  };
-  localStorage.setItem('phleb_user', JSON.stringify(App.user));
-  App.view = 'dashboard';
-  render();
-}
+    <div id="staffLoginForm">
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="staffMobile" placeholder="03xxxxxxxxx" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="staffPassword" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin('staff')">Login as Staff</button>
+    </div>
 
-function doLogout() {
-  if (!confirm('Logout?')) return;
-  App.user = null;
-  localStorage.removeItem('phleb_user');
-  render();
-}
+    <div id="adminLoginForm" class="hidden">
+      <div class="form-group">
+        <label>Username / Mobile</label>
+        <input type="text" id="adminUser" placeholder="admin" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary" onclick="doLogin('admin')">Login as Admin</button>
+    </div>
 
-function render() {
-  if (!App.user) { renderLogin(); return; }
-  var v = App.view;
-  var body = '';
-  if (v === 'dashboard') body = viewDash();
-  else if (v === 'roster') body = viewRoster();
-  else if (v === 'staff') body = viewStaff();
-  else if (v === 'leave') body = viewLeave();
-  else if (v === 'audit') body = viewAudit();
-  else if (v === 'settings') body = viewSettings();
-  else body = '<div class="card">Unknown view</div>';
+    <div class="login-footer">
+      © 2026 Kulsum International Hospital — Phlebotomy Dept.
+    </div>
+  </div>
+</div>
 
-  var isSup = App.user.role === 'supervisor';
-  var nav = isSup
-    ? [['dashboard','🏠','Home'],['roster','📅','Roster'],['staff','👥','Staff'],['leave','🏖','Leave'],['audit','📜','Audit'],['settings','⚙','Set']]
-    : [['dashboard','🏠','Home'],['roster','📅','Roster'],['leave','🏖','Leave']];
+<!-- ============ MAIN APP ============ -->
+<div id="app">
+  <header class="app-header">
+    <div class="logo">KIH</div>
+    <h1>Phlebotomist Roster <small id="headerUser">Kulsum International Hospital</small></h1>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openNotifications()" title="Notifications">
+        🔔<span class="badge hidden" id="notifBadge">0</span>
+      </button>
+      <button class="icon-btn" onclick="doLogout()" title="Logout">⎋</button>
+    </div>
+  </header>
 
-  var navHtml = nav.map(function(item) {
-    var cls = App.view === item[0] ? 'active' : '';
-    return '<button class="' + cls + '" onclick="App.view=\'' + item[0] + '\';render()"><span class="ic">' + item[1] + '</span>' + item[2] + '</button>';
-  }).join('');
+  <nav class="desktop-nav" id="desktopNav"></nav>
 
-  var title = 'Phlebotomist Roster';
-  var st = get('settings', {});
-  if (st.app_title) title = st.app_title;
+  <div class="container">
 
-  document.getElementById('app').innerHTML =
-    '<div class="header">' +
-    '<div class="logo">KIH</div>' +
-    '<h1>' + esc(title) + '</h1>' +
-    '<button onclick="doLogout()">Logout</button>' +
-    '</div>' +
-    '<div class="container">' + body + '</div>' +
-    '<div class="nav">' + navHtml + '</div>';
-}
+    <!-- ===== DASHBOARD ===== -->
+    <section class="section active" id="sec-dashboard">
+      <div class="stats" id="dashStats"></div>
+      <div class="card">
+        <h2>⚡ Quick Actions <span class="sub" id="dashDate"></span></h2>
+        <div class="form-row" id="quickActions"></div>
+      </div>
+      <div class="card">
+        <h2>📢 Recent Notifications</h2>
+        <div id="dashNotifs"><div class="empty">No notifications</div></div>
+      </div>
+    </section>
 
-function viewDash() {
-  var staff = Object.values(get('staff', {})).filter(function(s) { return s.status === 'Active'; });
-  var periods = Object.values(get('periods', {}));
-  var t = today();
-  var cp = periods.find(function(p) { return p.start <= t && p.end >= t; });
-  var asg = get('assignments', {});
-  var td = {};
-  if (cp && asg[cp.id]) {
-    staff.forEach(function(s) {
-      var c = asg[cp.id][s.id + '_' + t];
-      if (c) td[c] = (td[c] || 0) + 1;
-    });
-  }
+    <!-- ===== STAFF MANAGEMENT ===== -->
+    <section class="section" id="sec-staff">
+      <div class="card">
+        <h2>👥 Staff Management <span class="sub"><button class="btn btn-primary btn-sm" onclick="openStaffForm()">+ Add Staff</button></span></h2>
+        <div class="form-row mb-2">
+          <input type="text" id="staffSearch" placeholder="🔍 Search staff..." oninput="renderStaffList()" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px">
+          <select id="staffFilter" onchange="renderStaffList()" style="padding:8px;border:1px solid var(--border);border-radius:8px">
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
+          </select>
+        </div>
+        <div id="staffList"></div>
+      </div>
+    </section>
 
-  var periodHtml = '<div style="text-align:center;color:#999;padding:20px">No active period</div>';
-  if (cp) {
-    var badgeColor = cp.status === 'Published' ? 'background:#CAFFBF;color:#1E8449' : 'background:#FFF3B0;color:#7D6608';
-    periodHtml = '<div style="font-weight:700">' + esc(cp.name) + '</div>' +
-      '<div style="color:#666;font-size:12px;margin-top:4px">' + fmtDate(cp.start) + ' → ' + fmtDate(cp.end) + '</div>' +
-      '<div style="margin-top:6px"><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;' + badgeColor + '">' + cp.status + '</span></div>';
-  }
+    <!-- ===== ROSTER ===== -->
+    <section class="section" id="sec-roster">
+      <div class="card">
+        <h2>📅 Duty Roster <span class="sub" id="rosterPeriodLabel"></span></h2>
+        <div class="form-row mb-2">
+          <button class="btn btn-blue btn-sm" onclick="openAutoGenerate()">⚙️ Auto Generate</button>
+          <button class="btn btn-outline btn-sm" onclick="exportRosterExcel()">📊 Excel</button>
+          <button class="btn btn-outline btn-sm" onclick="printRoster()">🖨️ Print/PDF</button>
+          <select id="rosterPeriodSelect" onchange="loadRosterForPeriod(this.value)" style="padding:8px;border:1px solid var(--border);border-radius:8px">
+            <option value="">Select Period</option>
+          </select>
+        </div>
+        <div id="rosterWarnings"></div>
+        <div class="table-wrap" id="rosterTableWrap">
+          <div class="empty"><span class="ico">📋</span>No roster generated yet.<br>Click "Auto Generate" to create one.</div>
+        </div>
+      </div>
+    </section>
 
-  var dutyHtml = '<div style="text-align:center;color:#999;padding:20px">No duties today</div>';
-  var tdKeys = Object.keys(td);
-  if (tdKeys.length) {
-    dutyHtml = tdKeys.map(function(c) {
-      return '<span class="cell c' + c + '">' + c + ': ' + td[c] + '</span> ';
-    }).join('');
-  }
+    <!-- ===== LEAVE ===== -->
+    <section class="section" id="sec-leave">
+      <div class="card">
+        <h2>🏖️ Leave Management <span class="sub"><button class="btn btn-primary btn-sm" onclick="openLeaveForm()">+ Add Leave</button></span></h2>
+        <div class="table-wrap" id="leaveTableWrap">
+          <div class="empty"><span class="ico">🏖️</span>No leave records</div>
+        </div>
+      </div>
+    </section>
 
-  return '<div class="card"><h2>📅 Current Period</h2>' + periodHtml + '</div>' +
-    '<div class="card"><h2>👥 Staff: ' + staff.length + ' Active</h2></div>' +
-    '<div class="card"><h2>📊 Today\'s Duties (' + fmtDate(t) + ')</h2>' + dutyHtml + '</div>';
-}
+    <!-- ===== EXCHANGE ===== -->
+    <section class="section" id="sec-exchange">
+      <div class="card">
+        <h2>🔄 Shift Exchange <span class="sub"><button class="btn btn-primary btn-sm" onclick="openExchangeForm()">+ New Request</button></span></h2>
+        <div id="exchangeList"></div>
+      </div>
+    </section>
 
-function viewStaff() {
-  var staff = Object.values(get('staff', {}));
-  var isSup = App.user.role === 'supervisor';
-  var html = '<div class="card"><h2>👥 Staff (' + staff.length + ')</h2>';
-  if (isSup) html += '<button class="green" onclick="addStaff()">➕ Add New Staff</button>';
-  if (!staff.length) {
-    html += '<div style="text-align:center;color:#999;padding:20px">No staff</div>';
+    <!-- ===== CHAT ===== -->
+    <section class="section" id="sec-chat">
+      <div class="card">
+        <h2>💬 Chat</h2>
+        <div class="chat-list" id="chatList"></div>
+      </div>
+    </section>
+
+    <!-- ===== REPORTS ===== -->
+    <section class="section" id="sec-reports">
+      <div class="card">
+        <h2>📊 Reports</h2>
+        <div class="tabs" id="reportTabs">
+          <button class="active" onclick="showReport('daily',this)">Daily Duty</button>
+          <button onclick="showReport('monthly',this)">Monthly Summary</button>
+          <button onclick="showReport('cpl',this)">CPL/Overtime</button>
+          <button onclick="showReport('leave',this)">Leave</button>
+          <button onclick="showReport('audit',this)">Audit Log</button>
+        </div>
+        <div class="form-row mb-2">
+          <button class="btn btn-outline btn-sm" onclick="exportReportExcel()">📊 Excel</button>
+          <button class="btn btn-outline btn-sm" onclick="printReport()">🖨️ Print</button>
+        </div>
+        <div id="reportContent"><div class="empty">Select a report</div></div>
+      </div>
+    </section>
+
+    <!-- ===== TECH ROSTER ===== -->
+    <section class="section" id="sec-tech">
+      <div class="card">
+        <h2>🔬 Technologist Roster <span class="sub">(Separate Module)</span></h2>
+        <div class="alert blue">Technologist module is separate. Staff, roster, chat and reports are independent from Phlebotomy.</div>
+        <div class="form-row">
+          <button class="btn btn-primary btn-sm" onclick="toast('Technologist module ready — add staff to begin','blue')">+ Add Technologist</button>
+          <button class="btn btn-blue btn-sm" onclick="toast('Technologist roster — configure in Settings','blue')">⚙️ Auto Generate</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="section" id="sec-settings">
+      <div class="card">
+        <h2>⚙️ Settings</h2>
+        <div class="form-grid two">
+          <div class="form-group"><label>Hospital Name</label><input id="setHospital" placeholder="Kulsum International Hospital"></div>
+          <div class="form-group"><label>Department</label><input id="setDept" placeholder="Phlebotomy"></div>
+          <div class="form-group"><label>Address</label><input id="setAddress" placeholder="Islamabad"></div>
+          <div class="form-group"><label>WhatsApp Number</label><input id="setWhatsapp" placeholder="03xxxxxxxxx"></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 Save Settings</button>
+      </div>
+      <div class="card">
+        <h2>🎉 Gazetted Holidays <span class="sub"><button class="btn btn-primary btn-sm" onclick="openHolidayForm()">+ Add</button></span></h2>
+        <div id="holidayList"></div>
+      </div>
+      <div class="card">
+        <h2>🕐 Shift Timings</h2>
+        <div id="shiftTimingsList"></div>
+      </div>
+    </section>
+
+  </div><!-- /container -->
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bottom-nav" id="bottomNav"></nav>
+</div>
+
+<!-- ============ CHAT WINDOW ============ -->
+<div id="chatWindow">
+  <div class="chat-window-head">
+    <button class="back" onclick="closeChat()">←</button>
+    <div class="cw-name" id="chatWindowName">Chat</div>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-bar">
+    <input type="file" id="chatImageInput" accept="image/*" class="hidden" onchange="sendChatImage(this)">
+    <button class="attach" onclick="document.getElementById('chatImageInput').click()">📎</button>
+    <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatText()">
+    <button class="send" onclick="sendChatText()">➤</button>
+  </div>
+</div>
+
+<!-- ============ GENERIC MODAL ============ -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- ============ NOTIFICATIONS PANEL ============ -->
+<div class="modal-bg" id="notifBg" onclick="if(event.target===this)closeNotifications()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🔔 Notifications</h3>
+      <button class="close" onclick="closeNotifications()">✕</button>
+    </div>
+    <div id="notifList"><div class="empty">No notifications</div></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PART 2 WILL START HERE — JAVASCRIPT
+     ============================================================ -->
+  <!-- ============================================================
+     PART 2 WILL START HERE — JAVASCRIPT
+     ============================================================ -->
+  /* ============================================================
+   PART 3: DASHBOARD + STAFF + PERIODS
+   ============================================================ */
+
+/* ---------- DASHBOARD ---------- */
+function renderDashboard(){
+  const totalStaff = Object.keys(S.staff).filter(id=>!S.staff[id].archived).length;
+  const totalLeaves = Object.values(S.leaves).filter(l=>l.status!=='rejected').length;
+  const totalExch = Object.values(S.exchanges).filter(e=>e.status!=='completed' && e.status!=='rejected').length;
+  const totalPeriods = Object.keys(S.periods).length;
+
+  $('dashStats').innerHTML =
+    '<div class="stat"><div class="num">'+totalStaff+'</div><div class="lbl">Active Staff</div></div>'+
+    '<div class="stat blue"><div class="num">'+totalPeriods+'</div><div class="lbl">Roster Periods</div></div>'+
+    '<div class="stat amber"><div class="num">'+totalLeaves+'</div><div class="lbl">Leave Records</div></div>'+
+    '<div class="stat green"><div class="num">'+totalExch+'</div><div class="lbl">Pending Exchanges</div></div>';
+
+  $('dashDate').textContent = fmtDisplay(fmtDate(new Date()));
+
+  // Quick actions
+  let actions = '';
+  if(S.role === 'admin'){
+    actions =
+      '<button class="btn btn-primary btn-sm" onclick="openStaffForm()">+ Add Staff</button>'+
+      '<button class="btn btn-blue btn-sm" onclick="openAutoGenerate()">⚙️ Auto Generate</button>'+
+      '<button class="btn btn-outline btn-sm" onclick="switchSection(\'reports\')">📊 Reports</button>'+
+      '<button class="btn btn-outline btn-sm" onclick="switchSection(\'settings\')">⚙️ Settings</button>';
   } else {
-    staff.forEach(function(s) {
-      var statusStyle = s.status === 'Active' ? 'background:#E8F5E9;color:#27AE60' : 'background:#FFEBEE;color:#C8102E';
-      html += '<div class="staff-row">' +
-        '<div class="avatar">' + initials(s.name) + '</div>' +
-        '<div style="flex:1">' +
-        '<div style="font-weight:700;font-size:14px">' + esc(s.name) + '</div>' +
-        '<div style="font-size:11px;color:#888">' + esc(s.designation || 'Phlebotomist') + ' · 📱 ' + esc(s.mobile || '') + '</div>' +
-        '<div style="margin-top:3px">' +
-        '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;' + statusStyle + '">' + s.status + '</span> ' +
-        '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#F0F2F5;color:#555">' + esc(s.gender || 'Male') + '</span>' +
-        '</div></div>';
-      if (isSup) {
-        html += '<button class="small gray" onclick="editStaff(\'' + s.id + '\')">✏️</button>';
-        var toggleCls = s.status === 'Active' ? 'red' : 'green';
-        var toggleLabel = s.status === 'Active' ? '⏸' : '▶';
-        html += '<button class="small ' + toggleCls + '" onclick="toggleStaff(\'' + s.id + '\')">' + toggleLabel + '</button>';
-      }
-      html += '</div>';
-    });
+    actions =
+      '<button class="btn btn-primary btn-sm" onclick="switchSection(\'roster\')">📅 My Roster</button>'+
+      '<button class="btn btn-blue btn-sm" onclick="openLeaveForm()">🏖️ Apply Leave</button>'+
+      '<button class="btn btn-outline btn-sm" onclick="openExchangeForm()">🔄 Exchange</button>'+
+      '<button class="btn btn-outline btn-sm" onclick="switchSection(\'chat\')">💬 Chat</button>';
   }
-  html += '</div>';
-  return html;
+  $('quickActions').innerHTML = actions;
+
+  renderDashNotifs();
 }
 
-function addStaff() {
-  var name = prompt('Staff Name:');
-  if (!name) return;
-  var gender = prompt('Gender (Male/Female):', 'Male');
-  if (!gender) return;
-  var mobile = prompt('Mobile Number:');
-  if (!mobile) return;
-  var empId = prompt('Employee ID:');
-  if (!empId) return;
-  var designation = prompt('Designation:', 'Phlebotomist') || 'Phlebotomist';
-  var staff = get('staff', {});
-  var exists = Object.values(staff).find(function(s) { return s.mobile === mobile; });
-  if (exists) { toast('Mobile already registered', 'error'); return; }
-  var id = 's_' + uid();
-  staff[id] = {
-    id: id,
-    name: name,
-    gender: gender,
-    mobile: mobile,
-    empId: empId,
-    designation: designation,
-    status: 'Active',
-    createdAt: new Date().toISOString()
-  };
-  save('staff', staff);
-  var users = get('users', {});
-  users[mobile] = {
-    username: mobile,
-    password: '123456',
-    role: 'staff',
-    staff_id: id,
-    name: name,
-    mobile: mobile,
-    active: true
-  };
-  save('users', users);
-  logAudit('CREATE_STAFF', null, name);
-  toast('Staff added ✅');
-  render();
+function renderDashNotifs(){
+  const el = $('dashNotifs');
+  if(!el) return;
+  const recent = S.notifications.slice(0,5);
+  if(!recent.length){ el.innerHTML = '<div class="empty">No notifications</div>'; return; }
+  el.innerHTML = recent.map(n=>
+    '<div class="notif-item '+(n.read?'':'unread')+'">'+
+      '<div class="n-title">'+esc(n.title)+'</div>'+
+      '<div>'+(n.body?esc(n.body):'')+'</div>'+
+      '<div class="n-time">'+timeAgo(n.ts)+'</div>'+
+    '</div>'
+  ).join('');
 }
 
-function editStaff(id) {
-  var staff = get('staff', {});
-  var s = staff[id];
-  if (!s) return;
-  var name = prompt('Name:', s.name);
-  if (name === null) return;
-  var gender = prompt('Gender:', s.gender);
-  if (gender === null) return;
-  var mobile = prompt('Mobile:', s.mobile);
-  if (mobile === null) return;
-  var empId = prompt('Employee ID:', s.empId);
-  if (empId === null) return;
-  var designation = prompt('Designation:', s.designation);
-  if (designation === null) return;
-  s.name = name;
-  s.gender = gender;
-  s.mobile = mobile;
-  s.empId = empId;
-  s.designation = designation;
-  save('staff', staff);
-  logAudit('EDIT_STAFF', null, name);
-  toast('Updated ✅');
-  render();
+/* ---------- NOTIFICATIONS PANEL ---------- */
+function openNotifications(){
+  $('notifBg').classList.add('show');
+  renderNotifList();
+  // Mark all as read
+  setTimeout(()=>{
+    const updates = {};
+    S.notifications.forEach(n=>{ if(!n.read) updates['notifications/'+n.id+'/read'] = true; });
+    if(Object.keys(updates).length) db.ref().update(updates);
+  }, 800);
+}
+function closeNotifications(){ $('notifBg').classList.remove('show'); }
+
+function renderNotifList(){
+  const el = $('notifList');
+  if(!el) return;
+  if(!S.notifications.length){ el.innerHTML='<div class="empty">No notifications</div>'; return; }
+  el.innerHTML = S.notifications.map(n=>
+    '<div class="notif-item '+(n.read?'':'unread')+'">'+
+      '<div class="n-title">'+esc(n.title)+'</div>'+
+      '<div>'+(n.body?esc(n.body):'')+'</div>'+
+      '<div class="n-time">'+timeAgo(n.ts)+'</div>'+
+    '</div>'
+  ).join('');
 }
 
-function toggleStaff(id) {
-  var staff = get('staff', {});
-  var s = staff[id];
-  if (!s) return;
-  s.status = s.status === 'Active' ? 'Inactive' : 'Active';
-  save('staff', staff);
-  toast(s.status);
-  render();
-}
+/* ============================================================
+   STAFF MANAGEMENT
+   ============================================================ */
+function renderStaffList(){
+  const el = $('staffList');
+  if(!el) return;
+  const q = ($('staffSearch').value||'').toLowerCase();
+  const filter = $('staffFilter').value;
+  let arr = Object.entries(S.staff).map(([id,v])=>Object.assign({id},v));
 
-function viewRoster() {
-  var periods = Object.values(get('periods', {})).sort(function(a, b) {
-    return b.start.localeCompare(a.start);
-  });
-  var isSup = App.user.role === 'supervisor';
+  if(filter === 'active') arr = arr.filter(s=>!s.archived);
+  else if(filter === 'archived') arr = arr.filter(s=>s.archived);
 
-  if (!periods.length) {
-    if (!isSup) return '<div class="card"><div style="text-align:center;color:#999;padding:20px">No roster</div></div>';
-    return '<div class="card"><h2>📅 Create First Period</h2>' +
-      '<input id="pName" placeholder="Name" value="Sep 2026">' +
-      '<div class="grid2">' +
-      '<input id="pStart" type="date" value="2026-09-01">' +
-      '<input id="pEnd" type="date" value="2026-09-30">' +
-      '</div>' +
-      '<button class="green" onclick="createPeriod()">Create</button>' +
-      '</div>';
+  if(q){
+    arr = arr.filter(s=>
+      (s.name||'').toLowerCase().includes(q) ||
+      (s.mobile||'').includes(q) ||
+      (s.empId||'').toLowerCase().includes(q)
+    );
+  }
+  arr.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+
+  if(!arr.length){
+    el.innerHTML = '<div class="empty"><span class="ico">👥</span>No staff found</div>';
+    return;
   }
 
-  if (!App.periodId) App.periodId = periods[0].id;
-  var period = periods.find(function(p) { return p.id === App.periodId; }) || periods[0];
-  App.periodId = period.id;
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
+    '<th class="staff-col">Name</th><th>Gender</th><th>Mobile</th><th>Designation</th>'+
+    '<th>Emp ID</th><th>Shift</th><th>Role</th><th>Status</th><th>Action</th>'+
+    '</tr></thead><tbody>'+
+    arr.map(s=>{
+      const shiftTxt = s.fixedShift ? s.fixedShift : (s.multiShifts && s.multiShifts.length ? s.multiShifts.join(' → ') : '—');
+      return '<tr>'+
+        '<td class="staff-col"><b>'+esc(s.name)+'</b><br><span class="text-muted">'+esc(s.designation||'')+'</span></td>'+
+        '<td>'+esc(s.gender||'')+'</td>'+
+        '<td>'+esc(s.mobile||'')+'</td>'+
+        '<td>'+esc(s.designation||'')+'</td>'+
+        '<td>'+esc(s.empId||'')+'</td>'+
+        '<td>'+esc(shiftTxt)+'</td>'+
+        '<td>'+(s.isSupervisor?'<span class="chip red">Supervisor</span>':'<span class="chip">Staff</span>')+'</td>'+
+        '<td>'+(s.archived?'<span class="chip">Archived</span>':'<span class="chip green">Active</span>')+'</td>'+
+        '<td>'+
+          '<button class="btn btn-outline btn-sm" onclick="openStaffForm(\''+s.id+'\')">Edit</button> '+
+          (s.archived
+            ? '<button class="btn btn-green btn-sm" onclick="restoreStaff(\''+s.id+'\')">Restore</button>'
+            : '<button class="btn btn-danger btn-sm" onclick="archiveStaff(\''+s.id+'\')">Archive</button>')+
+        '</td>'+
+      '</tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
 
-  var staff = Object.values(get('staff', {})).filter(function(s) { return s.status === 'Active'; });
-  var dates = datesBetween(period.start, period.end);
-  var asg = get('assignments', {});
-  var pd = asg[period.id] || {};
+function openStaffForm(id){
+  const s = id ? S.staff[id] : {};
+  const genderOpts = ['Male','Female'].map(g=>'<option value="'+g+'" '+(s.gender===g?'selected':'')+'>'+g+'</option>').join('');
+  const shiftCodes = ['M','E','E4','N12','N','D','X'];
+  const fixedOpts = '<option value="">— None —</option>'+shiftCodes.map(c=>'<option value="'+c+'" '+(s.fixedShift===c?'selected':'')+'>'+c+'</option>').join('');
+  const multiOpts = shiftCodes.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  const multiSelected = (s.multiShifts||[]).join(',');
 
-  var gridHtml = '<div class="card"><h2>📋 Roster Grid</h2><div class="scroll-x"><table><thead><tr>';
-  gridHtml += '<th>Name</th>';
-  dates.forEach(function(d) {
-    var sun = isSunday(d);
-    var style = sun ? ' style="background:#E67E22"' : '';
-    gridHtml += '<th' + style + '>' + d.slice(8) + '<br><span style="font-size:9px">' + dayName(d) + '</span></th>';
+  openModal(
+    '<div class="modal-head"><h3>'+(id?'Edit Staff':'Add Staff')+'</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="form-group"><label>Name *</label><input id="sf_name" value="'+esc(s.name||'')+'"></div>'+
+    '<div class="form-grid two">'+
+      '<div class="form-group"><label>Gender *</label><select id="sf_gender"><option value="">Select</option>'+genderOpts+'</select></div>'+
+      '<div class="form-group"><label>Mobile *</label><input id="sf_mobile" value="'+esc(s.mobile||'')+'" placeholder="03xxxxxxxxx"></div>'+
+    '</div>'+
+    '<div class="form-grid two">'+
+      '<div class="form-group"><label>Designation *</label><input id="sf_desig" value="'+esc(s.designation||'Phlebotomist')+'"></div>'+
+      '<div class="form-group"><label>Employee ID *</label><input id="sf_empId" value="'+esc(s.empId||'')+'"></div>'+
+    '</div>'+
+    '<div class="form-group"><label>Password (default 123456)</label><input id="sf_pass" value="'+esc(s.password||'123456')+'"></div>'+
+    '<div class="form-grid two">'+
+      '<div class="form-group"><label>Fixed Shift</label><select id="sf_fixed">'+fixedOpts+'</select></div>'+
+      '<div class="form-group"><label>Multiple Shifts (Ctrl/Cmd)</label><select id="sf_multi" multiple size="5">'+multiOpts+'</select></div>'+
+    '</div>'+
+    '<div class="form-group"><label>Special Off Dates (comma separated YYYY-MM-DD)</label>'+
+      '<input id="sf_offdates" value="'+esc((s.specialOffDates||[]).join(', '))+'" placeholder="2026-09-05, 2026-09-12"></div>'+
+    '<div class="form-row mb-2">'+
+      '<label><input type="checkbox" id="sf_supervisor" '+(s.isSupervisor?'checked':'')+'> Make Supervisor</label>'+
+    '</div>'+
+    '<button class="btn btn-primary btn-block" onclick="saveStaff(\''+(id||'')+'\')">Save Staff</button>'
+  );
+}
+
+function saveStaff(id){
+  const name = $('sf_name').value.trim();
+  const gender = $('sf_gender').value;
+  const mobile = $('sf_mobile').value.trim();
+  const designation = $('sf_desig').value.trim();
+  const empId = $('sf_empId').value.trim();
+  const password = $('sf_pass').value.trim() || defaultPassword();
+  const fixedShift = $('sf_fixed').value;
+  const multiShifts = Array.from($('sf_multi').selectedOptions).map(o=>o.value);
+  const offDatesRaw = $('sf_offdates').value.trim();
+  const isSupervisor = $('sf_supervisor').checked;
+
+  if(!name) return toast('Enter name','red');
+  if(!gender) return toast('Select gender','red');
+  if(!validMobile(mobile)) return toast('Enter valid mobile (03xxxxxxxxx)','red');
+  if(!designation) return toast('Enter designation','red');
+  if(!empId) return toast('Enter employee ID','red');
+
+  const specialOffDates = offDatesRaw ? offDatesRaw.split(',').map(x=>x.trim()).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x)) : [];
+
+  const data = {
+    name, gender, mobile, designation, empId, password,
+    fixedShift, multiShifts, specialOffDates, isSupervisor,
+    archived: false,
+    updatedAt: nowISO()
+  };
+  if(!id) data.createdAt = nowISO();
+
+  const staffId = id || uid('staff');
+  data.id = staffId;
+
+  Promise.all([
+    db.ref('staff/'+staffId).update(data),
+    // Also create/update a user entry for login
+    db.ref('users').orderByChild('mobile').equalTo(mobile).once('value').then(snap=>{
+      let userId = null;
+      snap.forEach(c=>{ userId = c.key; });
+      const uData = {
+        name, mobile, password,
+        role: isSupervisor ? 'supervisor' : 'staff',
+        staffId: staffId
+      };
+      if(userId) return db.ref('users/'+userId).update(uData);
+      else return db.ref('users').push(uData);
+    })
+  ]).then(()=>{
+    toast('Staff saved','green');
+    audit(id?'Staff edit':'Staff add', name+' ('+empId+')');
+    pushNotification(id?'Staff Updated':'New Staff Added', name+' — '+designation, 'all');
+    closeModal();
+  }).catch(e=>toast('Error: '+e.message,'red'));
+}
+
+function archiveStaff(id){
+  if(!confirm('Archive this staff? They will be hidden from active list.')) return;
+  db.ref('staff/'+id).update({ archived: true }).then(()=>{
+    toast('Staff archived','green');
+    audit('Staff archive', S.staff[id]?.name || id);
   });
-  gridHtml += '<th>OFF</th><th>Tot</th></tr></thead><tbody>';
+}
 
-  staff.forEach(function(s) {
-    var off = 0;
-    var total = 0;
-    gridHtml += '<tr><td class="name-cell">' + esc(s.name) + '</td>';
-    dates.forEach(function(d) {
-      var c = pd[s.id + '_' + d] || '';
-      if (c === 'OFF' || c === 'EL' || c === 'CPL' || c === 'CL' || c === 'GH' || c === 'SL' || c === 'AL' || c === 'ML') off++;
-      if (c) total++;
-      var cls = c ? 'c' + c : 'c-empty';
-      gridHtml += '<td onclick="editCell(\'' + s.id + '\',\'' + d + '\')"><span class="cell ' + cls + '">' + (c || '·') + '</span></td>';
-    });
-    gridHtml += '<td><b>' + off + '</b></td><td><b>' + total + '</b></td></tr>';
+function restoreStaff(id){
+  db.ref('staff/'+id).update({ archived: false }).then(()=>{
+    toast('Staff restored','green');
+    audit('Staff restore', S.staff[id]?.name || id);
   });
-  gridHtml += '</tbody></table></div></div>';
+}
 
-  var opts = periods.map(function(p) {
-    var sel = p.id === period.id ? ' selected' : '';
-    return '<option value="' + p.id + '"' + sel + '>' + esc(p.name) + '</option>';
-  }).join('');
+/* ============================================================
+   PERIODS
+   ============================================================ */
+function renderPeriodSelect(){
+  const sel = $('rosterPeriodSelect');
+  if(!sel) return;
+  const arr = Object.entries(S.periods).map(([id,v])=>Object.assign({id},v));
+  arr.sort((a,b)=>(b.start||'').localeCompare(a.start||''));
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Select Period</option>'+
+    arr.map(p=>'<option value="'+p.id+'">'+esc(p.label||(p.start+' → '+p.end))+'</option>').join('');
+  if(cur && S.periods[cur]) sel.value = cur;
+  else if(arr.length){ sel.value = arr[0].id; S.currentPeriod = arr[0].id; }
+}
 
-  var actions = '';
-  if (isSup) {
-    actions = '<div class="grid2">' +
-      '<button class="green" onclick="autoGenerate()">⚡ Auto Generate</button>' +
-      '<button class="blue" onclick="exportExcel()">📊 Excel</button>' +
-      '<button class="gray" onclick="newPeriod()">➕ New Period</button>' +
-      '<button class="gray" onclick="shareWhatsApp()">💬 WhatsApp</button>' +
-      '</div>';
+function createPeriod(start, end, label){
+  const id = start+'_'+end;
+  const data = { start, end, label: label || (fmtDisplay(start)+' → '+fmtDisplay(end)), createdAt: nowISO() };
+  return db.ref('periods/'+id).set(data).then(()=>id);
+}
+
+function defaultPeriod(){
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+  let start, end;
+  if(today.getDate() >= 26){
+    start = new Date(y, m, 26);
+    end = new Date(y, m+1, 25);
+  } else {
+    start = new Date(y, m-1, 26);
+    end = new Date(y, m, 25);
   }
-
-  return '<div class="card">' +
-    '<select onchange="App.periodId=this.value;render()">' + opts + '</select>' +
-    '<div style="font-size:12px;color:#666;margin:8px 0">' + fmtDate(period.start) + ' → ' + fmtDate(period.end) + ' | Status: <b>' + period.status + '</b></div>' +
-    actions +
-    '</div>' + gridHtml;
+  return { start: fmtDate(start), end: fmtDate(end) };
 }
 
-function createPeriod() {
-  var name = document.getElementById('pName').value.trim();
-  var start = document.getElementById('pStart').value;
-  var end = document.getElementById('pEnd').value;
-  if (!name || !start || !end) { toast('All fields required', 'error'); return; }
-  var id = 'p_' + uid();
-  var periods = get('periods', {});
-  periods[id] = {
-    id: id,
-    name: name,
-    start: start,
-    end: end,
-    status: 'Draft',
-    created: new Date().toISOString()
+/* ============================================================
+   END OF PART 3
+   ============================================================ */
+  /* ============================================================
+   PART 4: AUTO GENERATE WIZARD
+   ============================================================ */
+
+/* State for wizard */
+let W = {
+  step: 1,
+  mode: 'simple',         // 'simple' | 'detailed'
+  period: null,           // { id, start, end, label }
+  simpleInstructions: {
+    offs: [],             // [{ staffId, date }]
+    leaves: [],           // [{ staffId, leaveType, date }]
+    duty12: [],           // [{ staffId, date }]
+    duty16: [],           // [{ staffId, date }]
+    gynee: [],            // [{ staffId, week }]  (as staffId list)
+    diagnostic: [],       // [{ staffId, week }]
+    stationOverride: [],  // [{ staffId, date, station }]
+    shiftOverride: [],    // [{ staffId, date, shift }]
+    holidays: [],         // [date]
+    specialOff: []        // [{ staffId, dates:[] }]
+  },
+  detailedInstructions: {}, // staffId -> { defaultShift, defaultStation, overrides: [{date, shift, station, leave, off}] }
+  preview: null,          // generated roster grid
+  warnings: []
+};
+
+function openAutoGenerate(){
+  // Reset wizard
+  const dp = defaultPeriod();
+  W = {
+    step: 1,
+    mode: 'simple',
+    period: { start: dp.start, end: dp.end, label: fmtDisplay(dp.start)+' → '+fmtDisplay(dp.end) },
+    simpleInstructions: { offs:[], leaves:[], duty12:[], duty16:[], gynee:[], diagnostic:[], stationOverride:[], shiftOverride:[], holidays:[], specialOff:[] },
+    detailedInstructions: {},
+    preview: null,
+    warnings: []
   };
-  save('periods', periods);
-  App.periodId = id;
-  toast('Period created');
-  render();
-}
-
-function newPeriod() {
-  var name = prompt('Period Name:');
-  if (!name) return;
-  var start = prompt('Start Date (YYYY-MM-DD):');
-  if (!start) return;
-  var end = prompt('End Date (YYYY-MM-DD):');
-  if (!end) return;
-  var id = 'p_' + uid();
-  var periods = get('periods', {});
-  periods[id] = {
-    id: id,
-    name: name,
-    start: start,
-    end: end,
-    status: 'Draft',
-    created: new Date().toISOString()
-  };
-  save('periods', periods);
-  App.periodId = id;
-  toast('Created');
-  render();
-}
-
-function editCell(staffId, date) {
-  if (App.user.role !== 'supervisor') { toast('Only supervisor', 'error'); return; }
-  var periods = get('periods', {});
-  var period = periods[App.periodId];
-  if (!period) return;
-  var options = ['M', 'E', 'E4', 'N12', 'N', 'D', 'X', 'OFF', 'EL', 'CPL', 'CL', 'GH', 'SL', 'AL', 'ML'];
-  var asg = get('assignments', {});
-  var pd = asg[period.id] || {};
-  var cur = pd[staffId + '_' + date] || '';
-  var choice = prompt('Choose duty:\n' + options.join(', ') + '\n\nCurrent: ' + (cur || 'none'), cur);
-  if (!choice) return;
-  var code = choice.toUpperCase().trim();
-  if (options.indexOf(code) === -1) { toast('Invalid code', 'error'); return; }
-  pd[staffId + '_' + date] = code;
-  asg[period.id] = pd;
-  save('assignments', asg);
-  logAudit('EDIT_DUTY', cur, code);
-  toast('Updated');
-  render();
-}
-
-function autoGenerate() {
-  if (!confirm('Auto Generate roster? Existing assignments will be replaced.')) return;
-
-  var periods = get('periods', {});
-  var p = periods[App.periodId];
-  if (!p) { toast('No period', 'error'); return; }
-
-  var staff = Object.values(get('staff', {})).filter(function(s) {
-    return s.status === 'Active';
-  });
-  if (!staff.length) { toast('No active staff', 'error'); return; }
-
-  var leaves = Object.values(get('leave', {})).filter(function(l) {
-    return l.status === 'Approved';
-  });
-  var dates = datesBetween(p.start, p.end);
-  var sundaysCount = dates.filter(function(d) { return isSunday(d); }).length;
-  var targetOff = sundaysCount;
-
-  var result = {};
-  var stats = {};
-  staff.forEach(function(s) {
-    stats[s.id] = {
-      offCount: 0,
-      counts: {},
-      total: 0
+  // Pre-fill detailed defaults for all active staff
+  Object.entries(S.staff).forEach(([id,s])=>{
+    if(s.archived) return;
+    W.detailedInstructions[id] = {
+      defaultShift: s.fixedShift || (s.multiShifts && s.multiShifts[0]) || '',
+      defaultStation: '',
+      overrides: []
     };
   });
-
-  for (var i = 0; i < dates.length; i++) {
-    var date = dates[i];
-    var sun = isSunday(date);
-    var sat = isSaturday(date) && !sun;
-
-    var availStaff = staff.filter(function(s) {
-      var onLv = leaves.find(function(l) {
-        return l.staff_id === s.id && date >= l.start && date <= l.end;
-      });
-      return !onLv;
-    });
-
-    var offToday = 0;
-    if (sun) {
-      offToday = Math.max(0, availStaff.length - 5);
-    } else if (sat) {
-      offToday = 2;
-    } else {
-      var needOff = availStaff.filter(function(s) {
-        return stats[s.id].offCount < targetOff;
-      });
-      if (needOff.length > 0) offToday = 1;
-    }
-
-    var offStaffIds = [];
-    if (offToday > 0) {
-      var candidates = availStaff
-        .filter(function(s) { return stats[s.id].offCount < targetOff; })
-        .sort(function(a, b) {
-          return stats[a.id].offCount - stats[b.id].offCount;
-        });
-      for (var j = 0; j < Math.min(offToday, candidates.length); j++) {
-        offStaffIds.push(candidates[j].id);
-      }
-    }
-
-    var assigned = {};
-    var rule;
-    if (sun) {
-      rule = { M: 2, E: 2, N: 1 };
-    } else {
-      rule = { M: 3, E: 3, D: 1, N12: 1, E4: 1, X: 1 };
-    }
-
-    var queue = [];
-    if (sun) {
-      for (var n1 = 0; n1 < rule.N; n1++) queue.push('N');
-      for (var n2 = 0; n2 < rule.M; n2++) queue.push('M');
-      for (var n3 = 0; n3 < rule.E; n3++) queue.push('E');
-    } else {
-      for (var n4 = 0; n4 < rule.N12; n4++) queue.push('N12');
-      for (var n5 = 0; n5 < rule.D; n5++) queue.push('D');
-      for (var n6 = 0; n6 < rule.E4; n6++) queue.push('E4');
-      for (var n7 = 0; n7 < rule.X; n7++) queue.push('X');
-      for (var n8 = 0; n8 < rule.M; n8++) queue.push('M');
-      for (var n9 = 0; n9 < rule.E; n9++) queue.push('E');
-    }
-
-    var gyneeM = false;
-    var gyneeE = false;
-
-    for (var q = 0; q < queue.length; q++) {
-      var code = queue[q];
-      var eligible = availStaff.filter(function(s) {
-        if (assigned[s.id]) return false;
-        if (offStaffIds.indexOf(s.id) !== -1) return false;
-        if (code === 'D' && s.gender !== 'Female') return false;
-        if ((code === 'N12' || code === 'N') && s.gender !== 'Male') return false;
-        if (code === 'M' && !sun && rule.M > 0 && !gyneeM && s.gender !== 'Female') {
-          var femAvailM = availStaff.some(function(x) {
-            return !assigned[x.id] && offStaffIds.indexOf(x.id) === -1 && x.gender === 'Female';
-          });
-          if (femAvailM) return false;
-        }
-        if (code === 'E' && !sun && rule.E > 0 && !gyneeE && s.gender !== 'Female') {
-          var femAvailE = availStaff.some(function(x) {
-            return !assigned[x.id] && offStaffIds.indexOf(x.id) === -1 && x.gender === 'Female';
-          });
-          if (femAvailE) return false;
-        }
-        return true;
-      });
-
-      eligible.sort(function(a, b) {
-        var aC = stats[a.id].counts[code] || 0;
-        var bC = stats[b.id].counts[code] || 0;
-        if (aC !== bC) return aC - bC;
-        return stats[a.id].total - stats[b.id].total;
-      });
-
-      if (eligible[0]) {
-        var ch = eligible[0];
-        result[ch.id + '_' + date] = code;
-        assigned[ch.id] = true;
-        stats[ch.id].counts[code] = (stats[ch.id].counts[code] || 0) + 1;
-        stats[ch.id].total++;
-        if (code === 'M' && !sun && !gyneeM) gyneeM = true;
-        if (code === 'E' && !sun && !gyneeE) gyneeE = true;
-      }
-    }
-
-    staff.forEach(function(s) {
-      if (result[s.id + '_' + date]) return;
-      var lv = leaves.find(function(l) {
-        return l.staff_id === s.id && date >= l.start && date <= l.end;
-      });
-      if (lv) {
-        result[s.id + '_' + date] = lv.type || 'EL';
-        stats[s.id].offCount++;
-      } else if (offStaffIds.indexOf(s.id) !== -1) {
-        result[s.id + '_' + date] = 'OFF';
-        stats[s.id].offCount++;
-      } else {
-        result[s.id + '_' + date] = 'OFF';
-      }
-    });
-  }
-
-  var asg = get('assignments', {});
-  asg[p.id] = result;
-  save('assignments', asg);
-  logAudit('GENERATE_ROSTER', null, Object.keys(result).length + ' assignments');
-  toast('✅ Generated ' + Object.keys(result).length + ' assignments');
-  render();
+  renderWizard();
 }
 
-function viewLeave() {
-  var leave = Object.values(get('leave', {}));
-  var staff = Object.values(get('staff', {}));
-  var isSup = App.user.role === 'supervisor';
+function renderWizard(){
+  const stepLabels = ['1. Period','2. Mode','3. Instructions','4. Preview & Save'];
+  const stepsHtml = stepLabels.map((lbl,i)=>{
+    const n = i+1;
+    const cls = W.step===n ? 'active' : (W.step>n ? 'done' : '');
+    return '<div class="wizard-step '+cls+'">'+lbl+'</div>';
+  }).join('');
 
-  var html = '';
-  if (isSup) {
-    var staffOpts = staff.map(function(s) {
-      return '<option value="' + s.id + '">' + esc(s.name) + '</option>';
-    }).join('');
-    html += '<div class="card"><h2>🏖 Add Leave</h2>' +
-      '<select id="lStaff">' + staffOpts + '</select>' +
-      '<select id="lType">' +
-      '<option>EL</option><option>CPL</option><option>CL</option><option>GH</option>' +
-      '<option>SL</option><option>AL</option><option>ML</option><option>OFF</option>' +
-      '</select>' +
-      '<div class="grid2">' +
-      '<input id="lStart" type="date">' +
-      '<input id="lEnd" type="date">' +
-      '</div>' +
-      '<input id="lRem" placeholder="Remarks">' +
-      '<button class="green" onclick="addLeave()">➕ Add Leave</button>' +
+  let body = '';
+  if(W.step===1) body = wizardStep1();
+  else if(W.step===2) body = wizardStep2();
+  else if(W.step===3) body = wizardStep3();
+  else if(W.step===4) body = wizardStep4();
+
+  openModal(
+    '<div class="modal-head"><h3>⚙️ Auto Generate Roster</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="wizard-steps">'+stepsHtml+'</div>'+
+    body
+  );
+}
+
+/* ---------- STEP 1: PERIOD ---------- */
+function wizardStep1(){
+  const p = W.period;
+  return ''+
+    '<h3>Step 1: Select Period</h3>'+
+    '<div class="alert blue">Default period is 26th to 25th of next month. You can change manually.</div>'+
+    '<div class="form-grid two">'+
+      '<div class="form-group"><label>Start Date</label><input type="date" id="wp_start" value="'+p.start+'"></div>'+
+      '<div class="form-group"><label>End Date</label><input type="date" id="wp_end" value="'+p.end+'"></div>'+
+    '</div>'+
+    '<div class="form-row">'+
+      '<button class="btn btn-grey btn-sm" onclick="useDefaultPeriod()">↻ Reset to Default</button>'+
+    '</div>'+
+    '<div class="mt-2"><label class="text-muted">Label (optional)</label>'+
+      '<input id="wp_label" value="'+esc(p.label||'')+'" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;margin-top:4px"></div>'+
+    '<div class="form-row mt-2">'+
+      '<button class="btn btn-primary" style="flex:1" onclick="wizardNext1()">Next: Mode →</button>'+
+    '</div>';
+}
+
+function useDefaultPeriod(){
+  const dp = defaultPeriod();
+  $('wp_start').value = dp.start;
+  $('wp_end').value = dp.end;
+  $('wp_label').value = fmtDisplay(dp.start)+' → '+fmtDisplay(dp.end);
+}
+
+function wizardNext1(){
+  const s = $('wp_start').value, e = $('wp_end').value;
+  if(!s || !e) return toast('Select both dates','red');
+  if(s > e) return toast('Start date must be before end date','red');
+  W.period.start = s;
+  W.period.end = e;
+  W.period.id = s+'_'+e;
+  W.period.label = $('wp_label').value.trim() || (fmtDisplay(s)+' → '+fmtDisplay(e));
+  W.step = 2;
+  renderWizard();
+}
+
+/* ---------- STEP 2: MODE ---------- */
+function wizardStep2(){
+  return ''+
+    '<h3>Step 2: Choose Mode</h3>'+
+    '<div class="form-row" style="gap:10px">'+
+      '<div class="card" style="flex:1;cursor:pointer;border:2px solid '+(W.mode==='simple'?'var(--red)':'var(--border)')+'" onclick="setMode(\'simple\')">'+
+        '<h3 style="margin-top:0">🟢 Simple Mode</h3>'+
+        '<div class="text-muted">Only give special instructions (OFF, Leave, 12hr, Gynee, etc.). App fills the rest automatically per rules.</div>'+
+      '</div>'+
+      '<div class="card" style="flex:1;cursor:pointer;border:2px solid '+(W.mode==='detailed'?'var(--red)':'var(--border)')+'" onclick="setMode(\'detailed\')">'+
+        '<h3 style="margin-top:0">🔵 Detailed Mode</h3>'+
+        '<div class="text-muted">Set every staff\'s default shift & station, and add date-wise overrides.</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="form-row mt-2">'+
+      '<button class="btn btn-grey" onclick="W.step=1;renderWizard()">← Back</button>'+
+      '<button class="btn btn-primary" style="flex:1" onclick="wizardNext2()">Next: Instructions →</button>'+
+    '</div>';
+}
+
+function setMode(m){ W.mode = m; renderWizard(); }
+
+function wizardNext2(){
+  W.step = 3;
+  renderWizard();
+}
+
+/* ---------- STEP 3: INSTRUCTIONS ---------- */
+function wizardStep3(){
+  if(W.mode === 'simple') return wizardStep3Simple();
+  return wizardStep3Detailed();
+}
+
+/* ---- SIMPLE MODE ---- */
+function wizardStep3Simple(){
+  const staffArr = activeStaffArr();
+  const staffOpts = staffArr.map(s=>'<option value="'+s.id+'">'+esc(s.name)+' ('+esc(s.gender||'')+')</option>').join('');
+  const si = W.simpleInstructions;
+
+  return ''+
+    '<h3>Step 3: Special Instructions (Simple Mode)</h3>'+
+    '<div class="alert blue">All fields are optional. Fill only what you need. App will fill the rest automatically.</div>'+
+
+    /* OFF */
+    '<div class="card"><h3 style="margin-top:0">1. OFF</h3>'+
+      '<div class="form-row"><select id="w_off_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_off_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'offs\')">+ Add</button></div>'+
+      '<div id="w_offs_list" class="mt-2">'+renderSimpleList('offs')+'</div>'+
+    '</div>'+
+
+    /* LEAVE */
+    '<div class="card"><h3 style="margin-top:0">2. Leave</h3>'+
+      '<div class="form-row">'+
+        '<select id="w_leave_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+        '<select id="w_leave_type" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+LEAVE_TYPES.map(t=>'<option>'+t+'</option>').join('')+'</select>'+
+        '<input type="date" id="w_leave_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+        '<button class="btn btn-blue btn-sm" onclick="addSimple(\'leaves\')">+ Add</button></div>'+
+      '<div id="w_leaves_list" class="mt-2">'+renderSimpleList('leaves')+'</div>'+
+    '</div>'+
+
+    /* 12hr */
+    '<div class="card"><h3 style="margin-top:0">3. 12 Hour Duty</h3>'+
+      '<div class="form-row"><select id="w_d12_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_d12_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'duty12\')">+ Add</button></div>'+
+      '<div id="w_duty12_list" class="mt-2">'+renderSimpleList('duty12')+'</div>'+
+    '</div>'+
+
+    /* 16hr */
+    '<div class="card"><h3 style="margin-top:0">4. 16 Hour Duty</h3>'+
+      '<div class="form-row"><select id="w_d16_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_d16_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'duty16\')">+ Add</button></div>'+
+      '<div id="w_duty16_list" class="mt-2">'+renderSimpleList('duty16')+'</div>'+
+    '</div>'+
+
+    /* Gynee */
+    '<div class="card"><h3 style="margin-top:0">5. Gynee (Female only)</h3>'+
+      '<div class="form-row"><select id="w_gynee_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Female Staff —</option>'+
+        staffArr.filter(s=>s.gender==='Female').map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('')+'</select>'+
+      '<input type="date" id="w_gynee_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'gynee\')">+ Add</button></div>'+
+      '<div class="text-muted">Gynee runs Mon-Sat only (09:00-21:00).</div>'+
+      '<div id="w_gynee_list" class="mt-2">'+renderSimpleList('gynee')+'</div>'+
+    '</div>'+
+
+    /* Diagnostic */
+    '<div class="card"><h3 style="margin-top:0">6. Diagnostic</h3>'+
+      '<div class="form-row"><select id="w_diag_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_diag_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'diagnostic\')">+ Add</button></div>'+
+      '<div id="w_diagnostic_list" class="mt-2">'+renderSimpleList('diagnostic')+'</div>'+
+    '</div>'+
+
+    /* Station Override */
+    '<div class="card"><h3 style="margin-top:0">7. Station Override</h3>'+
+      '<div class="form-row"><select id="w_st_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_st_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<select id="w_st_val" style="padding:8px;border:1px solid var(--border);border-radius:6px"><option>First Floor</option><option>Basement</option><option>Diagnostic</option><option>Gynee</option></select>'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'stationOverride\')">+ Add</button></div>'+
+      '<div id="w_stationOverride_list" class="mt-2">'+renderSimpleList('stationOverride')+'</div>'+
+    '</div>'+
+
+    /* Shift Override */
+    '<div class="card"><h3 style="margin-top:0">8. Shift Override</h3>'+
+      '<div class="form-row"><select id="w_sh_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input type="date" id="w_sh_date" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<select id="w_sh_val" style="padding:8px;border:1px solid var(--border);border-radius:6px">'+['M','E','E4','N12','N','D','X'].map(c=>'<option>'+c+'</option>').join('')+'</select>'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'shiftOverride\')">+ Add</button></div>'+
+      '<div id="w_shiftOverride_list" class="mt-2">'+renderSimpleList('shiftOverride')+'</div>'+
+    '</div>'+
+
+    /* Holiday */
+    '<div class="card"><h3 style="margin-top:0">9. Gazetted Holiday (in this period)</h3>'+
+      '<div class="form-row"><input type="date" id="w_hol_date" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<input id="w_hol_name" placeholder="Holiday name" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'holidays\')">+ Add</button></div>'+
+      '<div id="w_holidays_list" class="mt-2">'+renderSimpleList('holidays')+'</div>'+
+    '</div>'+
+
+    /* Special Off */
+    '<div class="card"><h3 style="margin-top:0">10. Special Off Dates (per staff)</h3>'+
+      '<div class="form-row"><select id="w_sp_staff" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px"><option value="">— Staff —</option>'+staffOpts+'</select>'+
+      '<input id="w_sp_dates" placeholder="2026-09-05, 2026-09-12" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px">'+
+      '<button class="btn btn-blue btn-sm" onclick="addSimple(\'specialOff\')">+ Add</button></div>'+
+      '<div id="w_specialOff_list" class="mt-2">'+renderSimpleList('specialOff')+'</div>'+
+    '</div>'+
+
+    '<div class="form-row mt-2">'+
+      '<button class="btn btn-grey" onclick="W.step=2;renderWizard()">← Back</button>'+
+      '<button class="btn btn-primary" style="flex:1" onclick="wizardNext3()">Preview Roster →</button>'+
+    '</div>';
+}
+
+function activeStaffArr(){
+  return Object.entries(S.staff)
+    .map(([id,v])=>Object.assign({id},v))
+    .filter(s=>!s.archived)
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+}
+
+function staffName(id){ return (S.staff[id] && S.staff[id].name) || id; }
+
+function addSimple(key){
+  const si = W.simpleInstructions;
+  const period = W.period;
+
+  if(key === 'offs'){
+    const s = $('w_off_staff').value, d = $('w_off_date').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.offs.push({ staffId: s, date: d });
+  }
+  else if(key === 'leaves'){
+    const s = $('w_leave_staff').value, t = $('w_leave_type').value, d = $('w_leave_date').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.leaves.push({ staffId: s, leaveType: t, date: d });
+  }
+  else if(key === 'duty12'){
+    const s = $('w_d12_staff').value, d = $('w_d12_date').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.duty12.push({ staffId: s, date: d });
+  }
+  else if(key === 'duty16'){
+    const s = $('w_d16_staff').value, d = $('w_d16_date').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.duty16.push({ staffId: s, date: d });
+  }
+  else if(key === 'gynee'){
+    const s = $('w_gynee_staff').value, d = $('w_gynee_date').value;
+    if(!s || !d) return toast('Select female staff and date','red');
+    si.gynee.push({ staffId: s, date: d });
+  }
+  else if(key === 'diagnostic'){
+    const s = $('w_diag_staff').value, d = $('w_diag_date').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.diagnostic.push({ staffId: s, date: d });
+  }
+  else if(key === 'stationOverride'){
+    const s = $('w_st_staff').value, d = $('w_st_date').value, v = $('w_st_val').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.stationOverride.push({ staffId: s, date: d, station: v });
+  }
+  else if(key === 'shiftOverride'){
+    const s = $('w_sh_staff').value, d = $('w_sh_date').value, v = $('w_sh_val').value;
+    if(!s || !d) return toast('Select staff and date','red');
+    si.shiftOverride.push({ staffId: s, date: d, shift: v });
+  }
+  else if(key === 'holidays'){
+    const d = $('w_hol_date').value, n = $('w_hol_name').value.trim();
+    if(!d) return toast('Select date','red');
+    si.holidays.push({ date: d, name: n || 'Holiday' });
+  }
+  else if(key === 'specialOff'){
+    const s = $('w_sp_staff').value, raw = $('w_sp_dates').value.trim();
+    if(!s || !raw) return toast('Select staff and enter dates','red');
+    const dates = raw.split(',').map(x=>x.trim()).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(x));
+    if(!dates.length) return toast('Invalid dates format','red');
+    si.specialOff.push({ staffId: s, dates: dates });
+  }
+  renderWizard();
+}
+
+function renderSimpleList(key){
+  const arr = W.simpleInstructions[key] || [];
+  if(!arr.length) return '<div class="text-muted">None added</div>';
+  return arr.map((item,i)=>{
+    let txt = '';
+    if(key==='offs') txt = staffName(item.staffId)+' — OFF on '+fmtDisplay(item.date);
+    else if(key==='leaves') txt = staffName(item.staffId)+' — '+item.leaveType+' on '+fmtDisplay(item.date);
+    else if(key==='duty12') txt = staffName(item.staffId)+' — 12hr on '+fmtDisplay(item.date);
+    else if(key==='duty16') txt = staffName(item.staffId)+' — 16hr on '+fmtDisplay(item.date);
+    else if(key==='gynee') txt = staffName(item.staffId)+' — Gynee on '+fmtDisplay(item.date);
+    else if(key==='diagnostic') txt = staffName(item.staffId)+' — Diagnostic on '+fmtDisplay(item.date);
+    else if(key==='stationOverride') txt = staffName(item.staffId)+' — '+item.station+' on '+fmtDisplay(item.date);
+    else if(key==='shiftOverride') txt = staffName(item.staffId)+' — '+item.shift+' on '+fmtDisplay(item.date);
+    else if(key==='holidays') txt = fmtDisplay(item.date)+' — '+esc(item.name);
+    else if(key==='specialOff') txt = staffName(item.staffId)+' — '+item.dates.join(', ');
+    return '<div class="chip red" style="margin:3px">'+txt+
+      ' <a href="javascript:void(0)" onclick="removeSimple(\''+key+'\','+i+')" style="color:#fff;font-weight:700">✕</a></div>';
+  }).join('');
+}
+
+function removeSimple(key, idx){
+  W.simpleInstructions[key].splice(idx,1);
+  renderWizard();
+}
+
+/* ---- DETAILED MODE ---- */
+function wizardStep3Detailed(){
+  const staffArr = activeStaffArr();
+  const shifts = ['M','E','E4','N12','N','D','X'];
+  const stations = ['First Floor','Basement','Diagnostic','Gynee'];
+
+  return ''+
+    '<h3>Step 3: Detailed Instructions</h3>'+
+    '<div class="alert blue">For each staff, set a default shift & station. Add date-wise overrides below.</div>'+
+    staffArr.map(s=>{
+      const d = W.detailedInstructions[s.id] || { defaultShift:'', defaultStation:'', overrides:[] };
+      return '<div class="card">'+
+        '<div class="staff-row">'+
+          '<div><div class="sr-name">'+esc(s.name)+'</div><div class="sr-meta">'+esc(s.gender)+' · '+esc(s.designation||'')+'</div></div>'+
+          '<div><label class="text-muted">Default Shift</label><select onchange="setDetailed(\''+s.id+'\',\'defaultShift\',this.value)">'+
+            '<option value="">Auto</option>'+shifts.map(c=>'<option '+(d.defaultShift===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+          '<div><label class="text-muted">Default Station</label><select onchange="setDetailed(\''+s.id+'\',\'defaultStation\',this.value)">'+
+            '<option value="">Auto</option>'+stations.map(c=>'<option '+(d.defaultStation===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+          '<div><button class="btn btn-outline btn-sm" onclick="addOverride(\''+s.id+'\')">+ Override</button></div>'+
+        '</div>'+
+        '<div style="margin-top:8px">'+(d.overrides||[]).map((o,i)=>
+          '<div class="chip red" style="margin:3px">'+fmtDisplay(o.date)+' → '+(o.shift||'')+' '+(o.leave||'')+' '+(o.off?'OFF':'')+
+          ' <a href="javascript:void(0)" onclick="removeOverride(\''+s.id+'\','+i+')" style="color:#fff;font-weight:700">✕</a></div>'
+        ).join('')+'</div>'+
       '</div>';
-  }
-
-  html += '<div class="card"><h2>📋 Leave Records (' + leave.length + ')</h2>';
-  if (!leave.length) {
-    html += '<div style="text-align:center;color:#999;padding:20px">No records</div>';
-  } else {
-    leave.forEach(function(l) {
-      var s = staff.find(function(x) { return x.id === l.staff_id; });
-      html += '<div class="staff-row">' +
-        '<div style="flex:1"><div style="font-weight:700">' + esc(s ? s.name : '?') + '</div>' +
-        '<div style="font-size:11px;color:#888">' + l.type + ' · ' + fmtDate(l.start) + ' → ' + fmtDate(l.end) + '</div></div>' +
-        '<span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:#CAFFBF;color:#1E8449">' + l.status + '</span>';
-      if (isSup) {
-        html += '<button class="small red" onclick="delLeave(\'' + l.id + '\')">🗑</button>';
-      }
-      html += '</div>';
-    });
-  }
-  html += '</div>';
-  return html;
+    }).join('')+
+    '<div class="form-row mt-2">'+
+      '<button class="btn btn-grey" onclick="W.step=2;renderWizard()">← Back</button>'+
+      '<button class="btn btn-primary" style="flex:1" onclick="wizardNext3()">Preview Roster →</button>'+
+    '</div>';
 }
 
-function addLeave() {
-  var staff_id = document.getElementById('lStaff').value;
-  var type = document.getElementById('lType').value;
-  var start = document.getElementById('lStart').value;
-  var end = document.getElementById('lEnd').value;
-  var remarks = document.getElementById('lRem').value;
-  if (!start || !end) { toast('Dates required', 'error'); return; }
-  if (start > end) { toast('Start before end', 'error'); return; }
-  var leave = get('leave', {});
-  var id = 'l_' + uid();
-  leave[id] = {
-    id: id,
-    staff_id: staff_id,
-    type: type,
-    start: start,
-    end: end,
-    status: 'Approved',
-    remarks: remarks,
-    at: new Date().toISOString()
+function setDetailed(staffId, key, val){
+  if(!W.detailedInstructions[staffId]) W.detailedInstructions[staffId] = { overrides: [] };
+  W.detailedInstructions[staffId][key] = val;
+}
+
+function addOverride(staffId){
+  const d = W.detailedInstructions[staffId] || { overrides: [] };
+  if(!d.overrides) d.overrides = [];
+  d.overrides.push({ date: W.period.start, shift:'', leave:'', off:false, station:'' });
+  W.detailedInstructions[staffId] = d;
+  openOverrideModal(staffId, d.overrides.length-1);
+}
+
+function openOverrideModal(staffId, idx){
+  const o = W.detailedInstructions[staffId].overrides[idx];
+  openModal(
+    '<div class="modal-head"><h3>Override — '+esc(staffName(staffId))+'</h3><button class="close" onclick="closeModal();renderWizard()">✕</button></div>'+
+    '<div class="form-group"><label>Date</label><input type="date" id="ov_date" value="'+o.date+'"></div>'+
+    '<div class="form-group"><label>Shift</label><select id="ov_shift"><option value="">— No change —</option>'+
+      ['M','E','E4','N12','N','D','X'].map(c=>'<option '+(o.shift===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="form-group"><label>Leave</label><select id="ov_leave"><option value="">— No leave —</option>'+
+      LEAVE_TYPES.map(c=>'<option '+(o.leave===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="form-group"><label>Station</label><select id="ov_station"><option value="">— No change —</option>'+
+      ['First Floor','Basement','Diagnostic','Gynee'].map(c=>'<option '+(o.station===c?'selected':'')+'>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="form-row mb-2"><label><input type="checkbox" id="ov_off" '+(o.off?'checked':'')+'> Mark as OFF</label></div>'+
+    '<button class="btn btn-primary btn-block" onclick="saveOverride(\''+staffId+'\','+idx+')">Save</button>'
+  );
+}
+
+function saveOverride(staffId, idx){
+  const o = {
+    date: $('ov_date').value,
+    shift: $('ov_shift').value,
+    leave: $('ov_leave').value,
+    station: $('ov_station').value,
+    off: $('ov_off').checked
   };
-  save('leave', leave);
-  logAudit('ADD_LEAVE', null, type);
-  toast('Leave added ✅');
-  render();
+  W.detailedInstructions[staffId].overrides[idx] = o;
+  closeModal();
+  renderWizard();
 }
 
-function delLeave(id) {
-  if (!confirm('Delete?')) return;
-  var leave = get('leave', {});
-  delete leave[id];
-  save('leave', leave);
-  toast('Deleted');
-  render();
+function removeOverride(staffId, idx){
+  W.detailedInstructions[staffId].overrides.splice(idx,1);
+  renderWizard();
 }
 
-function viewAudit() {
-  if (App.user.role !== 'supervisor') {
-    return '<div class="card" style="text-align:center;color:#999">Access denied</div>';
-  }
-  var log = Object.values(get('audit', {})).sort(function(a, b) {
-    return new Date(b.at) - new Date(a.at);
-  });
+/* ---------- STEP 3 → 4 (Generate Preview) ---------- */
+function wizardNext3(){
+  generatePreview();
+  W.step = 4;
+  renderWizard();
+}
 
-  var html = '<div class="card"><h2>📜 Audit Log (' + log.length + ')</h2>';
-  if (!log.length) {
-    html += '<div style="text-align:center;color:#999;padding:20px">No logs</div>';
+/* ============================================================
+   ROSTER GENERATION ALGORITHM
+   ============================================================ */
+function generatePreview(){
+  const dates = dateRange(W.period.start, W.period.end);
+  const staffArr = activeStaffArr();
+  const grid = {};        // date -> { staffId: code }
+  const stationAssign = {}; // date -> { staffId: station }
+  const warnings = [];
+
+  dates.forEach(d=>{ grid[d] = {}; stationAssign[d] = {}; });
+
+  // 1) Apply simple instructions (or detailed overrides) first — highest priority
+  const locks = {};   // date -> { staffId: code }
+  dates.forEach(d=>locks[d]={});
+
+  if(W.mode === 'simple'){
+    const si = W.simpleInstructions;
+    si.offs.forEach(x=>{ if(locks[x.date]) locks[x.date][x.staffId] = 'OFF'; });
+    si.leaves.forEach(x=>{ if(locks[x.date]) locks[x.date][x.staffId] = x.leaveType; });
+    si.duty12.forEach(x=>{ if(locks[x.date]) locks[x.date][x.staffId] = '12HR'; });
+    si.duty16.forEach(x=>{ if(locks[x.date]) locks[x.date][x.staffId] = '16HR'; });
+    si.shiftOverride.forEach(x=>{ if(locks[x.date]) locks[x.date][x.staffId] = x.shift; });
+    si.gynee.forEach(x=>{ if(locks[x.date]) { locks[x.date][x.staffId] = 'D'; stationAssign[x.date][x.staffId] = 'Gynee'; } });
+    si.diagnostic.forEach(x=>{ if(locks[x.date]) { if(!locks[x.date][x.staffId]) locks[x.date][x.staffId]='M'; stationAssign[x.date][x.staffId] = 'Diagnostic'; } });
+    si.stationOverride.forEach(x=>{ if(stationAssign[x.date]) stationAssign[x.date][x.staffId] = x.station; });
+    si.specialOff.forEach(x=>{
+      x.dates.forEach(d=>{ if(locks[d]) locks[d][x.staffId] = 'OFF'; });
+    });
+    // Holidays
+    si.holidays.forEach(h=>{
+      if(locks[h.date]) {}  // handled below
+    });
   } else {
-    log.slice(0, 100).forEach(function(l) {
-      html += '<div style="padding:8px;border-bottom:1px solid #eee;font-size:12px">' +
-        '<div style="font-weight:700;color:#C8102E">' + esc(l.action) + '</div>' +
-        '<div style="color:#666">👤 ' + esc(l.user) + '</div>' +
-        '<div style="color:#999;font-size:10px">' + new Date(l.at).toLocaleString() + '</div>' +
-        '</div>';
+    Object.entries(W.detailedInstructions).forEach(([staffId, d])=>{
+      (d.overrides||[]).forEach(o=>{
+        if(!locks[o.date]) return;
+        if(o.off) locks[o.date][staffId] = 'OFF';
+        else if(o.leave) locks[o.date][staffId] = o.leave;
+        else if(o.shift) locks[o.date][staffId] = o.shift;
+        if(o.station) stationAssign[o.date][staffId] = o.station;
+      });
     });
   }
-  html += '</div>';
-  return html;
-}
 
-function viewSettings() {
-  if (App.user.role !== 'supervisor') {
-    return '<div class="card" style="text-align:center;color:#999">Access denied</div>';
-  }
-  var s = get('settings', {});
-  return '<div class="card">' +
-    '<h2>🏥 Hospital Settings</h2>' +
-    '<input id="stHosp" placeholder="Hospital Name" value="' + esc(s.hospital_name || '') + '">' +
-    '<input id="stDept" placeholder="Department" value="' + esc(s.department || '') + '">' +
-    '<button class="green" onclick="saveSettings()">💾 Save</button>' +
-    '</div>' +
-    '<div class="card">' +
-    '<h2>ℹ About</h2>' +
-    '<div style="font-size:12px;color:#666">' +
-    '<div><b>Phlebotomist Roster</b></div>' +
-    '<div>Version 4.0</div>' +
-    '<div>' + esc(s.hospital_name || '') + '</div>' +
-    '</div></div>';
-}
+  // 2) Determine OFF targets
+  const sundays = dates.filter(d=>isSunday(d));
+  const holidaysInPeriod = dates.filter(d=>isHoliday(d));
+  const offDaysCount = sundays.length + holidaysInPeriod.length;
+  const offTarget = {};   // staffId -> target
+  staffArr.forEach(s=>offTarget[s.id] = offDaysCount);
 
-function saveSettings() {
-  var s = get('settings', {});
-  s.hospital_name = document.getElementById('stHosp').value;
-  s.department = document.getElementById('stDept').value;
-  save('settings', s);
-  toast('Saved ✅');
-  render();
-}
+  // 3) Fill each date
+  dates.forEach(d=>{
+    const isSun = isSunday(d);
+    const isHol = isHoliday(d);
+    const isOffDay = isSun || isHol;
 
-function exportExcel() {
-  var periods = get('periods', {});
-  var p = periods[App.periodId];
-  if (!p) { toast('No period', 'error'); return; }
-  var staff = Object.values(get('staff', {})).filter(function(s) {
-    return s.status === 'Active';
-  });
-  var dates = datesBetween(p.start, p.end);
-  var asg = get('assignments', {});
-  var pd = asg[p.id] || {};
-  var settings = get('settings', {});
-
-  var aoa = [];
-  aoa.push([settings.hospital_name || 'Hospital']);
-  aoa.push([(settings.department || '') + ' — Phlebotomist Duty Roster']);
-  aoa.push([]);
-  aoa.push(['Roster Period:', p.name, '', 'From:', p.start, 'To:', p.end]);
-  aoa.push([]);
-
-  var header = ['Sr.', 'Name', 'Mobile'];
-  dates.forEach(function(d) { header.push(d.slice(8)); });
-  header.push('M', 'E', 'E4', 'N12', 'D', 'X', 'OFF', 'CPL', 'TOTAL');
-  aoa.push(header);
-
-  staff.forEach(function(s, i) {
-    var row = [i + 1, s.name, s.mobile || ''];
-    var counts = { M: 0, E: 0, E4: 0, N12: 0, D: 0, X: 0, OFF: 0, CPL: 0 };
-    dates.forEach(function(d) {
-      var c = pd[s.id + '_' + d] || '';
-      row.push(c);
-      if (counts[c] !== undefined) counts[c]++;
+    // mark locked
+    Object.entries(locks[d]).forEach(([sid, code])=>{
+      grid[d][sid] = code;
+      if(code==='OFF' || LEAVE_TYPES.includes(code)){
+        offTarget[sid] = Math.max(0, (offTarget[sid]||0) - 1);
+      }
     });
-    var total = dates.filter(function(d) { return pd[s.id + '_' + d]; }).length;
-    row.push(counts.M, counts.E, counts.E4, counts.N12, counts.D, counts.X, counts.OFF, counts.CPL, total);
-    aoa.push(row);
+
+    if(isOffDay){
+      // Sunday/Holiday: 2 M + 2 E + 1 N (5 ON)  → 12 staff means 7 OFF
+      const need = { M:2, E:2, N:1 };
+      assignDay(d, need, staffArr, grid, 'sunday');
+    } else {
+      // Mon-Sat: 3 M + 3 E + 1 D + 1 N12 + 1 E4 + 1 X + 2 OFF
+      const need = { M:3, E:3, D:1, N12:1, E4:1, X:1 };
+      assignDay(d, need, staffArr, grid, 'weekday');
+    }
   });
 
-  aoa.push([]);
-  aoa.push(['Generated:', new Date().toLocaleString('en-GB')]);
-  aoa.push(['Prepared by:', App.user.name || App.user.username]);
+  // 4) Female check
+  dates.forEach(d=>{
+    const isSun = isSunday(d), isHol = isHoliday(d);
+    if(isSun || isHol) return;
+    const dStaff = Object.entries(grid[d]).filter(([sid,c])=>c==='D').map(([sid])=>sid);
+    const femaleInGynee = dStaff.filter(sid=>(S.staff[sid]||{}).gender==='Female').length;
+    if(femaleInGynee === 0){
+      warnings.push({ date:d, msg:'Gynee (D) needs a Female staff — none assigned on '+fmtDisplay(d) });
+    }
+  });
 
-  var ws = XLSX.utils.aoa_to_sheet(aoa);
-  var wb = XLSX.utils.book_new();
+  // 5) OFF target warnings
+  staffArr.forEach(s=>{
+    const actualOff = dates.filter(d=>grid[d][s.id]==='OFF').length;
+    if(actualOff !== offDaysCount){
+      // not a hard error, just note
+    }
+  });
+
+  W.preview = { grid, stationAssign, dates, staffArr, offTarget, offDaysCount, warnings, sundays, holidaysInPeriod };
+}
+
+function assignDay(date, need, staffArr, grid, dayType){
+  const isSun = dayType === 'sunday';
+  const dayStaff = { ...grid[date] };
+
+  // Shifts that can be assigned per dayType
+  const allowedShifts = isSun ? ['M','E','N'] : ['M','E','E4','N12','D','X'];
+
+  // Determine who is still free (not locked)
+  const lockedIds = new Set(Object.keys(dayStaff));
+  const free = staffArr.filter(s=>!lockedIds.has(s.id));
+
+  // Gender rules
+  // N12 & N → Male only
+  // D → Female only
+  // E4 → Male first
+
+  // Sort: prefer males for N/N12, females for D
+  function pickByGender(gender){
+    return free.filter(s=>s.gender===gender);
+  }
+
+  // First assign female-only D (only on Mon-Sat)
+  if(!isSun && need.D){
+    const females = pickByGender('Female').filter(s=>!dayStaff[s.id]);
+    if(females.length){
+      const chosen = females[0];
+      dayStaff[chosen.id] = 'D';
+      markTaken(free, chosen.id);
+    } else {
+      // find any female already locked with M/E and convert? No — just warn.
+    }
+  }
+
+  // Then assign by shift needs
+  Object.entries(need).forEach(([code, count])=>{
+    if(code==='D') return;
+    const assigned = Object.values(dayStaff).filter(c=>c===code).length;
+    const remaining = Math.max(0, count - assigned);
+    for(let i=0;i<remaining;i++){
+      let pool = free.filter(s=>!dayStaff[s.id]);
+      // Gender filters
+      if(code==='N' || code==='N12') pool = pool.filter(s=>s.gender==='Male');
+      if(code==='E4'){
+        const males = pool.filter(s=>s.gender==='Male');
+        if(males.length) pool = males;
+      }
+      // Prefer staff whose multiShift priority or fixedShift matches
+      pool.sort((a,b)=>{
+        const aP = shiftPriority(a, code);
+        const bP = shiftPriority(b, code);
+        return aP - bP;
+      });
+      if(!pool.length){
+        // fallback: take anyone free
+        pool = free.filter(s=>!dayStaff[s.id]);
+      }
+      if(!pool.length) break;
+      const pick = pool[0];
+      dayStaff[pick.id] = code;
+    }
+  });
+
+  // Remaining free staff → OFF
+  staffArr.forEach(s=>{
+    if(!dayStaff[s.id]) dayStaff[s.id] = 'OFF';
+  });
+
+  grid[date] = dayStaff;
+}
+
+function shiftPriority(staff, code){
+  // lower = higher priority
+  if(staff.fixedShift === code) return 0;
+  if(staff.multiShifts && staff.multiShifts.length){
+    const idx = staff.multiShifts.indexOf(code);
+    if(idx>=0) return 1+idx;
+  }
+  return 10;
+}
+
+function markTaken(freeArr, id){
+  const idx = freeArr.findIndex(s=>s.id===id);
+  if(idx>=0) freeArr.splice(idx,1);
+}
+
+/* ---------- STEP 4: PREVIEW ---------- */
+function wizardStep4(){
+  if(!W.preview) generatePreview();
+  const p = W.preview;
+
+  const tableHtml = renderRosterTable(p.grid, p.dates, p.staffArr);
+
+  const warnHtml = p.warnings.length
+    ? p.warnings.map(w=>'<div class="alert red">⚠️ '+esc(w.msg)+'</div>').join('')
+    : '<div class="alert green">✅ No warnings</div>';
+
+  // Summary
+  const summaryHtml = '<div class="table-wrap"><table><thead><tr><th class="staff-col">Staff</th><th>OFF</th><th>Leaves</th><th>Total Duties</th></tr></thead><tbody>'+
+    p.staffArr.map(s=>{
+      const cells = p.dates.map(d=>p.grid[d][s.id]);
+      const off = cells.filter(c=>c==='OFF').length;
+      const leaves = cells.filter(c=>LEAVE_TYPES.includes(c)).length;
+      const duties = cells.length - off - leaves;
+      return '<tr><td class="staff-col">'+esc(s.name)+'</td><td>'+off+'</td><td>'+leaves+'</td><td>'+duties+'</td></tr>';
+    }).join('')+
+  '</tbody></table></div>';
+
+  return ''+
+    '<h3>Step 4: Preview Roster</h3>'+
+    '<div class="alert blue">Period: <b>'+esc(W.period.label)+'</b> · '+p.dates.length+' days · OFF target: '+p.offDaysCount+'</div>'+
+    warnHtml+
+    '<h3 style="margin-top:12px">Roster Grid</h3>'+
+    '<div class="table-wrap" style="max-height:400px;overflow:auto">'+tableHtml+'</div>'+
+    '<h3 style="margin-top:12px">Summary</h3>'+
+    '<div style="max-height:300px;overflow:auto">'+summaryHtml+'</div>'+
+    '<div class="form-row mt-2">'+
+      '<button class="btn btn-grey" onclick="W.step=3;renderWizard()">← Back</button>'+
+      '<button class="btn btn-blue" style="flex:1" onclick="editPreviewCell()">✏️ Edit Cell</button>'+
+      '<button class="btn btn-primary" style="flex:1" onclick="saveRoster()">💾 Save Roster</button>'+
+    '</div>';
+}
+
+function renderRosterTable(grid, dates, staffArr){
+  const head = '<tr><th class="staff-col">Staff</th>'+dates.map(d=>'<th>'+dayName(d)+'<br>'+d.slice(5)+'</th>').join('')+'</tr>';
+  const body = staffArr.map(s=>{
+    const row = dates.map(d=>{
+      const code = grid[d][s.id] || '';
+      const cls = code ? 'cell-'+code : '';
+      const title = isHoliday(d) ? ' title="Holiday: '+esc(S.holidays[d])+'"' : '';
+      return '<td class="'+cls+'"'+title+'>'+code+'</td>';
+    }).join('');
+    return '<tr><td class="staff-col">'+esc(s.name)+'</td>'+row+'</tr>';
+  }).join('');
+  return '<table><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
+}
+
+function editPreviewCell(){
+  const p = W.preview;
+  const dateOpts = p.dates.map(d=>'<option value="'+d+'">'+fmtDisplay(d)+' ('+dayName(d)+')</option>').join('');
+  const staffOpts = p.staffArr.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+  const codeOpts = SHIFT_CODES.map(c=>'<option>'+c+'</option>').join('');
+  openModal(
+    '<div class="modal-head"><h3>✏️ Edit Roster Cell</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="form-group"><label>Date</label><select id="ep_date">'+dateOpts+'</select></div>'+
+    '<div class="form-group"><label>Staff</label><select id="ep_staff">'+staffOpts+'</select></div>'+
+    '<div class="form-group"><label>New Code</label><select id="ep_code">'+codeOpts+'</select></div>'+
+    '<button class="btn btn-primary btn-block" onclick="applyEditCell()">Apply</button>'
+  );
+}
+
+function applyEditCell(){
+  const d = $('ep_date').value, sid = $('ep_staff').value, code = $('ep_code').value;
+  if(!W.preview.grid[d]) return;
+  W.preview.grid[d][sid] = code;
+  closeModal();
+  renderWizard();
+}
+
+function saveRoster(){
+  const p = W.preview;
+  if(!p) return;
+  // Save to Firebase
+  const periodId = W.period.id;
+
+  // Save period meta
+  db.ref('periods/'+periodId).set({
+    start: W.period.start,
+    end: W.period.end,
+    label: W.period.label,
+    createdAt: nowISO()
+  });
+
+  // Save holidays from simple instructions
+  if(W.mode === 'simple'){
+    W.simpleInstructions.holidays.forEach(h=>{
+      db.ref('holidays/'+h.date).set(h.name);
+    });
+  }
+
+  // Save roster
+  db.ref('roster/'+periodId).set(p.grid).then(()=>{
+    toast('Roster saved successfully','green');
+    audit('Roster generated', 'Period '+W.period.label);
+    pushNotification('Roster Published', W.period.label+' roster is now live', 'all');
+    S.currentPeriod = periodId;
+    closeModal();
+    switchSection('roster');
+  }).catch(e=>toast('Error saving: '+e.message,'red'));
+}
+
+/* ============================================================
+   END OF PART 4
+   ============================================================ */
+      /* ============================================================
+   PART 5: ROSTER DISPLAY + LEAVE + EXCHANGE
+   ============================================================ */
+
+/* ---------- ROSTER DISPLAY ---------- */
+function loadRosterForPeriod(periodId){
+  S.currentPeriod = periodId;
+  renderRoster();
+}
+
+function renderRoster(){
+  const wrap = $('rosterTableWrap');
+  const label = $('rosterPeriodLabel');
+  const warnEl = $('rosterWarnings');
+  const sel = $('rosterPeriodSelect');
+
+  if(!S.currentPeriod && sel && sel.value) S.currentPeriod = sel.value;
+  if(!S.currentPeriod){
+    wrap.innerHTML = '<div class="empty"><span class="ico">📋</span>Select a period or click Auto Generate</div>';
+    if(warnEl) warnEl.innerHTML = '';
+    if(label) label.textContent = '';
+    return;
+  }
+
+  const period = S.periods[S.currentPeriod];
+  if(!period){
+    wrap.innerHTML = '<div class="empty">Period not found</div>';
+    return;
+  }
+  if(label) label.textContent = period.label || (period.start+' → '+period.end);
+
+  db.ref('roster/'+S.currentPeriod).once('value').then(snap=>{
+    const grid = snap.val() || {};
+    const dates = dateRange(period.start, period.end);
+    const staffArr = activeStaffArr();
+
+    if(!Object.keys(grid).length){
+      wrap.innerHTML = '<div class="empty"><span class="ico">📋</span>No roster data for this period</div>';
+      if(warnEl) warnEl.innerHTML = '';
+      return;
+    }
+
+    // Warnings
+    const warns = [];
+    dates.forEach(d=>{
+      const isSun = isSunday(d), isHol = isHoliday(d);
+      if(isSun || isHol) return;
+      const dayRow = grid[d] || {};
+      const dStaff = Object.entries(dayRow).filter(([sid,c])=>c==='D').map(([sid])=>sid);
+      const femaleInGynee = dStaff.filter(sid=>(S.staff[sid]||{}).gender==='Female').length;
+      if(dStaff.length && femaleInGynee === 0){
+        warns.push('Gynee (D) on '+fmtDisplay(d)+' has no Female staff');
+      }
+    });
+    if(warnEl){
+      warnEl.innerHTML = warns.length
+        ? warns.slice(0,3).map(w=>'<div class="alert red">⚠️ '+esc(w)+'</div>').join('')
+        : '';
+    }
+
+    wrap.innerHTML = renderRosterTable(grid, dates, staffArr) +
+      (S.role==='admin' ? '<div class="alert blue mt-2">Admin: click any cell to edit</div>' : '');
+
+    if(S.role === 'admin'){
+      // Attach click handlers
+      wrap.querySelectorAll('td[data-date][data-staff]').forEach(td=>{
+        td.style.cursor = 'pointer';
+        td.onclick = ()=>editRosterCellDirect(td.dataset.date, td.dataset.staff);
+      });
+    }
+
+    // Save for export
+    S._currentGrid = grid;
+    S._currentDates = dates;
+    S._currentStaff = staffArr;
+    S._currentPeriod = period;
+  });
+}
+
+// Override renderRosterTable to add data attributes
+const _origRenderRosterTable = renderRosterTable;
+renderRosterTable = function(grid, dates, staffArr){
+  const head = '<tr><th class="staff-col">Staff</th>'+dates.map(d=>
+    '<th>'+dayName(d)+'<br>'+d.slice(5)+(isHoliday(d)?' 🎉':'')+'</th>'
+  ).join('')+'</tr>';
+  const body = staffArr.map(s=>{
+    const row = dates.map(d=>{
+      const code = grid[d] ? (grid[d][s.id] || '') : '';
+      const cls = code ? 'cell-'+code : '';
+      const title = isHoliday(d) ? ' title="Holiday: '+esc(S.holidays[d])+'"' : '';
+      return '<td class="'+cls+'" data-date="'+d+'" data-staff="'+s.id+'"'+title+'>'+code+'</td>';
+    }).join('');
+    return '<tr><td class="staff-col">'+esc(s.name)+'</td>'+row+'</tr>';
+  }).join('');
+  return '<table><thead>'+head+'</thead><tbody>'+body+'</tbody></table>';
+};
+
+function editRosterCellDirect(date, staffId){
+  const cur = (S._currentGrid[date] && S._currentGrid[date][staffId]) || '';
+  const codeOpts = SHIFT_CODES.map(c=>'<option '+(c===cur?'selected':'')+'>'+c+'</option>').join('');
+  openModal(
+    '<div class="modal-head"><h3>Edit Cell</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="alert blue">'+esc(staffName(staffId))+' — '+fmtDisplay(date)+' ('+dayName(date)+')</div>'+
+    '<div class="form-group"><label>Code</label><select id="rc_code">'+codeOpts+'</select></div>'+
+    '<button class="btn btn-primary btn-block" onclick="applyRosterCell(\''+date+'\',\''+staffId+'\')">Save</button>'
+  );
+}
+
+function applyRosterCell(date, staffId){
+  const code = $('rc_code').value;
+  db.ref('roster/'+S.currentPeriod+'/'+date+'/'+staffId).set(code).then(()=>{
+    toast('Roster updated','green');
+    audit('Roster edit', staffName(staffId)+' on '+date+' → '+code);
+    closeModal();
+    renderRoster();
+  });
+}
+
+/* ============================================================
+   LEAVE MANAGEMENT
+   ============================================================ */
+function renderLeaveTable(){
+  const el = $('leaveTableWrap');
+  if(!el) return;
+  const arr = Object.entries(S.leaves).map(([id,v])=>Object.assign({id},v));
+  arr.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  if(!arr.length){
+    el.innerHTML = '<div class="empty"><span class="ico">🏖️</span>No leave records</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr>'+
+    '<th>Date</th><th>Staff</th><th>Type</th><th>Reason</th><th>Status</th><th>Added By</th><th>Action</th>'+
+    '</tr></thead><tbody>'+
+    arr.map(l=>'<tr>'+
+      '<td>'+fmtDisplay(l.date)+'<br><span class="text-muted">'+dayName(l.date)+'</span></td>'+
+      '<td>'+esc(staffName(l.staffId))+'</td>'+
+      '<td><span class="chip red">'+esc(l.type)+'</span></td>'+
+      '<td>'+esc(l.reason||'')+'</td>'+
+      '<td>'+esc(l.status||'pending')+'</td>'+
+      '<td>'+esc(l.addedBy||'')+'</td>'+
+      '<td>'+(S.role==='admin' ? '<button class="btn btn-danger btn-sm" onclick="deleteLeave(\''+l.id+'\')">Del</button>' : '—')+'</td>'+
+    '</tr>').join('')+
+    '</tbody></table></div>';
+}
+
+function openLeaveForm(){
+  const staffArr = activeStaffArr();
+  const staffOpts = staffArr.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+  openModal(
+    '<div class="modal-head"><h3>🏖️ Add Leave</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="form-group"><label>Staff *</label><select id="lf_staff">'+staffOpts+'</select></div>'+
+    '<div class="form-grid two">'+
+      '<div class="form-group"><label>Leave Type *</label><select id="lf_type">'+LEAVE_TYPES.map(t=>'<option>'+t+'</option>').join('')+'</select></div>'+
+      '<div class="form-group"><label>Date *</label><input type="date" id="lf_date"></div>'+
+    '</div>'+
+    '<div class="form-group"><label>Reason</label><input id="lf_reason" placeholder="Optional"></div>'+
+    '<button class="btn btn-primary btn-block" onclick="saveLeave()">Save Leave</button>'
+  );
+}
+
+function saveLeave(){
+  const staffId = $('lf_staff').value;
+  const type = $('lf_type').value;
+  const date = $('lf_date').value;
+  const reason = $('lf_reason').value.trim();
+  if(!staffId || !date) return toast('Fill required fields','red');
+  const data = {
+    staffId, type, date, reason,
+    status: 'approved',
+    addedBy: S.user.name || S.user.mobile,
+    addedAt: nowISO()
+  };
+  db.ref('leaves').push(data).then(()=>{
+    toast('Leave added','green');
+    audit('Leave add', staffName(staffId)+' — '+type+' on '+date);
+    pushNotification('Leave Added', staffName(staffId)+' — '+type+' on '+fmtDisplay(date), 'all');
+    // Also mark in roster
+    if(S.currentPeriod){
+      db.ref('roster/'+S.currentPeriod+'/'+date+'/'+staffId).set(type).catch(()=>{});
+    }
+    closeModal();
+  });
+}
+
+function deleteLeave(id){
+  if(!confirm('Delete this leave record?')) return;
+  db.ref('leaves/'+id).remove().then(()=>{
+    toast('Leave deleted','green');
+    audit('Leave delete', id);
+  });
+}
+
+/* ============================================================
+   SHIFT EXCHANGE (3-step)
+   ============================================================ */
+function renderExchangeList(){
+  const el = $('exchangeList');
+  if(!el) return;
+  const arr = Object.entries(S.exchanges).map(([id,v])=>Object.assign({id},v));
+  arr.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+
+  if(!arr.length){
+    el.innerHTML = '<div class="empty"><span class="ico">🔄</span>No exchange requests</div>';
+    return;
+  }
+
+  el.innerHTML = arr.map(e=>{
+    let statusChip = '<span class="chip">'+esc(e.status)+'</span>';
+    if(e.status === 'pending_staff') statusChip = '<span class="chip red">Waiting: Staff B</span>';
+    else if(e.status === 'pending_supervisor') statusChip = '<span class="chip blue">Waiting: Supervisor</span>';
+    else if(e.status === 'approved') statusChip = '<span class="chip green">Approved</span>';
+    else if(e.status === 'rejected') statusChip = '<span class="chip">Rejected</span>';
+
+    let actions = '';
+    const isB = e.toStaffId === (S.user.staffId || S.user.id);
+    const isSupervisor = S.role==='admin' || S.user.isSupervisor;
+    if(e.status==='pending_staff' && isB){
+      actions = '<button class="btn btn-green btn-sm" onclick="respondExchange(\''+e.id+'\',true)">Accept</button> '+
+                '<button class="btn btn-danger btn-sm" onclick="respondExchange(\''+e.id+'\',false)">Reject</button>';
+    } else if(e.status==='pending_supervisor' && isSupervisor){
+      actions = '<button class="btn btn-green btn-sm" onclick="approveExchange(\''+e.id+'\',true)">Approve</button> '+
+                '<button class="btn btn-danger btn-sm" onclick="approveExchange(\''+e.id+'\',false)">Reject</button>';
+    } else if((e.fromStaffId === (S.user.staffId||S.user.id)) && (e.status==='pending_staff'||e.status==='pending_supervisor')){
+      actions = '<button class="btn btn-danger btn-sm" onclick="cancelExchange(\''+e.id+'\')">Cancel</button>';
+    }
+
+    return '<div class="card" style="margin-bottom:8px">'+
+      '<div class="form-row"><b>'+esc(staffName(e.fromStaffId))+'</b> ↔ <b>'+esc(staffName(e.toStaffId))+'</b>'+
+        '<span style="margin-left:auto">'+statusChip+'</span></div>'+
+      '<div class="text-muted">'+fmtDisplay(e.date)+' ('+dayName(e.date)+') · '+esc(e.fromShift)+' → '+esc(e.toShift)+'</div>'+
+      (e.reason ? '<div class="text-muted">Reason: '+esc(e.reason)+'</div>' : '')+
+      (actions ? '<div class="form-row mt-2">'+actions+'</div>' : '')+
+    '</div>';
+  }).join('');
+}
+
+function openExchangeForm(){
+  const staffArr = activeStaffArr();
+  const myId = S.user.staffId || S.user.id;
+  // Staff can request: their own shift ↔ another staff
+  const fromId = S.role==='admin' ? (staffArr[0]?.id || '') : myId;
+  const dateOpts = S._currentDates ? S._currentDates.map(d=>'<option value="'+d+'">'+fmtDisplay(d)+'</option>').join('') : '';
+  const staffOpts = staffArr.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+
+  openModal(
+    '<div class="modal-head"><h3>🔄 New Exchange Request</h3><button class="close" onclick="closeModal()">✕</button></div>'+
+    '<div class="form-group"><label>From Staff</label><select id="xf_from">'+staffOpts+'</select></div>'+
+    '<div class="form-group"><label>Date</label>'+(dateOpts?'<select id="xf_date">'+dateOpts+'</select>':'<input type="date" id="xf_date">')+'</div>'+
+    '<div class="form-group"><label>Shift (mine)</label><select id="xf_fromShift">'+['M','E','E4','N12','N','D','X'].map(c=>'<option>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="form-group"><label>To Staff</label><select id="xf_to">'+staffOpts+'</select></div>'+
+    '<div class="form-group"><label>Shift (theirs)</label><select id="xf_toShift">'+['M','E','E4','N12','N','D','X'].map(c=>'<option>'+c+'</option>').join('')+'</select></div>'+
+    '<div class="form-group"><label>Reason</label><input id="xf_reason" placeholder="Optional"></div>'+
+    '<button class="btn btn-primary btn-block" onclick="saveExchange()">Send Request</button>'
+  );
+}
+
+function saveExchange(){
+  const fromStaffId = $('xf_from').value;
+  const toStaffId = $('xf_to').value;
+  const date = $('xf_date').value;
+  const fromShift = $('xf_fromShift').value;
+  const toShift = $('xf_toShift').value;
+  const reason = $('xf_reason').value.trim();
+
+  if(fromStaffId === toStaffId) return toast('Cannot exchange with same staff','red');
+  if(!date) return toast('Select date','red');
+
+  const data = {
+    fromStaffId, toStaffId, date, fromShift, toShift, reason,
+    status: 'pending_staff',
+    requestedBy: S.user.name || S.user.mobile,
+    createdAt: nowISO()
+  };
+  db.ref('exchanges').push(data).then(()=>{
+    toast('Exchange request sent','green');
+    audit('Exchange request', staffName(fromStaffId)+' ↔ '+staffName(toStaffId)+' on '+date);
+    pushNotification('Exchange Request', staffName(fromStaffId)+' wants to exchange with '+staffName(toStaffId)+' on '+fmtDisplay(date), 'all');
+    closeModal();
+  });
+}
+
+function respondExchange(id, accept){
+  const e = S.exchanges[id];
+  if(!e) return;
+  const newStatus = accept ? 'pending_supervisor' : 'rejected';
+  db.ref('exchanges/'+id).update({ status: newStatus, staffRespondedAt: nowISO() }).then(()=>{
+    toast(accept?'Accepted — sent to supervisor':'Rejected','green');
+    audit('Exchange response', (accept?'Accepted':'Rejected')+' by '+staffName(e.toStaffId));
+    pushNotification('Exchange Update', staffName(e.toStaffId)+(accept?' accepted':' rejected')+' the exchange', 'all');
+  });
+}
+
+function approveExchange(id, approve){
+  const e = S.exchanges[id];
+  if(!e) return;
+  if(!approve){
+    db.ref('exchanges/'+id).update({ status:'rejected', supervisorActionAt: nowISO() }).then(()=>{
+      toast('Rejected','green'); audit('Exchange reject', id);
+    });
+    return;
+  }
+  // Apply to roster
+  const updates = {};
+  updates['roster/'+S.currentPeriod+'/'+e.date+'/'+e.fromStaffId] = e.toShift;
+  updates['roster/'+S.currentPeriod+'/'+e.date+'/'+e.toStaffId] = e.fromShift;
+  updates['exchanges/'+id+'/status'] = 'approved';
+  updates['exchanges/'+id+'/supervisorActionAt'] = nowISO();
+  db.ref().update(updates).then(()=>{
+    toast('Approved — roster updated','green');
+    audit('Exchange approve', id+' → roster updated');
+    pushNotification('Exchange Approved', staffName(e.fromStaffId)+' ↔ '+staffName(e.toStaffId)+' on '+fmtDisplay(e.date), 'all');
+    // WhatsApp prompt
+    offerWhatsApp(e);
+    renderRoster();
+  });
+}
+
+function cancelExchange(id){
+  if(!confirm('Cancel this exchange request?')) return;
+  db.ref('exchanges/'+id).update({ status:'cancelled' }).then(()=>{
+    toast('Cancelled','green'); audit('Exchange cancel', id);
+  });
+}
+
+function offerWhatsApp(e){
+  const other = staffName(e.toStaffId);
+  const msg = 'Dear '+staffName(e.fromStaffId)+',\nYour duty on '+fmtDisplay(e.date)+' has been changed with '+other+
+    ' from '+e.fromShift+' to '+e.toShift+'.\n— Phlebotomist Roster\nKulsum International Hospital';
+  const phone = (S.staff[e.fromStaffId]||{}).mobile || '';
+  const url = 'https://wa.me/'+(phone?('92'+phone.slice(1)):'')+'?text='+encodeURIComponent(msg);
+  if(confirm('Send WhatsApp notification to '+staffName(e.fromStaffId)+'?')){
+    window.open(url, '_blank');
+  }
+}
+
+/* ============================================================
+   END OF PART 5
+   ============================================================ */
+      /* ============================================================
+   PART 6: CHAT + REPORTS + EXPORT + INIT
+   ============================================================ */
+
+/* ---------- CHAT LIST ---------- */
+function renderChatList(){
+  const el = $('chatList');
+  if(!el) return;
+  const staffArr = activeStaffArr();
+  const myId = S.user.staffId || S.user.id;
+
+  let html = '<div class="chat-item" onclick="openChat(\'group\',\'group\',\'Group Chat\')">'+
+    '<div class="chat-avatar group">👥</div>'+
+    '<div><div class="ci-name">Group Chat</div><div class="ci-last">All staff together</div></div>'+
+  '</div>';
+
+  staffArr.forEach(s=>{
+    if(s.id === myId) return;
+    html += '<div class="chat-item" onclick="openChat(\'individual\',\''+s.id+'\',\''+esc(s.name)+'\')">'+
+      '<div class="chat-avatar">'+esc((s.name||'?')[0].toUpperCase())+'</div>'+
+      '<div><div class="ci-name">'+esc(s.name)+'</div><div class="ci-last">'+esc(s.designation||'')+'</div></div>'+
+    '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+/* ---------- CHAT WINDOW ---------- */
+let chatListener = null;
+function openChat(type, id, name){
+  S.currentChat = { type, id, name };
+  $('chatWindow').classList.add('show');
+  $('chatWindowName').textContent = name;
+  $('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+  const myId = S.user.staffId || S.user.id;
+  let path;
+  if(type === 'group') path = 'chat/group';
+  else {
+    const pair = [myId, id].sort().join('_');
+    path = 'chat/individual/'+pair;
+  }
+
+  if(chatListener){ chatListener.off(); chatListener = null; }
+
+  chatListener = db.ref(path).limitToLast(100);
+  chatListener.on('value', snap=>{
+    const msgs = [];
+    snap.forEach(c=>msgs.push(Object.assign({id:c.key}, c.val())));
+    renderChatMessages(msgs);
+  });
+}
+
+function closeChat(){
+  $('chatWindow').classList.remove('show');
+  if(chatListener){ chatListener.off(); chatListener = null; }
+  S.currentChat = null;
+}
+
+function renderChatMessages(msgs){
+  const el = $('chatMessages');
+  if(!msgs.length){
+    el.innerHTML = '<div class="empty"><span class="ico">💬</span>No messages yet. Say hello!</div>';
+    return;
+  }
+  const myId = S.user.staffId || S.user.id;
+  el.innerHTML = msgs.map(m=>{
+    const isMe = m.senderId === myId;
+    const time = m.ts ? new Date(m.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+    let content = '';
+    if(m.type === 'image' && m.url){
+      content = '<img src="'+esc(m.url)+'" alt="image" onclick="window.open(this.src)">';
+    } else {
+      content = esc(m.text || '');
+    }
+    return '<div class="msg '+(isMe?'me':'other')+'">'+
+      (!isMe ? '<div class="m-sender">'+esc(m.senderName||'')+'</div>' : '')+
+      content+
+      '<div class="m-time">'+time+'</div>'+
+    '</div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function sendChatText(){
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if(!text || !S.currentChat) return;
+  const myId = S.user.staffId || S.user.id;
+  const msg = {
+    senderId: myId,
+    senderName: S.user.name || S.user.mobile,
+    text: text,
+    type: 'text',
+    ts: nowISO()
+  };
+  let path;
+  if(S.currentChat.type === 'group') path = 'chat/group';
+  else {
+    const pair = [myId, S.currentChat.id].sort().join('_');
+    path = 'chat/individual/'+pair;
+  }
+  db.ref(path).push(msg);
+  input.value = '';
+}
+
+function sendChatImage(input){
+  const file = input.files[0];
+  if(!file || !S.currentChat) return;
+  if(file.size > 5*1024*1024) return toast('Image must be under 5MB','red');
+
+  const myId = S.user.staffId || S.user.id;
+  const ext = file.name.split('.').pop();
+  const ref = storage.ref('chat/'+Date.now()+'_'+Math.random().toString(36).slice(2,7)+'.'+ext);
+
+  toast('Uploading image...','blue');
+  ref.put(file).then(snap=>snap.ref.getDownloadURL()).then(url=>{
+    const msg = {
+      senderId: myId,
+      senderName: S.user.name || S.user.mobile,
+      url: url,
+      type: 'image',
+      ts: nowISO()
+    };
+    let path;
+    if(S.currentChat.type === 'group') path = 'chat/group';
+    else {
+      const pair = [myId, S.currentChat.id].sort().join('_');
+      path = 'chat/individual/'+pair;
+    }
+    return db.ref(path).push(msg);
+  }).then(()=>{
+    toast('Image sent','green');
+    input.value = '';
+  }).catch(e=>{
+    toast('Upload failed: '+e.message,'red');
+  });
+}
+
+/* ============================================================
+   REPORTS
+   ============================================================ */
+function showReport(type, btn){
+  S.currentReport = type;
+  document.querySelectorAll('#reportTabs button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderReport();
+}
+
+function renderReport(){
+  const el = $('reportContent');
+  if(!el) return;
+  if(S.currentReport === 'daily') renderDailyReport(el);
+  else if(S.currentReport === 'monthly') renderMonthlyReport(el);
+  else if(S.currentReport === 'cpl') renderCPLReport(el);
+  else if(S.currentReport === 'leave') renderLeaveReport(el);
+  else if(S.currentReport === 'audit') renderAuditReport(el);
+}
+
+function renderDailyReport(el){
+  const today = fmtDate(new Date());
+  const grid = S._currentGrid || {};
+  const row = grid[today] || {};
+  const arr = Object.entries(row).map(([sid,code])=>({sid, code}));
+  if(!arr.length){
+    el.innerHTML = '<div class="empty">No roster for today. Load a period in Roster tab.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="card"><h3>Daily Duty — '+fmtDisplay(today)+'</h3>'+
+    '<div class="table-wrap"><table><thead><tr><th>Staff</th><th>Shift</th><th>Station</th></tr></thead><tbody>'+
+    arr.map(x=>'<tr><td>'+esc(staffName(x.sid))+'</td><td>'+esc(x.code)+'</td><td>—</td></tr>').join('')+
+    '</tbody></table></div></div>';
+}
+
+function renderMonthlyReport(el){
+  const grid = S._currentGrid || {};
+  const dates = S._currentDates || [];
+  const staffArr = S._currentStaff || [];
+  if(!dates.length){
+    el.innerHTML = '<div class="empty">Load a roster first (Roster tab)</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr><th class="staff-col">Staff</th><th>Total Days</th><th>OFF</th><th>Leave</th><th>Duties</th></tr></thead><tbody>'+
+    staffArr.map(s=>{
+      const cells = dates.map(d=>grid[d] ? grid[d][s.id] : '');
+      const off = cells.filter(c=>c==='OFF').length;
+      const leave = cells.filter(c=>LEAVE_TYPES.includes(c)).length;
+      const duties = cells.length - off - leave;
+      return '<tr><td class="staff-col">'+esc(s.name)+'</td><td>'+cells.length+'</td><td>'+off+'</td><td>'+leave+'</td><td>'+duties+'</td></tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
+
+function renderCPLReport(el){
+  const grid = S._currentGrid || {};
+  const dates = S._currentDates || [];
+  const staffArr = S._currentStaff || [];
+  if(!dates.length){
+    el.innerHTML = '<div class="empty">Load a roster first</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr><th class="staff-col">Staff</th><th>Sunday/Holiday Duties</th><th>CPL Earned</th><th>CPL Used</th><th>Balance</th></tr></thead><tbody>'+
+    staffArr.map(s=>{
+      let sunHol = 0, used = 0;
+      dates.forEach(d=>{
+        const c = grid[d] ? grid[d][s.id] : '';
+        if((isSunday(d) || isHoliday(d)) && c && c!=='OFF' && !LEAVE_TYPES.includes(c)) sunHol++;
+        if(c === 'CPL') used++;
+      });
+      const balance = sunHol - used;
+      return '<tr><td class="staff-col">'+esc(s.name)+'</td><td>'+sunHol+'</td><td>'+sunHol+'</td><td>'+used+'</td><td><b>'+balance+'</b></td></tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
+
+function renderLeaveReport(el){
+  const arr = Object.entries(S.leaves).map(([id,v])=>Object.assign({id},v));
+  arr.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!arr.length){
+    el.innerHTML = '<div class="empty">No leaves</div>';
+    return;
+  }
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Date</th><th>Staff</th><th>Type</th><th>Reason</th></tr></thead><tbody>'+
+    arr.map(l=>'<tr><td>'+fmtDisplay(l.date)+'</td><td>'+esc(staffName(l.staffId))+'</td><td>'+esc(l.type)+'</td><td>'+esc(l.reason||'')+'</td></tr>').join('')+
+    '</tbody></table></div>';
+}
+
+function renderAuditReport(el){
+  const arr = S.auditLog || [];
+  if(!arr.length){
+    el.innerHTML = '<div class="empty">No audit log</div>';
+    return;
+  }
+  const visible = (S.role === 'admin' || S.user.isSupervisor)
+    ? arr
+    : arr.filter(a=>a.user === (S.user.name || S.user.mobile));
+  el.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody>'+
+    visible.slice(0,200).map(a=>'<tr><td>'+new Date(a.ts).toLocaleString()+'</td><td>'+esc(a.user)+'</td><td>'+esc(a.action)+'</td><td>'+esc(a.details||'')+'</td></tr>').join('')+
+    '</tbody></table></div>';
+}
+
+/* ============================================================
+   EXCEL EXPORT
+   ============================================================ */
+function exportRosterExcel(){
+  if(!S._currentGrid){ return toast('Load a roster first','red'); }
+  const dates = S._currentDates, staffArr = S._currentStaff;
+  const wb = XLSX.utils.book_new();
+
+  // Header rows
+  const header = [
+    [S.settings.hospital || 'Kulsum International Hospital'],
+    ['Department: '+(S.settings.department||'Phlebotomy')],
+    ['Roster Period: '+(S._currentPeriod ? S._currentPeriod.label : '')],
+    ['Generated: '+new Date().toLocaleString()],
+    []
+  ];
+  const gridRows = [];
+  gridRows.push(['Staff', ...dates]);
+  staffArr.forEach(s=>{
+    const row = [s.name];
+    dates.forEach(d=>row.push(S._currentGrid[d] ? (S._currentGrid[d][s.id]||'') : ''));
+    gridRows.push(row);
+  });
+
+  // Summary
+  const summary = [['Summary'], ['Staff','OFF','Leave','Duties']];
+  staffArr.forEach(s=>{
+    const cells = dates.map(d=>S._currentGrid[d] ? S._currentGrid[d][s.id] : '');
+    const off = cells.filter(c=>c==='OFF').length;
+    const lv = cells.filter(c=>LEAVE_TYPES.includes(c)).length;
+    summary.push([s.name, off, lv, cells.length-off-lv]);
+  });
+
+  // Signatures
+  const sig = [[],['Generated by:','Prepared by:','Approved by:']];
+
+  const all = [...header, ...gridRows, [], ...summary, ...sig];
+  const ws = XLSX.utils.aoa_to_sheet(all);
+  ws['!cols'] = [{wch:20}, ...dates.map(()=>({wch:8}))];
   XLSX.utils.book_append_sheet(wb, ws, 'Roster');
-  XLSX.writeFile(wb, 'roster-' + p.name.replace(/\s+/g, '_') + '.xlsx');
-  toast('Excel downloaded ✅');
+
+  const fname = 'Roster_'+(S._currentPeriod ? S._currentPeriod.start+'_'+S._currentPeriod.end : 'period')+'.xlsx';
+  XLSX.writeFile(wb, fname);
+  toast('Excel exported','green');
+  audit('Excel export', fname);
 }
 
-function shareWhatsApp() {
-  var periods = get('periods', {});
-  var p = periods[App.periodId];
-  if (!p) { toast('No period', 'error'); return; }
-  var staff = Object.values(get('staff', {})).filter(function(s) {
-    return s.status === 'Active';
-  });
-  var dates = datesBetween(p.start, p.end);
-  var asg = get('assignments', {});
-  var pd = asg[p.id] || {};
-  var settings = get('settings', {});
+function exportReportExcel(){
+  if(S.currentReport === 'audit') return exportAuditExcel();
+  if(S.currentReport === 'leave') return exportLeaveExcel();
+  if(S.currentReport === 'cpl') return exportCPLExcel();
+  if(S.currentReport === 'monthly') return exportMonthlyExcel();
+  toast('Excel not available for this report','red');
+}
 
-  var text = '*' + (settings.hospital_name || 'Hospital') + '*\n';
-  text += '*' + (settings.department || '') + '*\n';
-  text += '*Roster:* ' + p.name + '\n\n';
-  staff.forEach(function(s) {
-    text += '*' + s.name + '*: ';
-    var parts = [];
-    dates.forEach(function(d) {
-      parts.push(d.slice(8) + ':' + (pd[s.id + '_' + d] || '-'));
+function exportMonthlyExcel(){
+  if(!S._currentGrid) return toast('Load roster first','red');
+  const wb = XLSX.utils.book_new();
+  const dates = S._currentDates, staffArr = S._currentStaff;
+  const rows = [['Staff', ...dates, 'OFF','Leave','Duties']];
+  staffArr.forEach(s=>{
+    const row = [s.name];
+    dates.forEach(d=>row.push(S._currentGrid[d] ? (S._currentGrid[d][s.id]||'') : ''));
+    const cells = dates.map(d=>S._currentGrid[d] ? S._currentGrid[d][s.id] : '');
+    row.push(cells.filter(c=>c==='OFF').length, cells.filter(c=>LEAVE_TYPES.includes(c)).length, cells.filter(c=>c && c!=='OFF' && !LEAVE_TYPES.includes(c)).length);
+    rows.push(row);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Monthly');
+  XLSX.writeFile(wb, 'Monthly_Summary.xlsx');
+  toast('Monthly Excel exported','green');
+}
+
+function exportCPLExcel(){
+  if(!S._currentGrid) return toast('Load roster first','red');
+  const wb = XLSX.utils.book_new();
+  const dates = S._currentDates, staffArr = S._currentStaff;
+  const rows = [['Staff','Sunday/Holiday Duties','CPL Earned','CPL Used','Balance']];
+  staffArr.forEach(s=>{
+    let sH = 0, used = 0;
+    dates.forEach(d=>{
+      const c = S._currentGrid[d] ? (S._currentGrid[d][s.id]||'') : '';
+      if((isSunday(d)||isHoliday(d)) && c && c!=='OFF' && !LEAVE_TYPES.includes(c)) sH++;
+      if(c==='CPL') used++;
     });
-    text += parts.join(' | ') + '\n\n';
+    rows.push([s.name, sH, sH, used, sH-used]);
   });
-
-  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
-  toast('WhatsApp opening...');
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'CPL');
+  XLSX.writeFile(wb, 'CPL_Balance.xlsx');
+  toast('CPL Excel exported','green');
 }
 
-initCache();
-
-try {
-  var saved = localStorage.getItem('phleb_user');
-  if (saved) App.user = JSON.parse(saved);
-} catch (e) {
-  console.error('Session error', e);
+function exportLeaveExcel(){
+  const arr = Object.entries(S.leaves).map(([id,v])=>Object.assign({id},v));
+  const wb = XLSX.utils.book_new();
+  const rows = [['Date','Staff','Type','Reason','Status','Added By']];
+  arr.forEach(l=>rows.push([l.date, staffName(l.staffId), l.type, l.reason||'', l.status||'', l.addedBy||'']));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Leaves');
+  XLSX.writeFile(wb, 'Leave_Report.xlsx');
+  toast('Leave Excel exported','green');
 }
 
-setTimeout(function() {
-  render();
-}, 1200);
+function exportAuditExcel(){
+  const arr = S.auditLog || [];
+  const wb = XLSX.utils.book_new();
+  const rows = [['Time','User','Role','Action','Details']];
+  arr.forEach(a=>rows.push([new Date(a.ts).toLocaleString(), a.user, a.role, a.action, a.details||'']));
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, 'Audit');
+  XLSX.writeFile(wb, 'Audit_Log.xlsx');
+  toast('Audit Excel exported','green');
+}
 
+/* ============================================================
+   PRINT / PDF
+   ============================================================ */
+function printRoster(){
+  if(!S._currentGrid) return toast('Load a roster first','red');
+  const dates = S._currentDates, staffArr = S._currentStaff;
+
+  // Build print-only HTML
+  const header =
+    '<div class="print-header">'+
+      '<div class="ph-logo">KIH</div>'+
+      '<h1>'+esc(S.settings.hospital||'Kulsum International Hospital')+'</h1>'+
+      '<p>Department: '+esc(S.settings.department||'Phlebotomy')+'</p>'+
+      '<p>Roster Period: '+esc(S._currentPeriod ? S._currentPeriod.label : '')+'</p>'+
+    '</div>';
+
+  let table = '<table><thead><tr><th>Staff</th>'+dates.map(d=>'<th>'+dayName(d)+' '+d.slice(5)+'</th>').join('')+'</tr></thead><tbody>';
+  staffArr.forEach(s=>{
+    table += '<tr><td>'+esc(s.name)+'</td>';
+    dates.forEach(d=>{
+      const c = S._currentGrid[d] ? (S._currentGrid[d][s.id]||'') : '';
+      table += '<td>'+c+'</td>';
+    });
+    table += '</tr>';
+  });
+  table += '</tbody></table>';
+
+  const sig =
+    '<div class="print-signatures">'+
+      '<div><div class="line">Generated by</div></div>'+
+      '<div><div class="line">Prepared by</div></div>'+
+      '<div><div class="line">Approved by</div></div>'+
+    '</div>';
+
+  // Open new window for print
+  const w = window.open('', '_blank');
+  w.document.write('<html><head><title>Roster Print</title><style>'+
+    'body{font-family:Arial,sans-serif;padding:12px;font-size:11px}'+
+    'h1{color:#C8102E;font-size:16px;margin:0}'+
+    '.ph-logo{display:inline-flex;width:50px;height:50px;border-radius:50%;background:#C8102E;color:#fff;align-items:center;justify-content:center;font-weight:800;font-size:16px;margin-bottom:6px}'+
+    '.print-header{text-align:center;margin-bottom:12px}'+
+    'table{width:100%;border-collapse:collapse;font-size:10px}'+
+    'th,td{border:1px solid #000;padding:3px;text-align:center}'+
+    'th{background:#fff;font-weight:700}'+
+    'td.cell-OFF,td.cell-EL,td.cell-CPL,td.cell-CL,td.cell-GH,td.cell-SL,td.cell-AL,td.cell-ML,td.cell-holiday{background:#000;color:#fff}'+
+    '.print-signatures{display:flex;justify-content:space-between;margin-top:40px}'+
+    '.print-signatures>div{width:30%;text-align:center}'+
+    '.line{border-top:1px solid #000;padding-top:4px;font-size:10px}'+
+    '</style></head><body>'+header+table+sig+'</body></html>');
+  w.document.close();
+  setTimeout(()=>{ w.print(); }, 400);
+  audit('Print roster', S._currentPeriod ? S._currentPeriod.label : '');
+}
+
+function printReport(){
+  toast('Print: use Ctrl+P or browser print','blue');
+  window.print();
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Setup admin default user if not exists
+  db.ref('users').orderByChild('mobile').equalTo('03001234567').once('value').then(snap=>{
+    if(!snap.exists()){
+      db.ref('users').push({
+        name:'Administrator',
+        mobile:'03001234567',
+        password:'admin123',
+        role:'admin'
+      });
+    }
+  });
+  // Focus first input
+  setTimeout(()=>{ $('staffMobile') && $('staffMobile').focus(); }, 300);
+});
+
+// Expose some functions globally (since onclick uses them)
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.switchLoginTab = switchLoginTab;
+window.switchSection = switchSection;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.toast = toast;
+window.openStaffForm = openStaffForm;
+window.saveStaff = saveStaff;
+window.archiveStaff = archiveStaff;
+window.restoreStaff = restoreStaff;
+window.renderStaffList = renderStaffList;
+window.openAutoGenerate = openAutoGenerate;
+window.renderWizard = renderWizard;
+window.wizardNext1 = wizardNext1;
+window.wizardNext2 = wizardNext2;
+window.wizardNext3 = wizardNext3;
+window.setMode = setMode;
+window.addSimple = addSimple;
+window.removeSimple = removeSimple;
+window.setDetailed = setDetailed;
+window.addOverride = addOverride;
+window.saveOverride = saveOverride;
+window.removeOverride = removeOverride;
+window.editPreviewCell = editPreviewCell;
+window.applyEditCell = applyEditCell;
+window.saveRoster = saveRoster;
+window.useDefaultPeriod = useDefaultPeriod;
+window.loadRosterForPeriod = loadRosterForPeriod;
+window.renderRoster = renderRoster;
+window.editRosterCellDirect = editRosterCellDirect;
+window.applyRosterCell = applyRosterCell;
+window.openLeaveForm = openLeaveForm;
+window.saveLeave = saveLeave;
+window.deleteLeave = deleteLeave;
+window.openExchangeForm = openExchangeForm;
+window.saveExchange = saveExchange;
+window.respondExchange = respondExchange;
+window.approveExchange = approveExchange;
+window.cancelExchange = cancelExchange;
+window.openChat = openChat;
+window.closeChat = closeChat;
+window.sendChatText = sendChatText;
+window.sendChatImage = sendChatImage;
+window.showReport = showReport;
+window.exportRosterExcel = exportRosterExcel;
+window.exportReportExcel = exportReportExcel;
+window.printRoster = printRoster;
+window.printReport = printReport;
+window.openNotifications = openNotifications;
+window.closeNotifications = closeNotifications;
+window.saveSettings = saveSettings;
+window.editShift = editShift;
+window.saveShift = saveShift;
+window.openHolidayForm = openHolidayForm;
+window.saveHoliday = saveHoliday;
+window.deleteHoliday = deleteHoliday;
+
+/* ============================================================
+   END OF PART 6 — APP COMPLETE
+   ============================================================ */
 </script>
 </body>
 </html>
